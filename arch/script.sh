@@ -1,6 +1,21 @@
 #!/bin/bash
 unalias -a
 
+if [ -z "${DUMP_SYMS}" ]; then
+  printf "You must set the \`DUMP_SYMS\` enviornment variable before running the script\n"
+  exit 1
+fi
+
+if [ -z "${SYMBOLS_API_TOKEN}" ]; then
+  printf "You must set the \`SYMBOLS_API_TOKEN\` enviornment variable before running the script\n"
+  exit 1
+fi
+
+if [ -z "${CRASHSTATS_API_TOKEN}" ]; then
+  printf "You must set the \`CRASHSTATS_API_TOKEN\` enviornment variable before running the script\n"
+  exit 1
+fi
+
 function purge {
   package_name="${1}"
   package_url="${2}"

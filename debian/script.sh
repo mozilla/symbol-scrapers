@@ -1,6 +1,21 @@
 #!/bin/sh
 unalias -a
 
+if [ -z "${DUMP_SYMS}" ]; then
+  printf "You must set the \`DUMP_SYMS\` enviornment variable before running the script\n"
+  exit 1
+fi
+
+if [ -z "${SYMBOLS_API_TOKEN}" ]; then
+  printf "You must set the \`SYMBOLS_API_TOKEN\` enviornment variable before running the script\n"
+  exit 1
+fi
+
+if [ -z "${CRASHSTATS_API_TOKEN}" ]; then
+  printf "You must set the \`CRASHSTATS_API_TOKEN\` enviornment variable before running the script\n"
+  exit 1
+fi
+
 URL="http://ftp.it.debian.org/debian/pool"
 DDEB_URL="http://debug.mirrors.debian.org/debian-debug/pool"
 ARCHITECTURES="i386 amd64"
