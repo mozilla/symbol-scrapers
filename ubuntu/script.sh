@@ -39,12 +39,12 @@ function fetch {
   dbg_package_regexp="${dbg_package_regexp%%,}"
   dbgsym_package_regexp="${dbgsym_package_regexp%%,}"
 
-  wget --no-cache -P downloads -nd -c -r -np -e robots=off -A "${package_regexp},${dbg_package_regexp}" "${url}/${pkg_path}/"
-  wget --no-cache -P downloads -nd -c -r -np -e robots=off -A "${dbgsym_package_regexp}" "${ddeb_url}/${pkg_path}/"
+  wget -o wget.log --no-cache -P downloads -nd -c -r -np -e robots=off -A "${package_regexp},${dbg_package_regexp}" "${url}/${pkg_path}/"
+  wget -o wget.log --no-cache -P downloads -nd -c -r -np -e robots=off -A "${dbgsym_package_regexp}" "${ddeb_url}/${pkg_path}/"
 
   if [ -n "${alt_url}" ]; then
-    wget --no-cache -P downloads -nd -c -r -np -e robots=off -A "${package_regexp},${dbg_package_regexp}" "${alt_url}/${pkg_path}/"
-    wget --no-cache -P downloads -nd -c -r -np -e robots=off -A "${dbgsym_package_regexp}" "${alt_url}/${pkg_path}/"
+    wget -o wget.log --no-cache -P downloads -nd -c -r -np -e robots=off -A "${package_regexp},${dbg_package_regexp}" "${alt_url}/${pkg_path}/"
+    wget -o wget.log --no-cache -P downloads -nd -c -r -np -e robots=off -A "${dbgsym_package_regexp}" "${alt_url}/${pkg_path}/"
   fi
 }
 
@@ -65,10 +65,10 @@ function purge {
       if wget -q --method HEAD "${alt_url}/${pkg_path}/${package}" ; then
         :
       else
-        rm -vf "${path}"
+        rm -f "${path}"
       fi
     else
-      rm -vf "${path}"
+      rm -f "${path}"
     fi
   done
 
@@ -80,10 +80,10 @@ function purge {
       if wget -q --method HEAD "${alt_url}/${pkg_path}/${package}" ; then
         :
       else
-        rm -vf "${path}"
+        rm -f "${path}"
       fi
     else
-      rm -vf "${path}"
+      rm -f "${path}"
     fi
   done
 
@@ -95,10 +95,10 @@ function purge {
       if wget -q --method HEAD "${alt_url}/${pkg_path}/${package}" ; then
         :
       else
-        rm -vf "${path}"
+        rm -f "${path}"
       fi
     else
-      rm -vf "${path}"
+      rm -f "${path}"
     fi
   done
 }
@@ -117,7 +117,7 @@ function merge_debug_info {
     objcopy --decompress-debug-sections "${debuginfo}"
     eu-unstrip "${path}" "${debuginfo}"
     printf "Merging ${debuginfo} to ${path}\n"
-    cp -vf "${debuginfo}" "${path}"
+    cp -f "${debuginfo}" "${path}"
     return
   else
     filename=$(basename "${path}")
@@ -127,7 +127,7 @@ function merge_debug_info {
             objcopy --decompress-debug-sections "${debuginfo}"
             eu-unstrip "${path}" "${debuginfo}"
             printf "Merging ${debuginfo} to ${path}\n"
-            cp -vf "${debuginfo}" "${path}"
+            cp -f "${debuginfo}" "${path}"
             return
         fi
     done
@@ -135,7 +135,7 @@ function merge_debug_info {
   printf "Could not find debuginfo for ${1}\n" >> error.log
 }
 
-rm -rvf symbols debug tmp symbols*.zip error.log
+rm -rf symbols debug tmp symbols*.zip error.log
 mkdir -p downloads
 mkdir -p symbols
 mkdir -p tmp
@@ -204,13 +204,13 @@ for i in ${package_files}; do
   full_hash=$(sha256sum "${i}")
   hash=$(echo "${full_hash}" | cut -b 1-64)
   if ! grep -q ${hash} SHA256SUMS; then
-    7z -y x "${i}"
+    7z -y x "${i}" > /dev/null
     if [[ ${i} =~ -(dbg|dbgsym)_ ]]; then
       mkdir -p "debug/${i##downloads/}"
-      tar -C "debug/${i##downloads/}" -x -a -v -f data.tar
+      tar -C "debug/${i##downloads/}" -x -a -f data.tar
     else
       mkdir -p "tmp/${i##downloads/}"
-      tar -C "tmp/${i##downloads/}" -x -a -v -f data.tar
+      tar -C "tmp/${i##downloads/}" -x -a -f data.tar
     fi
     echo "${full_hash}" >> SHA256SUMS
   fi
@@ -230,7 +230,7 @@ find tmp -type f | while read path; do
     file_size=$(stat -c "%s" "${path}")
     # Copy the object file only if it's not larger than roughly 2GiB
     if [ $file_size -lt 2100000000 ]; then
-      cp -vf "${path}" "symbols/${filename}/${debugid}/${filename}"
+      cp -f "${path}" "symbols/${filename}/${debugid}/${filename}"
     fi
   fi
 done

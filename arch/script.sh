@@ -24,12 +24,12 @@ function purge {
     if wget -q --method HEAD "${package_url}${package}" ; then
       :
     else
-      rm -vf "${path}"
+      rm -f "${path}"
     fi
   done
 }
 
-rm -rvf symbols* tmp
+rm -rf symbols* tmp
 mkdir -p symbols
 mkdir -p tarballs
 mkdir -p tmp
@@ -48,7 +48,7 @@ https://www.archlinux.org/packages/extra/x86_64/libxext/download/
 https://www.archlinux.org/packages/extra/x86_64/mesa/download/
 https://www.archlinux.org/packages/extra/x86_64/wayland/download/
 "
-wget -c --content-disposition ${packages}
+wget -o ../wget.log -c --content-disposition ${packages}
 tarballs=$(ls)
 cd ..
 
