@@ -128,11 +128,13 @@ function merge_debug_info {
             eu-unstrip "${path}" "${debuginfo}"
             printf "Merging ${debuginfo} to ${path}\n"
             cp -f "${debuginfo}" "${path}"
-            return
+            return 1
         fi
     done
+    if [ $? -ne 1 ]; then
+      printf "Could not find debuginfo for ${1}\n" >> error.log
+    fi
   fi
-  printf "Could not find debuginfo for ${1}\n" >> error.log
 }
 
 rm -rf symbols debug tmp symbols*.zip error.log
