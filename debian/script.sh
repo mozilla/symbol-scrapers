@@ -17,6 +17,7 @@ if [ -z "${CRASHSTATS_API_TOKEN}" ]; then
 fi
 
 URL="http://ftp.it.debian.org/debian/pool"
+UPDATES_URL="http://security-cdn.debian.org/debian-security/pool/updates"
 DDEB_URL="http://debug.mirrors.debian.org/debian-debug/pool"
 ARCHITECTURES="i386 amd64"
 
@@ -25,7 +26,7 @@ function fetch {
   pkg_path=${2}
   dbg_package_name=${3:-$package_name}
   dbgsym_package_name=${4:-$package_name}
-  alt_url="${5}"
+  alt_url="${UPDATES_URL}"
   url=${URL}
   ddeb_url=${DDEB_URL}
 
@@ -55,7 +56,7 @@ function purge {
   dbgsym_package_name=${4:-$package_name}
   url=${URL}
   ddeb_url=${DDEB_URL}
-  alt_url="${5}"
+  alt_url="${UPDATES_URL}"
 
   find downloads -name "${package_name}_*.*deb" | while read path; do
     package=$(basename "${path}")
