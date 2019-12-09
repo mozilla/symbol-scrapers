@@ -144,13 +144,13 @@ mkdir -p tmp
 mkdir -p debug
 
 packages="
-dconf-gsettings-backend main/d/d-conf dconf-gsettings-backend dconf-gsettings-backend main/d/dconf
+dconf-gsettings-backend main/d/dconf
 firefox main/f/firefox firefox firefox http://ppa.launchpad.net/mozillateam/firefox-next/ubuntu/pool
 glib-networking main/g/glib-networking
 gvfs main/g/gvfs
 libasound2 main/a/alsa-lib
-libavutil[0-9][0-9] main/f/ffmpeg
 libavcodec[0-9][0-9] main/f/ffmpeg
+libavutil[0-9][0-9] main/f/ffmpeg
 libc6 main/g/glibc
 libcairo2 main/c/cairo
 libdbus-1-3 main/d/dbus
