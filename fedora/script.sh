@@ -91,14 +91,51 @@ mkdir -p tmp
 mkdir -p debug
 
 packages="
+alsa-lib a
 cairo c
+dbus-glib d
+dbus-libs d
 dconf d
+ffmpeg-libs f http://mirror.nl.leaseweb.net/rpmfusion/free/fedora
 firefox f
+fontconfig f
+freetype f
+fribidi f
+gdk-pixbuf2 g
 glib2 g
 glibc g
+glib-networking g
+gnome-vfs2 g
 gtk2 g
 gtk3 g
+libepoxy l
+libevent l
+libicu l
+libpng12 l
+libpng l
+libproxy l
+libstdc++ l
+libthai l
+libvpx l
+libwayland-client l
+libx11 l
+libxcb l
+libXext l
+libxml2 l
+mesa-dri-drivers m
+mesa-libGL m
+nspr n
+opus o
+pango p
+pcre p
+pcsc-lite-libs p
 pulseaudio-libs p
+speech-dispatcher s
+systemd-libs s
+x264-libs x http://mirror.nl.leaseweb.net/rpmfusion/free/fedora
+x265-libs x http://mirror.nl.leaseweb.net/rpmfusion/free/fedora
+xvidcore x http://mirror.nl.leaseweb.net/rpmfusion/free/fedora
+zlib z
 "
 
 echo "${packages}" | while read line; do
