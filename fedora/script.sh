@@ -42,10 +42,10 @@ function fetch {
   package_regexp="${package_name}-[0-9]*.x86_64.rpm"
   dbg_package_regexp="${dbg_package_name}-[0-9]*.x86_64.rpm"
 
-  wget -o wget.log --no-cache -P downloads -nd -c -r -np -e robots=off -A "${package_regexp}" "${release_url}/${pkg_path}/"
-  wget -o wget.log --no-cache -P downloads -nd -c -r -np -e robots=off -A "${package_regexp}" "${updates_url}/${pkg_path}/"
-  wget -o wget.log --no-cache -P downloads -nd -c -r -np -e robots=off -A "${dbg_package_regexp}" "${release_debuginfo_url}/${pkg_path}/"
-  wget -o wget.log --no-cache -P downloads -nd -c -r -np -e robots=off -A "${dbg_package_regexp}" "${updates_debuginfo_url}/${pkg_path}/"
+  wget -o wget.log --no-cache -P downloads -nd -c -r -l 1 -np -e robots=off -A "${package_regexp}" "${release_url}/${pkg_path}/"
+  wget -o wget.log --no-cache -P downloads -nd -c -r -l 1 -np -e robots=off -A "${package_regexp}" "${updates_url}/${pkg_path}/"
+  wget -o wget.log --no-cache -P downloads -nd -c -r -l 1 -np -e robots=off -A "${dbg_package_regexp}" "${release_debuginfo_url}/${pkg_path}/"
+  wget -o wget.log --no-cache -P downloads -nd -c -r -l 1 -np -e robots=off -A "${dbg_package_regexp}" "${updates_debuginfo_url}/${pkg_path}/"
 }
 
 function unpack_package {
