@@ -97,7 +97,6 @@ dbus-glib d
 dbus-libs d
 dconf d
 ffmpeg-libs f http://mirror.nl.leaseweb.net/rpmfusion/free/fedora
-firefox f
 fontconfig f
 freetype f
 fribidi f
