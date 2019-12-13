@@ -20,13 +20,24 @@ URL="https://dl.fedoraproject.org/pub/fedora/linux"
 
 function fetch {
   package_name=${1}
-  pkg_path=${2}
   dbg_package_name="${package_name}-debuginfo"
+  pkg_path=${2}
+  url=${3:-$URL}
   
-  release_url="${URL}/releases/31/Everything/x86_64/os/Packages"
-  release_debuginfo_url="${URL}/releases/31/Everything/x86_64/debug/tree/Packages"
-  updates_url="${URL}/updates/31/Everything/x86_64/Packages"
-  updates_debuginfo_url="${URL}/updates/31/Everything/x86_64/debug/Packages"
+  if [ -z "${3}" ]; then
+    everything_dir="Everything"
+    packages_dir="Packages"
+    tree_dir="tree"
+  else
+    everything_dir=""
+    packages_dir=""
+    tree_dir=""
+  fi
+
+  release_url="${url}/releases/31/Everything/x86_64/os/Packages"
+  release_debuginfo_url="${url}/releases/31/Everything/x86_64/debug/${tree_dir}/${packages_dir}"
+  updates_url="${url}/updates/31/${everything_dir}/x86_64/${packages_dir}"
+  updates_debuginfo_url="${url}/updates/31/${everything_dir}/x86_64/debug/${packages_dir}"
 
   package_regexp="${package_name}-[0-9]*.x86_64.rpm"
   dbg_package_regexp="${dbg_package_name}-[0-9]*.x86_64.rpm"
