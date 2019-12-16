@@ -99,7 +99,8 @@ find . -name "*.zip" | while read myfile; do
 done
 
 find symbols -mindepth 2 -maxdepth 2 -type d | while read module; do
-  crashes=$(supersearch --num=all --modules_in_stack=${module##symbols/})
+  module_name=${module##symbols/}
+  crashes=$(supersearch --num=all --modules_in_stack=${module_name//-})
   if [ -n "${crashes}" ]; then
    echo "${crashes}" | reprocess
   fi
