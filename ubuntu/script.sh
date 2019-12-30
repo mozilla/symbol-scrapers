@@ -23,6 +23,8 @@ ARCHITECTURES="i386 amd64"
 function fetch {
   package_name=${1}
   pkg_path=${2}
+  main_path="main/${pkg_path}"
+  universe_path="universe/${pkg_path}"
   dbg_package_name=${3:-$package_name}
   dbgsym_package_name=${4:-$package_name}
   alt_url="${5}"
@@ -39,18 +41,24 @@ function fetch {
   dbg_package_regexp="${dbg_package_regexp%%,}"
   dbgsym_package_regexp="${dbgsym_package_regexp%%,}"
 
-  wget -o wget.log --no-cache -P downloads -nd -c -r -np -e robots=off -A "${package_regexp},${dbg_package_regexp}" "${url}/${pkg_path}/"
-  wget -o wget.log --no-cache -P downloads -nd -c -r -np -e robots=off -A "${dbgsym_package_regexp}" "${ddeb_url}/${pkg_path}/"
+  wget -o wget.log --no-cache -P downloads -nd -c -r -np -e robots=off -A "${package_regexp},${dbg_package_regexp}" "${url}/${main_path}/"
+  wget -o wget.log --no-cache -P downloads -nd -c -r -np -e robots=off -A "${dbgsym_package_regexp}" "${ddeb_url}/${main_path}/"
+  wget -o wget.log --no-cache -P downloads -nd -c -r -np -e robots=off -A "${package_regexp},${dbg_package_regexp}" "${url}/${universe_path}/"
+  wget -o wget.log --no-cache -P downloads -nd -c -r -np -e robots=off -A "${dbgsym_package_regexp}" "${ddeb_url}/${universe_path}/"
 
   if [ -n "${alt_url}" ]; then
-    wget -o wget.log --no-cache -P downloads -nd -c -r -np -e robots=off -A "${package_regexp},${dbg_package_regexp}" "${alt_url}/${pkg_path}/"
-    wget -o wget.log --no-cache -P downloads -nd -c -r -np -e robots=off -A "${dbgsym_package_regexp}" "${alt_url}/${pkg_path}/"
+    wget -o wget.log --no-cache -P downloads -nd -c -r -np -e robots=off -A "${package_regexp},${dbg_package_regexp}" "${alt_url}/${main_path}/"
+    wget -o wget.log --no-cache -P downloads -nd -c -r -np -e robots=off -A "${dbgsym_package_regexp}" "${alt_url}/${main_path}/"
+    wget -o wget.log --no-cache -P downloads -nd -c -r -np -e robots=off -A "${package_regexp},${dbg_package_regexp}" "${alt_url}/${universe_path}/"
+    wget -o wget.log --no-cache -P downloads -nd -c -r -np -e robots=off -A "${dbgsym_package_regexp}" "${alt_url}/${universe_path}/"
   fi
 }
 
 function purge {
   package_name=${1}
   pkg_path=${2}
+  main_path="main/${pkg_path}"
+  universe_path="universe/${pkg_path}"
   dbg_package_name=${3:-$package_name}
   dbgsym_package_name=${4:-$package_name}
   url=${URL}
@@ -59,10 +67,10 @@ function purge {
 
   find downloads -name "${package_name}_*.*deb" | while read path; do
     package=$(basename "${path}")
-    if wget -q --method HEAD "${url}/${pkg_path}/${package}" ; then
+    if wget -q --method HEAD "${url}/${main_path}/${package}" || wget -q --method HEAD "${url}/${universe_path}/${package}" ; then
       :
     elif [ -n "${alt_url}" ]; then
-      if wget -q --method HEAD "${alt_url}/${pkg_path}/${package}" ; then
+      if wget -q --method HEAD "${alt_url}/${main_path}/${package}" || wget -q --method HEAD "${alt_url}/${universe_path}/${package}" ; then
         :
       else
         rm -f "${path}"
@@ -74,10 +82,10 @@ function purge {
 
   find downloads -name "${package_name}-dbgsym_*.ddeb" | while read path; do
     package=$(basename "${path}")
-    if wget -q --method HEAD "${ddeb_url}/${pkg_path}/${package}" ; then
+    if wget -q --method HEAD "${ddeb_url}/${main_path}/${package}" || wget -q --method HEAD "${ddeb_url}/${universe_path}/${package}" ; then
       :
     elif [ -n "${alt_url}" ]; then
-      if wget -q --method HEAD "${alt_url}/${pkg_path}/${package}" ; then
+      if wget -q --method HEAD "${alt_url}/${main_path}/${package}" || wget -q --method HEAD "${alt_url}/${universe_path}/${package}" ; then
         :
       else
         rm -f "${path}"
@@ -89,10 +97,10 @@ function purge {
 
   find downloads -name "${dbg_package_name}-dbg_*.*deb" | while read path; do
     package=$(basename "${path}")
-    if wget -q --method HEAD "${url}/${pkg_path}/${package}" ; then
+    if wget -q --method HEAD "${url}/${main_path}/${package}" || wget -q --method HEAD "${url}/${universe_path}/${package}" ; then
       :
     elif [ -n "${alt_url}" ]; then
-      if wget -q --method HEAD "${alt_url}/${pkg_path}/${package}" ; then
+      if wget -q --method HEAD "${alt_url}/${main_path}/${package}" || wget -q --method HEAD "${alt_url}/${universe_path}/${package}"; then
         :
       else
         rm -f "${path}"
@@ -144,55 +152,54 @@ mkdir -p tmp
 mkdir -p debug
 
 packages="
-dconf-gsettings-backend main/d/dconf
-firefox main/f/firefox firefox firefox http://ppa.launchpad.net/mozillateam/firefox-next/ubuntu/pool
-glib-networking main/g/glib-networking
-gvfs main/g/gvfs
-libasound2 main/a/alsa-lib
-libavcodec[0-9][0-9] main/f/ffmpeg
-libavutil[0-9][0-9] main/f/ffmpeg
-libc6 main/g/glibc
-libcairo2 main/c/cairo
-libdbus-1-3 main/d/dbus
-libdbus-glib-1-2 main/d/dbus-glib
-libepoxy0 main/libe/libepoxy
-libevent-2.[0-9]-[0-9] main/libe/libevent libevent libevent-2.[0-9]-[0-9]
-libfontconfig1 main/f/fontconfig
-libfreetype6 main/f/freetype
-libfribidi0 main/f/fribidi
-libgdk-pixbuf2.0-0 main/g/gdk-pixbuf
-libgl1-mesa-dri main/m/mesa
-libgl1-mesa-glx main/m/mesa
-libglib2.0-0 main/g/glib2.0
-libglx-mesa0 main/m/mesa
-libgtk-3-0 main/g/gtk+3.0
-libicu[0-9][0-9] main/i/icu
-libopus0 main/o/opus libopus
-libpcre3 main/p/pcre3
-libpcsclite1 main/p/pcsc-lite
-libpng12-0 main/libp/libpng
-libpng16-16 main/libp/libpng1.6
-libnspr4 main/n/nspr
-libpango-1.0-0 main/p/pango1.0
-libproxy1-plugin-gsettings main/libp/libproxy
-libproxy1v5 main/libp/libproxy
-libpulse0 main/p/pulseaudio
-libspeechd2 main/s/speech-dispatcher
-libstdc++6 main/g/gcc-9 libstdc++6-9
-libstdc++6 universe/g/gcc-9 libstdc++6-9
-libsystemd0 main/s/systemd
-libthai0 main/libt/libthai
-libvpx[0-9] main/libv/libvpx
-libwayland-client0 main/w/wayland
-libx11-6 main/libx/libx11
-libx264-[0-9][0-9][0-9] universe/x/x264
-libx265-[0-9][0-9][0-9] universe/x/x265
-libxcb1 main/libx/libxcb
-libxext6 main/libx/libxext
-libxml2 main/libx/libxml2
-libxvidcore4 universe/x/xvidcore
-opensc-pkcs11 main/o/opensc
-zlib1g main/z/zlib
+dconf-gsettings-backend d/dconf
+firefox f/firefox firefox firefox http://ppa.launchpad.net/mozillateam/firefox-next/ubuntu/pool
+glib-networking g/glib-networking
+gvfs g/gvfs
+libasound2 a/alsa-lib
+libavcodec[0-9][0-9] f/ffmpeg
+libavutil[0-9][0-9] f/ffmpeg
+libc6 g/glibc
+libcairo2 c/cairo
+libdbus-1-3 d/dbus
+libdbus-glib-1-2 d/dbus-glib
+libepoxy0 libe/libepoxy
+libevent-2.[0-9]-[0-9] libe/libevent libevent libevent-2.[0-9]-[0-9]
+libfontconfig1 f/fontconfig
+libfreetype6 f/freetype
+libfribidi0 f/fribidi
+libgdk-pixbuf2.0-0 g/gdk-pixbuf
+libgl1-mesa-dri m/mesa
+libgl1-mesa-glx m/mesa
+libglib2.0-0 g/glib2.0
+libglx-mesa0 m/mesa
+libgtk-3-0 g/gtk+3.0
+libicu[0-9][0-9] i/icu
+libopus0 o/opus libopus
+libpcre3 p/pcre3
+libpcsclite1 p/pcsc-lite
+libpng12-0 libp/libpng
+libpng16-16 libp/libpng1.6
+libnspr4 n/nspr
+libpango-1.0-0 p/pango1.0
+libproxy1-plugin-gsettings libp/libproxy
+libproxy1v5 libp/libproxy
+libpulse0 p/pulseaudio
+libspeechd2 s/speech-dispatcher
+libstdc++6 g/gcc-9 libstdc++6-9
+libsystemd0 s/systemd
+libthai0 libt/libthai
+libvpx[0-9] libv/libvpx
+libwayland-client0 w/wayland
+libx11-6 libx/libx11
+libx264-[0-9][0-9][0-9] x/x264
+libx265-[0-9][0-9][0-9] x/x265
+libxcb1 libx/libxcb
+libxext6 libx/libxext
+libxml2 libx/libxml2
+libxvidcore4 x/xvidcore
+opensc-pkcs11 o/opensc
+zlib1g z/zlib
 "
 
 echo "${packages}" | while read line; do
