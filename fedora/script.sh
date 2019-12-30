@@ -17,6 +17,7 @@ if [ -z "${CRASHSTATS_API_TOKEN}" ]; then
 fi
 
 URL="https://dl.fedoraproject.org/pub/fedora/linux"
+RELEASES="31"
 
 function fetch {
   package_name=${1}
@@ -34,18 +35,27 @@ function fetch {
     tree_dir=""
   fi
 
-  release_url="${url}/releases/31/Everything/x86_64/os/Packages"
-  release_debuginfo_url="${url}/releases/31/Everything/x86_64/debug/${tree_dir}/${packages_dir}"
-  updates_url="${url}/updates/31/${everything_dir}/x86_64/${packages_dir}"
-  updates_debuginfo_url="${url}/updates/31/${everything_dir}/x86_64/debug/${packages_dir}"
-
   package_regexp="${package_name}-[0-9]*.x86_64.rpm"
   dbg_package_regexp="${dbg_package_name}-[0-9]*.x86_64.rpm"
 
-  wget -o wget.log --no-cache -P downloads -nd -c -r -l 1 -np -e robots=off -A "${package_regexp}" "${release_url}/${pkg_path}/"
-  wget -o wget.log --no-cache -P downloads -nd -c -r -l 1 -np -e robots=off -A "${package_regexp}" "${updates_url}/${pkg_path}/"
-  wget -o wget.log --no-cache -P downloads -nd -c -r -l 1 -np -e robots=off -A "${dbg_package_regexp}" "${release_debuginfo_url}/${pkg_path}/"
-  wget -o wget.log --no-cache -P downloads -nd -c -r -l 1 -np -e robots=off -A "${dbg_package_regexp}" "${updates_debuginfo_url}/${pkg_path}/"
+  for release in ${RELEASES}; do
+    release_url="${url}/releases/${release}/Everything/x86_64/os/Packages"
+    release_debuginfo_url="${url}/releases/${release}/Everything/x86_64/debug/${tree_dir}/${packages_dir}"
+    updates_url="${url}/updates/${release}/${everything_dir}/x86_64/${packages_dir}"
+    updates_debuginfo_url="${url}/updates/${release}/${everything_dir}/x86_64/debug/${packages_dir}"
+
+    wget -o wget.log --no-cache -P downloads -nd -c -r -l 1 -np -e robots=off -A "${package_regexp}" "${release_url}/${pkg_path}/"
+    wget -o wget.log --no-cache -P downloads -nd -c -r -l 1 -np -e robots=off -A "${package_regexp}" "${updates_url}/${pkg_path}/"
+    wget -o wget.log --no-cache -P downloads -nd -c -r -l 1 -np -e robots=off -A "${dbg_package_regexp}" "${release_debuginfo_url}/${pkg_path}/"
+    wget -o wget.log --no-cache -P downloads -nd -c -r -l 1 -np -e robots=off -A "${dbg_package_regexp}" "${updates_debuginfo_url}/${pkg_path}/"
+  done
+
+  # Rawhide
+  rawhide_url="${url}/development/rawhide/Everything/x86_64/os/Packages"
+  rawhide_debuginfo_url="${url}/development/rawhide/Everything/x86_64/debug/${tree_dir}/${packages_dir}"
+
+  wget -o wget.log --no-cache -P downloads -nd -c -r -l 1 -np -e robots=off -A "${package_regexp}" "${rawhide_url}/${pkg_path}/"
+  wget -o wget.log --no-cache -P downloads -nd -c -r -l 1 -np -e robots=off -A "${dbg_package_regexp}" "${rawhide_debuginfo_url}/${pkg_path}/"
 }
 
 function unpack_package {
