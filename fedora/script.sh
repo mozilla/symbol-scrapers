@@ -17,7 +17,7 @@ if [ -z "${CRASHSTATS_API_TOKEN}" ]; then
 fi
 
 URL="https://dl.fedoraproject.org/pub/fedora/linux"
-RELEASES="31"
+RELEASES="30 31"
 
 function fetch {
   package_name=${1}
