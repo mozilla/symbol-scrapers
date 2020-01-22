@@ -19,46 +19,69 @@ fi
 URL="https://dl.fedoraproject.org/pub/fedora/linux"
 RELEASES="30 31"
 
-function fetch {
-  package_name=${1}
-  dbg_package_name="${package_name}-debuginfo"
-  pkg_path=${2}
-  url=${3:-$URL}
-  
+list_rpms_from_url() {
+  local url="${1}"
+  local package_name="${2}"
+  local dbg_package_name="${package_name}-debuginfo"
+
+  local packages=""
+  wget --quiet -O - ${url} | grep -o "\"https://\(${package_name}-[0-9].*.x86_64.rpm\|${dbg_package_name}-[0-9].*.x86_64.rpm\)\"" | while read line; do
+    line=${line%%<}
+    line=${line##>}
+    printf "${url}/${line}\n"
+  done
+}
+
+get_package_urls() {
+  local package_name=${1}
+  local dbg_package_name="${package_name}-debuginfo"
+  local pkg_path=${2}
+  local url=${3:-$URL}
+
+  local everything_dir=""
+  local packages_dir=""
+  local tree_dir=""
+
   if [ -z "${3}" ]; then
     everything_dir="Everything"
     packages_dir="Packages"
     tree_dir="tree"
-  else
-    everything_dir=""
-    packages_dir=""
-    tree_dir=""
   fi
 
-  package_regexp="${package_name}-[0-9]*.x86_64.rpm"
-  dbg_package_regexp="${dbg_package_name}-[0-9]*.x86_64.rpm"
+  local urls=""
 
   for release in ${RELEASES}; do
-    release_url="${url}/releases/${release}/Everything/x86_64/os/Packages"
-    release_debuginfo_url="${url}/releases/${release}/Everything/x86_64/debug/${tree_dir}/${packages_dir}"
-    updates_url="${url}/updates/${release}/${everything_dir}/x86_64/${packages_dir}"
-    updates_debuginfo_url="${url}/updates/${release}/${everything_dir}/x86_64/debug/${packages_dir}"
+    local release_url="${url}/releases/${release}/Everything/x86_64/os/Packages/${pkg_path}/"
+    local release_debuginfo_url="${url}/releases/${release}/Everything/x86_64/debug/${tree_dir}/${packages_dir}/${pkg_path}/"
+    local updates_url="${url}/updates/${release}/${everything_dir}/x86_64/${packages_dir}/${pkg_path}/"
+    local updates_debuginfo_url="${url}/updates/${release}/${everything_dir}/x86_64/debug/${packages_dir}/${pkg_path}/"
 
-    wget -o wget.log --no-cache -P downloads -nd -c -r -l 1 -np -e robots=off -A "${package_regexp}" "${release_url}/${pkg_path}/"
-    wget -o wget.log --no-cache -P downloads -nd -c -r -l 1 -np -e robots=off -A "${package_regexp}" "${updates_url}/${pkg_path}/"
-    wget -o wget.log --no-cache -P downloads -nd -c -r -l 1 -np -e robots=off -A "${dbg_package_regexp}" "${release_debuginfo_url}/${pkg_path}/"
-    wget -o wget.log --no-cache -P downloads -nd -c -r -l 1 -np -e robots=off -A "${dbg_package_regexp}" "${updates_debuginfo_url}/${pkg_path}/"
+    urls="${urls} ${release_url} ${release_debuginfo_url} ${updates_url} ${updates_debuginfo_url}"
   done
 
   # Rawhide
-  rawhide_url="${url}/development/rawhide/Everything/x86_64/os/Packages"
-  rawhide_debuginfo_url="${url}/development/rawhide/Everything/x86_64/debug/${tree_dir}/${packages_dir}"
+  local rawhide_url="${url}/development/rawhide/Everything/x86_64/os/Packages/${pkg_path}/"
+  local rawhide_debuginfo_url="${url}/development/rawhide/Everything/x86_64/debug/${tree_dir}/${packages_dir}/${pkg_path}/"
 
-  wget -o wget.log --no-cache -P downloads -nd -c -r -l 1 -np -e robots=off -A "${package_regexp}" "${rawhide_url}/${pkg_path}/"
-  wget -o wget.log --no-cache -P downloads -nd -c -r -l 1 -np -e robots=off -A "${dbg_package_regexp}" "${rawhide_debuginfo_url}/${pkg_path}/"
+  urls="${urls} ${rawhide_url} ${rawhide_debuginfo_url}"
+
+  wget -k --quiet ${urls}
+  grep -h -o "$url.*/\(${package_name}-[0-9].*.x86_64.rpm\|${dbg_package_name}-[0-9].*.x86_64.rpm\)\"" index.html* | cut -d'"' -f1
+  rm -f index.html*
 }
 
-function unpack_package {
+fetch_packages() {
+  echo "${1}" | while read line; do
+    [ -z "${line}" ] && continue
+    get_package_urls ${line} >> packages.txt
+  done
+
+  wget -o wget.log -P downloads -c -i packages.txt
+
+  rev packages.txt | cut -d'/' -f1 | rev > package_names.txt
+}
+
+unpack_package() {
   package_filename="${1##downloads/}"
   package_name="${package_filename%%.rpm}"
 
@@ -71,11 +94,11 @@ function unpack_package {
   fi
 }
 
-function get_build_id {
+get_build_id() {
   echo "${1}" | cut -d'=' -f2 | cut -d',' -f1
 }
 
-function merge_debug_info {
+merge_debug_info() {
   buildid=${2}
   prefix=$(echo "${buildid}" | cut -b1-2)
   suffix=$(echo "${buildid}" | cut -b3-)
@@ -94,7 +117,17 @@ function merge_debug_info {
   fi
 }
 
-rm -rf symbols debug tmp symbols*.zip error.log
+purge_old_packages() {
+  find downloads | while read line; do
+    name=$(echo "${line}" | cut -d'/' -f2)
+
+    if ! grep -q ${name} package_names.txt; then
+      rm -vf "downloads/${name}"
+    fi
+  done
+}
+
+rm -rf symbols debug tmp symbols*.zip error.log packages.txt package_names.txt
 mkdir -p downloads
 mkdir -p symbols
 mkdir -p tmp
@@ -147,10 +180,7 @@ xvidcore x http://mirror.nl.leaseweb.net/rpmfusion/free/fedora
 zlib z
 "
 
-echo "${packages}" | while read line; do
-    [ -z "${line}" ] && continue
-    fetch ${line}
-done
+fetch_packages "${packages}"
 
 find downloads -name "*.rpm" -type f | while read package; do
   full_hash=$(sha256sum "${package}")
@@ -214,3 +244,5 @@ find symbols -mindepth 2 -maxdepth 2 -type d | while read module; do
    echo "${crashes}" | reprocess
   fi
 done
+
+purge_old_packages

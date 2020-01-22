@@ -3,5 +3,7 @@ symbols*
 data.tar
 debug
 downloads
+packages.txt
+package_names.txt
 tmp
 wget.log
