@@ -19,7 +19,7 @@ fi
 function purge {
   package_name="${1}"
   package_url="${2}"
-  find tarballs -name "${package_name}*.tar.xz" | while read path; do
+  find tarballs -name "${package_name}*.tar.*" | while read path; do
     package=$(basename "${path}")
     if wget -q --method HEAD "${package_url}${package}" ; then
       :
