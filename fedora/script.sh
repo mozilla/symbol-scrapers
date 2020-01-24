@@ -19,19 +19,6 @@ fi
 URL="https://dl.fedoraproject.org/pub/fedora/linux"
 RELEASES="30 31"
 
-list_rpms_from_url() {
-  local url="${1}"
-  local package_name="${2}"
-  local dbg_package_name="${package_name}-debuginfo"
-
-  local packages=""
-  wget --quiet -O - ${url} | grep -o "\"https://\(${package_name}-[0-9].*.x86_64.rpm\|${dbg_package_name}-[0-9].*.x86_64.rpm\)\"" | while read line; do
-    line=${line%%<}
-    line=${line##>}
-    printf "${url}/${line}\n"
-  done
-}
-
 get_package_urls() {
   local package_name=${1}
   local dbg_package_name="${package_name}-debuginfo"
