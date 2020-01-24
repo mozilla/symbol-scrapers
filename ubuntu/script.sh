@@ -186,6 +186,7 @@ libproxy1-plugin-gsettings libp/libproxy
 libproxy1v5 libp/libproxy
 libpulse0 p/pulseaudio
 libspeechd2 s/speech-dispatcher
+libsqlite3-0 s/sqlite3
 libstdc++6 g/gcc-9 libstdc++6-9
 libsystemd0 s/systemd
 libthai0 libt/libthai
