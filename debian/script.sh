@@ -16,10 +16,9 @@ if [ -z "${CRASHSTATS_API_TOKEN}" ]; then
   exit 1
 fi
 
-URL="http://ftp.it.debian.org/debian/pool"
+URL="http://ftp.nl.debian.org/debian/pool"
 UPDATES_URL="http://security-cdn.debian.org/debian-security/pool/updates"
 DDEB_URL="http://debug.mirrors.debian.org/debian-debug/pool"
-ARCHITECTURES="i386 amd64"
 
 get_package_urls() {
   local package_name=${1}
@@ -30,10 +29,6 @@ get_package_urls() {
   local alt_url="${UPDATES_URL}"
   local url=${URL}
   local ddeb_url=${DDEB_URL}
-
-  local package_regexp="${package_name}_*_\(i386\|amd64\).deb"
-  local dbg_package_regexp="${dbg_package_name}-dbg_*_\(i386\|amd64\).deb"
-  local dbgsym_package_regexp="${dbgsym_package_name}-dbgsym_*_\(i386\|amd64\).deb"
 
   local urls="${url}/${main_path}/ ${ddeb_url}/${main_path}/ "
 
