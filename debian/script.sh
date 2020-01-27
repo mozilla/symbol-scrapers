@@ -21,89 +21,42 @@ UPDATES_URL="http://security-cdn.debian.org/debian-security/pool/updates"
 DDEB_URL="http://debug.mirrors.debian.org/debian-debug/pool"
 ARCHITECTURES="i386 amd64"
 
-function fetch {
-  package_name=${1}
-  pkg_path=${2}
-  main_path="main/${pkg_path}"
-  dbg_package_name=${3:-$package_name}
-  dbgsym_package_name=${4:-$package_name}
-  alt_url="${UPDATES_URL}"
-  url=${URL}
-  ddeb_url=${DDEB_URL}
+get_package_urls() {
+  local package_name=${1}
+  local pkg_path=${2}
+  local main_path="main/${pkg_path}"
+  local dbg_package_name=${3:-$package_name}
+  local dbgsym_package_name=${4:-$package_name}
+  local alt_url="${UPDATES_URL}"
+  local url=${URL}
+  local ddeb_url=${DDEB_URL}
 
-  for arch in ${ARCHITECTURES}; do
-    package_regexp="${package_name}_*_${arch}.deb,${package_regexp}"
-    dbg_package_regexp="${dbg_package_name}-dbg_*_${arch}.deb,${dbg_package_regexp}"
-    dbgsym_package_regexp="${dbgsym_package_name}-dbgsym_*_${arch}.deb,${dbgsym_package_regexp}"
-  done
+  local package_regexp="${package_name}_*_\(i386\|amd64\).deb"
+  local dbg_package_regexp="${dbg_package_name}-dbg_*_\(i386\|amd64\).deb"
+  local dbgsym_package_regexp="${dbgsym_package_name}-dbgsym_*_\(i386\|amd64\).deb"
 
-  package_regexp="${package_regexp%%,}"
-  dbg_package_regexp="${dbg_package_regexp%%,}"
-  dbgsym_package_regexp="${dbgsym_package_regexp%%,}"
-
-  wget -o wget.log --no-cache -P downloads -nd -c -r -np -e robots=off -A "${package_regexp},${dbg_package_regexp}" "${url}/${main_path}/"
-  wget -o wget.log --no-cache -P downloads -nd -c -r -np -e robots=off -A "${dbgsym_package_regexp}" "${ddeb_url}/${main_path}/"
+  local urls="${url}/${main_path}/ ${ddeb_url}/${main_path}/ "
 
   if [ -n "${alt_url}" ]; then
-    wget -o wget.log --no-cache -P downloads -nd -c -r -np -e robots=off -A "${package_regexp},${dbg_package_regexp}" "${alt_url}/${main_path}/"
-    wget -o wget.log --no-cache -P downloads -nd -c -r -np -e robots=off -A "${dbgsym_package_regexp}" "${alt_url}/${main_path}/"
+    urls="${urls} ${alt_url}/${main_path}/"
   fi
+
+  wget -k --quiet ${urls}
+  for i in ${urls}; do
+    grep -h -o "${i}\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).deb\"" index.html* | cut -d'"' -f1
+  done
+  rm -f index.html*
 }
 
-function purge {
-  package_name=${1}
-  pkg_path=${2}
-  main_path="main/${pkg_path}"
-  dbg_package_name=${3:-$package_name}
-  dbgsym_package_name=${4:-$package_name}
-  url=${URL}
-  ddeb_url=${DDEB_URL}
-  alt_url="${UPDATES_URL}"
-
-  find downloads -name "${package_name}_*.*deb" | while read path; do
-    package=$(basename "${path}")
-    if wget -q --method HEAD "${url}/${main_path}/${package}" ; then
-      :
-    elif [ -n "${alt_url}" ]; then
-      if wget -q --method HEAD "${alt_url}/${main_path}/${package}" ; then
-        :
-      else
-        rm -f "${path}"
-      fi
-    else
-      rm -f "${path}"
-    fi
+fetch_packages() {
+  echo "${1}" | while read line; do
+    [ -z "${line}" ] && continue
+    get_package_urls ${line} >> packages.txt
   done
 
-  find downloads -name "${package_name}-dbgsym_*.deb" | while read path; do
-    package=$(basename "${path}")
-    if wget -q --method HEAD "${ddeb_url}/${main_path}/${package}" ; then
-      :
-    elif [ -n "${alt_url}" ]; then
-      if wget -q --method HEAD "${alt_url}/${main_path}/${package}" ; then
-        :
-      else
-        rm -f "${path}"
-      fi
-    else
-      rm -f "${path}"
-    fi
-  done
-
-  find downloads -name "${dbg_package_name}-dbg_*.*deb" | while read path; do
-    package=$(basename "${path}")
-    if wget -q --method HEAD "${url}/${main_path}/${package}" ; then
-      :
-    elif [ -n "${alt_url}" ]; then
-      if wget -q --method HEAD "${alt_url}/${main_path}/${package}" ; then
-        :
-      else
-        rm -f "${path}"
-      fi
-    else
-      rm -f "${path}"
-    fi
-  done
+  sed -i -e 's/%2b/+/g' packages.txt
+  sort packages.txt | wget -o wget.log -P downloads -c -i -
+  rev packages.txt | cut -d'/' -f1 | rev > package_names.txt
 }
 
 function get_build_id {
@@ -140,7 +93,17 @@ function merge_debug_info {
   fi
 }
 
-rm -rf symbols debug tmp symbols*.zip error.log
+purge_old_packages() {
+  find downloads | while read line; do
+    name=$(echo "${line}" | cut -d'/' -f2)
+
+    if ! grep -q ${name} package_names.txt; then
+      rm -vf "downloads/${name}"
+    fi
+  done
+}
+
+rm -rf symbols debug tmp symbols*.zip error.log packages.txt package_names.txt
 mkdir -p downloads
 mkdir -p symbols
 mkdir -p tmp
@@ -199,24 +162,19 @@ opensc-pkcs11 o/opensc
 zlib1g z/zlib
 "
 
-echo "${packages}" | while read line; do
-    [ -z "${line}" ] && continue
-    fetch ${line}
-done
+fetch_packages "${packages}"
 
-package_files=$(find downloads -name "*.deb" -type f)
-
-for i in ${package_files}; do
-  full_hash=$(sha256sum "${i}")
+find downloads -name "*.deb" -type f | while read path; do
+  full_hash=$(sha256sum "${path}")
   hash=$(echo "${full_hash}" | cut -b 1-64)
   if ! grep -q ${hash} SHA256SUMS; then
-    7z -y x "${i}" > /dev/null
-    if [[ ${i} =~ -(dbg|dbgsym)_ ]]; then
-      mkdir -p "debug/${i##downloads/}"
-      tar -C "debug/${i##downloads/}" -x -a -f data.tar
+    7z -y x "${path}" > /dev/null
+    if [[ ${path} =~ -(dbg|dbgsym)_ ]]; then
+      mkdir -p "debug/${path##downloads/}"
+      tar -C "debug/${path##downloads/}" -x -a -f data.tar
     else
-      mkdir -p "tmp/${i##downloads/}"
-      tar -C "tmp/${i##downloads/}" -x -a -f data.tar
+      mkdir -p "tmp/${path##downloads/}"
+      tar -C "tmp/${path##downloads/}" -x -a -f data.tar
     fi
     echo "${full_hash}" >> SHA256SUMS
   fi
@@ -274,7 +232,4 @@ find symbols -mindepth 2 -maxdepth 2 -type d | while read module; do
   fi
 done
 
-echo "${packages}" | while read line; do
-    [ -z "${line}" ] && continue
-    purge $line
-done
+purge_old_packages
