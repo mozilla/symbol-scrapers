@@ -48,6 +48,7 @@ https://www.archlinux.org/packages/extra/x86_64/libx11/download/
 https://www.archlinux.org/packages/extra/x86_64/libxcb/download/
 https://www.archlinux.org/packages/extra/x86_64/libxext/download/
 https://www.archlinux.org/packages/extra/x86_64/mesa/download/
+https://www.archlinux.org/packages/extra/x86_64/pixman/download/
 https://www.archlinux.org/packages/extra/x86_64/wayland/download/
 "
 wget -o ../wget.log -c --content-disposition ${packages}

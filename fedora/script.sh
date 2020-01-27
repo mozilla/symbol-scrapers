@@ -152,12 +152,14 @@ libxcb l
 libXext l
 libxml2 l
 mesa-dri-drivers m
+mesa-libEGL m
 mesa-libGL m
 nspr n
 opus o
 pango p
 pcre p
 pcsc-lite-libs p
+pixman p
 pulseaudio-libs p
 speech-dispatcher s
 systemd-libs s

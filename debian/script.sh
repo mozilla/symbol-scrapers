@@ -106,8 +106,8 @@ mkdir -p debug
 
 packages="
 dconf-gsettings-backend d/dconf
-firefox f/firefox
 firefox-esr f/firefox-esr
+firefox f/firefox
 glib-networking g/glib-networking
 gvfs g/gvfs
 libasound2 a/alsa-lib
@@ -117,6 +117,9 @@ libc6 g/glibc
 libcairo2 c/cairo
 libdbus-1-3 d/dbus
 libdbus-glib-1-2 d/dbus-glib
+libegl1-mesa-drivers m/mesa
+libegl1-mesa m/mesa
+libegl-mesa0 m/mesa
 libepoxy0 libe/libepoxy
 libevent-2.[0-9]-[0-9] libe/libevent libevent libevent-2.[0-9]-[0-9]
 libfontconfig1 f/fontconfig
@@ -129,13 +132,14 @@ libglib2.0-0 g/glib2.0
 libglx-mesa0 m/mesa
 libgtk-3-0 g/gtk+3.0
 libicu[0-9][0-9] i/icu
+libnspr4 n/nspr
 libopus0 o/opus libopus
+libpango-1.0-0 p/pango1.0
 libpcre3 p/pcre3
 libpcsclite1 p/pcsc-lite
+libpixman-1-0 p/pixman
 libpng12-0 libp/libpng
 libpng16-16 libp/libpng1.6
-libnspr4 n/nspr
-libpango-1.0-0 p/pango1.0
 libproxy1-plugin-gsettings libp/libproxy
 libproxy1v5 libp/libproxy
 libpulse0 p/pulseaudio
