@@ -139,10 +139,12 @@ gtk2 g
 gtk3 g
 libepoxy l
 libevent l
+libICE l
 libicu l
 libpng12 l
 libpng l
 libproxy l
+libSM l
 libstdc++ l
 libthai l
 libvpx l

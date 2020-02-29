@@ -21,14 +21,14 @@ UPDATES_URL="http://security-cdn.debian.org/debian-security/pool/updates"
 DDEB_URL="http://debug.mirrors.debian.org/debian-debug/pool"
 
 get_package_urls() {
-  local package_name=${1}
-  local pkg_path=${2}
+  local package_name="${1}"
+  local pkg_path="${2}"
   local main_path="main/${pkg_path}"
-  local dbg_package_name=${3:-$package_name}
-  local dbgsym_package_name=${4:-$package_name}
-  local alt_url="${UPDATES_URL}"
-  local url=${URL}
-  local ddeb_url=${DDEB_URL}
+  local dbg_package_name="${3:-$package_name}"
+  local dbgsym_package_name="${4:-$package_name}"
+  local alt_url="${5:-$UPDATES_URL}"
+  local url="${URL}"
+  local ddeb_url="${DDEB_URL}"
 
   local urls="${url}/${main_path}/ ${ddeb_url}/${main_path}/ "
 
@@ -113,6 +113,8 @@ gvfs g/gvfs
 libasound2 a/alsa-lib
 libavcodec[0-9][0-9] f/ffmpeg
 libavutil[0-9][0-9] f/ffmpeg
+libavcodec[0-9][0-9] f/ffmpeg-dmo libavcodec[0-9][0-9] libavcodec[0-9][0-9] http://mirror.home-dn.net/debian-multimedia/pool
+libavutil[0-9][0-9] f/ffmpeg-dmo libavutil[0-9][0-9] libavutil[0-9][0-9] http://mirror.home-dn.net/debian-multimedia/pool
 libc6 g/glibc
 libcairo2 c/cairo
 libdbus-1-3 d/dbus
@@ -131,6 +133,7 @@ libgl1-mesa-glx m/mesa
 libglib2.0-0 g/glib2.0
 libglx-mesa0 m/mesa
 libgtk-3-0 g/gtk+3.0
+libice6 libi/libice
 libicu[0-9][0-9] i/icu
 libnspr4 n/nspr
 libopus0 o/opus libopus
@@ -143,6 +146,7 @@ libpng16-16 libp/libpng1.6
 libproxy1-plugin-gsettings libp/libproxy
 libproxy1v5 libp/libproxy
 libpulse0 p/pulseaudio
+libsm6 libs/libsm
 libspeechd2 s/speech-dispatcher
 libsqlite3-0 s/sqlite3
 libstdc++6 g/gcc-9 libstdc++6-9
