@@ -16,12 +16,18 @@ if [ -z "${CRASHSTATS_API_TOKEN}" ]; then
   exit 1
 fi
 
-URL="https://dl.fedoraproject.org/pub/fedora/linux"
-RELEASES="30 31"
+URL="https://fedora.mirror.wearetriple.com/linux"
+RELEASES="30 31 32"
 
 get_package_urls() {
   local package_name=${1}
   local dbg_package_name="${package_name}-debuginfo"
+  local url=${3:-$URL}
+
+  grep -h -o "$url.*/\(${package_name}-[0-9].*.x86_64.rpm\|${dbg_package_name}-[0-9].*.x86_64.rpm\)\"" index.html* | cut -d'"' -f1
+}
+
+get_package_indexes() {
   local pkg_path=${2}
   local url=${3:-$URL}
 
@@ -35,33 +41,36 @@ get_package_urls() {
     tree_dir="tree"
   fi
 
-  local urls=""
-
   for release in ${RELEASES}; do
-    local release_url="${url}/releases/${release}/Everything/x86_64/os/Packages/${pkg_path}/"
-    local release_debuginfo_url="${url}/releases/${release}/Everything/x86_64/debug/${tree_dir}/${packages_dir}/${pkg_path}/"
-    local updates_url="${url}/updates/${release}/${everything_dir}/x86_64/${packages_dir}/${pkg_path}/"
-    local updates_debuginfo_url="${url}/updates/${release}/${everything_dir}/x86_64/debug/${packages_dir}/${pkg_path}/"
-
-    urls="${urls} ${release_url} ${release_debuginfo_url} ${updates_url} ${updates_debuginfo_url}"
+    printf "${url}/releases/${release}/Everything/x86_64/os/Packages/${pkg_path}/\n"
+    printf "${url}/releases/${release}/Everything/x86_64/debug/${tree_dir}/${packages_dir}/${pkg_path}/\n"
+    printf "${url}/updates/${release}/${everything_dir}/x86_64/${packages_dir}/${pkg_path}/\n"
+    printf "${url}/updates/${release}/${everything_dir}/x86_64/debug/${packages_dir}/${pkg_path}/\n"
   done
 
+  # 32 beta
+  printf "${url}/development/32/Everything/x86_64/os/Packages/${pkg_path}/\n"
+  printf "${url}/development/32/Everything/x86_64/debug/${tree_dir}/${packages_dir}/${pkg_path}/\n"
+
   # Rawhide
-  local rawhide_url="${url}/development/rawhide/Everything/x86_64/os/Packages/${pkg_path}/"
-  local rawhide_debuginfo_url="${url}/development/rawhide/Everything/x86_64/debug/${tree_dir}/${packages_dir}/${pkg_path}/"
-
-  urls="${urls} ${rawhide_url} ${rawhide_debuginfo_url}"
-
-  wget -k --quiet ${urls}
-  grep -h -o "$url.*/\(${package_name}-[0-9].*.x86_64.rpm\|${dbg_package_name}-[0-9].*.x86_64.rpm\)\"" index.html* | cut -d'"' -f1
-  rm -f index.html*
+  printf "${url}/development/rawhide/Everything/x86_64/os/Packages/${pkg_path}/\n"
+  printf "${url}/development/rawhide/Everything/x86_64/debug/${tree_dir}/${packages_dir}/${pkg_path}/\n"
 }
 
 fetch_packages() {
   echo "${1}" | while read line; do
     [ -z "${line}" ] && continue
+    get_package_indexes ${line}
+  done | sort -u > indexes.txt
+
+  wget --compression=auto -k -i indexes.txt
+
+  echo "${1}" | while read line; do
+    [ -z "${line}" ] && continue
     get_package_urls ${line} >> packages.txt
   done
+
+  rm -vf index.html*
 
   wget -o wget.log -P downloads -c -i packages.txt
 
@@ -137,8 +146,10 @@ glib-networking g
 gnome-vfs2 g
 gtk2 g
 gtk3 g
+libdrm l
 libepoxy l
 libevent l
+libffi l
 libICE l
 libicu l
 libpng12 l
@@ -173,12 +184,11 @@ zlib z
 
 fetch_packages "${packages}"
 
-find downloads -name "*.rpm" -type f | while read package; do
-  full_hash=$(sha256sum "${package}")
-  hash=$(echo "${full_hash}" | cut -b 1-64)
-  if ! grep -q ${hash} SHA256SUMS; then
-    unpack_package "${package}"
-    echo "$full_hash" >> SHA256SUMS
+find downloads -name "*.rpm" -type f | while read path; do
+  filename="${path##downloads/}"
+  if ! grep -q -F "${filename}" SHA256SUMS; then
+    unpack_package "${path}"
+    echo "$filename" >> SHA256SUMS
   fi
 done
 

@@ -124,6 +124,7 @@ libegl1-mesa m/mesa
 libegl-mesa0 m/mesa
 libepoxy0 libe/libepoxy
 libevent-2.[0-9]-[0-9] libe/libevent libevent libevent-2.[0-9]-[0-9]
+libffi[0-9] libf/libffi
 libfontconfig1 f/fontconfig
 libfreetype6 f/freetype
 libfribidi0 f/fribidi
@@ -168,18 +169,17 @@ zlib1g z/zlib
 fetch_packages "${packages}"
 
 find downloads -name "*.deb" -type f | while read path; do
-  full_hash=$(sha256sum "${path}")
-  hash=$(echo "${full_hash}" | cut -b 1-64)
-  if ! grep -q ${hash} SHA256SUMS; then
+  filename="${path##downloads/}"
+  if ! grep -q -F "${filename}" SHA256SUMS; then
     7z -y x "${path}" > /dev/null
     if [[ ${path} =~ -(dbg|dbgsym)_ ]]; then
-      mkdir -p "debug/${path##downloads/}"
-      tar -C "debug/${path##downloads/}" -x -a -f data.tar
+      mkdir -p "debug/${filename}"
+      tar -C "debug/${filename}" -x -a -f data.tar
     else
-      mkdir -p "tmp/${path##downloads/}"
-      tar -C "tmp/${path##downloads/}" -x -a -f data.tar
+      mkdir -p "tmp/${filename}"
+      tar -C "tmp/${filename}" -x -a -f data.tar
     fi
-    echo "${full_hash}" >> SHA256SUMS
+    echo "${filename}" >> SHA256SUMS
   fi
 done
 

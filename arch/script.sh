@@ -39,13 +39,16 @@ packages="
 https://www.archlinux.org/packages/community/x86_64/firefox-developer-edition/download/
 https://www.archlinux.org/packages/core/x86_64/glib2/download/
 https://www.archlinux.org/packages/core/x86_64/glibc/download/
+https://www.archlinux.org/packages/core/x86_64/libffi/download/
 https://www.archlinux.org/packages/extra/x86_64/cairo/download/
 https://www.archlinux.org/packages/extra/x86_64/dconf/download/
 https://www.archlinux.org/packages/extra/x86_64/gtk3/download/
+https://www.archlinux.org/packages/extra/x86_64/libdrm/download/
 https://www.archlinux.org/packages/extra/x86_64/libice/download/
 https://www.archlinux.org/packages/extra/x86_64/libpulse/download/
 https://www.archlinux.org/packages/extra/x86_64/libsm/download/
 https://www.archlinux.org/packages/extra/x86_64/libstdc++5/download/
+https://www.archlinux.org/packages/extra/x86_64/libva-mesa-driver/download/
 https://www.archlinux.org/packages/extra/x86_64/libx11/download/
 https://www.archlinux.org/packages/extra/x86_64/libxcb/download/
 https://www.archlinux.org/packages/extra/x86_64/libxext/download/
@@ -115,12 +118,16 @@ purge "firefox-developer-edition-" "https://ind.mirror.pkgbuild.com/community/os
 purge "glib2-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
 purge "glibc-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
 purge "gtk3-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
+purge "libdrm-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
+purge "libffi-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
 purge "libice-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libpulse-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libsm-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libstdc++5-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
+purge "libva-mesa-driver-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libx11-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libxcb-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libxext-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "mesa-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
+purge "pixman-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "wayland-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
