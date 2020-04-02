@@ -158,8 +158,10 @@ libx265-[0-9][0-9][0-9] x/x265
 libxcb1 libx/libxcb
 libxext6 libx/libxext
 libxml2 libx/libxml2
+libxss1 libx/libxss
 libxvidcore4 x/xvidcore
 opensc-pkcs11 o/opensc
+thunderbird t/thunderbird
 zlib1g z/zlib
 "
 
