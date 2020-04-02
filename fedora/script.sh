@@ -117,6 +117,17 @@ merge_debug_info() {
   fi
 }
 
+function get_soname {
+  local path="${1}"
+  local soname=$(objdump -p "${path}" | grep "^  SONAME *" | cut -b24-)
+  if [ -n "${soname}" ]; then
+    printf "${soname}"
+  else
+    local filename=$(basename "${path}")
+    printf "${filename}"
+  fi
+}
+
 purge_old_packages() {
   find downloads | while read line; do
     name=$(echo "${line}" | cut -d'/' -f2)
@@ -199,7 +210,7 @@ done
 find tmp -type f | while read path; do
   file_output=$(file "${path}")
   if echo "${file_output}" | grep -q "ELF \(32\|64\)-bit LSB \(shared object\|pie executable\)" ; then
-    filename=$(basename "${path}")
+    soname=$(get_soname "${path}")
     buildid=$(get_build_id "${file_output}")
     merge_debug_info "${path}" "${buildid}"
     tmpfile=$(mktemp)
@@ -207,12 +218,12 @@ find tmp -type f | while read path; do
     ${DUMP_SYMS} "${path}" > "${tmpfile}"
     printf "done\n"
     debugid=$(head -n 1 "${tmpfile}" | cut -d' ' -f4)
-    mkdir -p "symbols/${filename}/${debugid}"
-    mv "${tmpfile}" "symbols/${filename}/${debugid}/${filename}.sym"
+    mkdir -p "symbols/${soname}/${debugid}"
+    mv "${tmpfile}" "symbols/${soname}/${debugid}/${soname}.sym"
     file_size=$(stat -c "%s" "${path}")
     # Copy the object file only if it's not larger than roughly 2GiB
     if [ $file_size -lt 2100000000 ]; then
-      /bin/cp -f "${path}" "symbols/${filename}/${debugid}/${filename}"
+      /bin/cp -f "${path}" "symbols/${soname}/${debugid}/${soname}"
     fi
   fi
 done

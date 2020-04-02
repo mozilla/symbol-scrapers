@@ -16,6 +16,17 @@ if [ -z "${CRASHSTATS_API_TOKEN}" ]; then
   exit 1
 fi
 
+function get_soname {
+  local path="${1}"
+  local soname=$(objdump -p "${path}" | grep "^  SONAME *" | cut -b24-)
+  if [ -n "${soname}" ]; then
+    printf "${soname}"
+  else
+    local filename=$(basename "${path}")
+    printf "${filename}"
+  fi
+}
+
 function purge {
   package_name="${1}"
   package_url="${2}"
@@ -76,9 +87,10 @@ find tmp -name "*.so*" -type f | while read library; do
   if file "${library}" | grep -q "ELF 64-bit LSB shared object" ; then
     library_basename=$(basename "${library}")
     debugid=$("${DUMP_SYMS}" "${library}" | head -n 1 | cut -b 21-53)
-    mkdir -p "symbols/${library_basename}/${debugid}"
-    "${DUMP_SYMS}" "${library}" > "symbols/${library_basename}/${debugid}/${library_basename}.sym"
-    cp -v "${library}" "symbols/${library_basename}/${debugid}/${library_basename}"
+    soname=$(get_soname "${library}")
+    mkdir -p "symbols/${soname}/${debugid}"
+    "${DUMP_SYMS}" "${library}" > "symbols/${soname}/${debugid}/${soname}.sym"
+    cp -v "${library}" "symbols/${soname}/${debugid}/${soname}"
   fi
 done
 

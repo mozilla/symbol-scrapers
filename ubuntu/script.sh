@@ -59,11 +59,11 @@ function get_build_id {
 }
 
 function merge_debug_info {
-  path="${1}"
-  buildid=$(get_build_id "${path}")
-  prefix=$(echo "${buildid}" | cut -b1-2)
-  suffix=$(echo "${buildid}" | cut -b3-)
-  debuginfo=$(find debug -path "*/${prefix}/${suffix}.debug" | head -n1)
+  local path="${1}"
+  local buildid=$(get_build_id "${path}")
+  local prefix=$(echo "${buildid}" | cut -b1-2)
+  local suffix=$(echo "${buildid}" | cut -b3-)
+  local debuginfo=$(find debug -path "*/${prefix}/${suffix}.debug" | head -n1)
   if test -n "${debuginfo}" ; then
     objcopy --decompress-debug-sections "${debuginfo}"
     eu-unstrip "${path}" "${debuginfo}"
@@ -71,9 +71,9 @@ function merge_debug_info {
     cp -f "${debuginfo}" "${path}"
     return
   else
-    filename=$(basename "${path}")
+    local filename=$(basename "${path}")
     find debug -path "*-dbg*_*${filename}" -type f | while read debuginfo; do
-        tbuildid=$(get_build_id "${debuginfo}")
+        local tbuildid=$(get_build_id "${debuginfo}")
         if [ "$buildid" == "$tbuildid" ]; then
             objcopy --decompress-debug-sections "${debuginfo}"
             eu-unstrip "${path}" "${debuginfo}"
@@ -85,6 +85,17 @@ function merge_debug_info {
     if [ $? -ne 1 ]; then
       printf "Could not find debuginfo for ${1}\n" >> error.log
     fi
+  fi
+}
+
+function get_soname {
+  local path="${1}"
+  local soname=$(objdump -p "${path}" | grep "^  SONAME *" | cut -b24-)
+  if [ -n "${soname}" ]; then
+    printf "${soname}"
+  else
+    local filename=$(basename "${path}")
+    printf "${filename}"
   fi
 }
 
@@ -184,19 +195,19 @@ done
 
 find tmp -type f | while read path; do
   if file "${path}" | grep -q "ELF \(32\|64\)-bit LSB \(shared object\|pie executable\)" ; then
-    filename=$(basename "${path}")
+    soname=$(get_soname "${path}")
     merge_debug_info "${path}"
     tmpfile=$(mktemp)
     printf "Writing symbol file for ${path} ... "
     ${DUMP_SYMS} "${path}" > "${tmpfile}"
     printf "done\n"
     debugid=$(head -n 1 "${tmpfile}" | cut -d' ' -f4)
-    mkdir -p "symbols/${filename}/${debugid}"
-    mv "${tmpfile}" "symbols/${filename}/${debugid}/${filename}.sym"
+    mkdir -p "symbols/${soname}/${debugid}"
+    mv "${tmpfile}" "symbols/${soname}/${debugid}/${soname}.sym"
     file_size=$(stat -c "%s" "${path}")
     # Copy the object file only if it's not larger than roughly 2GiB
     if [ $file_size -lt 2100000000 ]; then
-      cp -f "${path}" "symbols/${filename}/${debugid}/${filename}"
+      cp -f "${path}" "symbols/${soname}/${debugid}/${soname}"
     fi
   fi
 done
