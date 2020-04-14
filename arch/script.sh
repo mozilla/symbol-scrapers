@@ -51,12 +51,16 @@ https://www.archlinux.org/packages/community/x86_64/firefox-developer-edition/do
 https://www.archlinux.org/packages/core/x86_64/glib2/download/
 https://www.archlinux.org/packages/core/x86_64/glibc/download/
 https://www.archlinux.org/packages/core/x86_64/libffi/download/
+https://www.archlinux.org/packages/extra/x86_64/atk/download/
+https://www.archlinux.org/packages/extra/x86_64/at-spi2-atk/download/
+https://www.archlinux.org/packages/extra/x86_64/at-spi2-core/download/
 https://www.archlinux.org/packages/extra/x86_64/cairo/download/
 https://www.archlinux.org/packages/extra/x86_64/dconf/download/
 https://www.archlinux.org/packages/extra/x86_64/ffmpeg/download/
 https://www.archlinux.org/packages/extra/x86_64/gtk3/download/
 https://www.archlinux.org/packages/extra/x86_64/gvfs/download/
 https://www.archlinux.org/packages/extra/x86_64/libdrm/download/
+https://www.archlinux.org/packages/extra/x86_64/libglvnd/download/
 https://www.archlinux.org/packages/extra/x86_64/libice/download/
 https://www.archlinux.org/packages/extra/x86_64/libpulse/download/
 https://www.archlinux.org/packages/extra/x86_64/libsm/download/
@@ -127,6 +131,9 @@ find symbols -mindepth 2 -maxdepth 2 -type d | while read module; do
   fi
 done
 
+purge "atk-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
+purge "at-spi2-atk" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
+purge "at-spi2-core" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "cairo-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "dconf-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "ffmpeg-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
@@ -137,6 +144,7 @@ purge "gtk3-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "gvfs-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libdrm-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libffi-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
+purge "libglvnd-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libice-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libpulse-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libsm-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"

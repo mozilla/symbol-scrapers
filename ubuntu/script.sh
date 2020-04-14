@@ -121,6 +121,9 @@ firefox f/firefox firefox firefox http://ppa.launchpad.net/mozillateam/firefox-n
 glib-networking g/glib-networking
 gvfs g/gvfs
 libasound2 a/alsa-lib
+libatk1.0-0 a/atk1.0
+libatk-bridge2.0-0 a/at-spi2-atk
+libatspi2.0-0 a/at-spi2-core
 libavcodec[0-9][0-9] f/ffmpeg
 libavutil[0-9][0-9] f/ffmpeg
 libc6 g/glibc

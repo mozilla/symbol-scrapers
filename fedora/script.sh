@@ -146,6 +146,9 @@ mkdir -p debug
 
 packages="
 alsa-lib a
+at-spi2-atk a
+at-spi2-core a
+atk a
 cairo c
 dbus-glib d
 dbus-libs d

@@ -122,9 +122,12 @@ firefox f/firefox
 glib-networking g/glib-networking
 gvfs g/gvfs
 libasound2 a/alsa-lib
+libatk1.0-0 a/atk1.0
+libatk-bridge2.0-0 a/at-spi2-atk
+libatspi2.0-0 a/at-spi2-core
 libavcodec[0-9][0-9] f/ffmpeg
-libavutil[0-9][0-9] f/ffmpeg
 libavcodec[0-9][0-9] f/ffmpeg-dmo libavcodec[0-9][0-9] libavcodec[0-9][0-9] http://mirror.home-dn.net/debian-multimedia/pool
+libavutil[0-9][0-9] f/ffmpeg
 libavutil[0-9][0-9] f/ffmpeg-dmo libavutil[0-9][0-9] libavutil[0-9][0-9] http://mirror.home-dn.net/debian-multimedia/pool
 libc6 g/glibc
 libcairo2 c/cairo
