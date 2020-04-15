@@ -20,15 +20,15 @@ URL="http://nl.archive.ubuntu.com/ubuntu/pool"
 DDEB_URL="http://ddebs.ubuntu.com/pool"
 
 get_package_urls() {
-  local package_name=${1}
-  local pkg_path=${2}
+  local package_name="${1}"
+  local pkg_path="${2}"
   local main_path="main/${pkg_path}"
   local universe_path="universe/${pkg_path}"
-  local dbg_package_name=${3:-$package_name}
-  local dbgsym_package_name=${4:-$package_name}
+  local dbg_package_name="${3:-$package_name}"
+  local dbgsym_package_name="${4:-$package_name}"
   local alt_url="${5}"
-  local url=${URL}
-  local ddeb_url=${DDEB_URL}
+  local url="${URL}"
+  local ddeb_url="${DDEB_URL}"
 
   local urls="${url}/${main_path}/ ${url}/${universe_path}/ ${ddeb_url}/${main_path}/ ${ddeb_url}/${universe_path}/"
 
@@ -54,48 +54,11 @@ fetch_packages() {
   rev packages.txt | cut -d'/' -f1 | rev > package_names.txt
 }
 
-function get_build_id {
-  eu-readelf -n "${1}" | grep "^    Build ID:" | cut -b15-
-}
-
-function merge_debug_info {
-  local path="${1}"
-  local buildid=$(get_build_id "${path}")
-  local prefix=$(echo "${buildid}" | cut -b1-2)
-  local suffix=$(echo "${buildid}" | cut -b3-)
-  local debuginfo=$(find debug -path "*/${prefix}/${suffix}.debug" | head -n1)
-  if test -n "${debuginfo}" ; then
-    objcopy --decompress-debug-sections "${debuginfo}"
-    eu-unstrip "${path}" "${debuginfo}"
-    printf "Merging ${debuginfo} to ${path}\n"
-    cp -f "${debuginfo}" "${path}"
-    return
-  else
-    local filename=$(basename "${path}")
-    find debug -path "*-dbg*_*${filename}" -type f | while read debuginfo; do
-        local tbuildid=$(get_build_id "${debuginfo}")
-        if [ "$buildid" == "$tbuildid" ]; then
-            objcopy --decompress-debug-sections "${debuginfo}"
-            eu-unstrip "${path}" "${debuginfo}"
-            printf "Merging ${debuginfo} to ${path}\n"
-            cp -f "${debuginfo}" "${path}"
-            return 1
-        fi
-    done
-    if [ $? -ne 1 ]; then
-      printf "Could not find debuginfo for ${1}\n" >> error.log
-    fi
-  fi
-}
-
 function get_soname {
   local path="${1}"
   local soname=$(objdump -p "${path}" | grep "^  SONAME *" | cut -b24-)
   if [ -n "${soname}" ]; then
     printf "${soname}"
-  else
-    local filename=$(basename "${path}")
-    printf "${filename}"
   fi
 }
 
@@ -109,11 +72,32 @@ purge_old_packages() {
   done
 }
 
-rm -rf symbols debug tmp symbols*.zip error.log packages.txt package_names.txt
+find_elf_folders() {
+  local tmpfile=$(mktemp --tmpdir=tmp)
+  find "${1}" -type f > "${tmpfile}"
+  file --files-from "${tmpfile}" | grep ": *ELF" | cut -d':' -f1 | rev | cut -d'/' -f2- | rev | sort -u
+  rm -f "${tmpfile}"
+}
+
+find_executables() {
+  local tmpfile=$(mktemp --tmpdir=tmp)
+  find "${1}" -type f > "${tmpfile}"
+  file --files-from "${tmpfile}" | grep ": *ELF" | cut -d':' -f1
+  rm -f "${tmpfile}"
+}
+
+unpack_debuginfo() {
+  chmod -R +w debug packages
+  find_executables debug | xargs -I{} objcopy --decompress-debug-sections {}
+  find_executables packages | xargs -I{} objcopy --decompress-debug-sections {}
+}
+
+rm -rf symbols packages debug tmp symbols*.zip error.log packages.txt package_names.txt
+mkdir -p debug
 mkdir -p downloads
+mkdir -p packages
 mkdir -p symbols
 mkdir -p tmp
-mkdir -p debug
 
 packages="
 dconf-gsettings-backend d/dconf
@@ -181,38 +165,68 @@ zlib1g z/zlib
 
 fetch_packages "${packages}"
 
-find downloads -name "*.d*eb" -type f | while read path; do
-  filename="${path##downloads/}"
-  if ! grep -q -F "${filename}" SHA256SUMS; then
-    7z -y x "${path}" > /dev/null
-    if [[ ${path} =~ -(dbg|dbgsym)_ ]]; then
-      mkdir -p "debug/${filename}"
-      tar -C "debug/${filename}" -x -a -f data.tar
-    else
-      mkdir -p "tmp/${filename}"
-      tar -C "tmp/${filename}" -x -a -f data.tar
-    fi
-    echo "${filename}" >> SHA256SUMS
-  fi
-done
+function process_packages() {
+  local package_name="${1}"
+  local dbg_package_name="${3:-$package_name}"
+  local dbgsym_package_name="${4:-$package_name}"
 
-find tmp -type f | while read path; do
-  if file "${path}" | grep -q "ELF \(32\|64\)-bit LSB \(shared object\|pie executable\)" ; then
-    soname=$(get_soname "${path}")
-    merge_debug_info "${path}"
-    tmpfile=$(mktemp)
-    printf "Writing symbol file for ${path} ... "
-    ${DUMP_SYMS} "${path}" > "${tmpfile}"
-    printf "done\n"
-    debugid=$(head -n 1 "${tmpfile}" | cut -d' ' -f4)
-    mkdir -p "symbols/${soname}/${debugid}"
-    mv "${tmpfile}" "symbols/${soname}/${debugid}/${soname}.sym"
-    file_size=$(stat -c "%s" "${path}")
-    # Copy the object file only if it's not larger than roughly 2GiB
-    if [ $file_size -lt 2100000000 ]; then
-      cp -f "${path}" "symbols/${soname}/${debugid}/${soname}"
+  find downloads -regex "downloads/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.?eb" -type f  | while read path; do
+    local filename="${path##downloads/}"
+    if ! grep -q -F "${filename}" SHA256SUMS; then
+      7z -y x "${path}" > /dev/null
+      if [[ ${path} =~ -(dbg|dbgsym)_ ]]; then
+        mkdir -p "debug/${filename}"
+        tar -C "debug/${filename}" -x -a -f data.tar
+      else
+        mkdir -p "packages/${filename}"
+        tar -C "packages/${filename}" -x -a -f data.tar
+      fi
+      echo "${filename}" >> SHA256SUMS
     fi
-  fi
+  done
+
+  unpack_debuginfo
+  debuginfo_folders="$(find_elf_folders packages) $(find_elf_folders debug)"
+
+  find packages -type f | while read path; do
+    if file "${path}" | grep -q ": *ELF" ; then
+      local tmpfile=$(mktemp --tmpdir=tmp)
+      printf "Writing symbol file for ${path} ... "
+      ${DUMP_SYMS} "${path}" ${debuginfo_folders} > "${tmpfile}"
+      if [ $? -ne 0 ]; then
+        printf "Writing symbol file with missing debuginfo ... "
+        ${DUMP_SYMS} "${path}" > "${tmpfile}"
+        if [ $? -ne 0 ]; then
+          printf "failed\nSomething went terribly wrong with ${path}\n"
+          exit 1
+        else
+          printf "done\n"
+        fi
+      else
+        printf "done\n"
+      fi
+
+      local debugid=$(head -n 1 "${tmpfile}" | cut -d' ' -f4)
+      local filename=$(basename "${path}")
+      mkdir -p "symbols/${filename}/${debugid}"
+      cp "${tmpfile}" "symbols/${filename}/${debugid}/${filename}.sym"
+      local soname=$(get_soname "${path}")
+      if [ -n "${soname}" ]; then
+        if [ "${soname}" != "${filename}" ]; then
+          mkdir -p "symbols/${soname}/${debugid}"
+          cp "${tmpfile}" "symbols/${soname}/${debugid}/${soname}.sym"
+        fi
+      fi
+      rm -f "${tmpfile}"
+    fi
+  done
+}
+
+echo "${packages}" | while read line; do
+  [ -z "${line}" ] && continue
+  process_packages ${line}
+  rm -rf debug packages
+  mkdir -p debug packages
 done
 
 cd symbols

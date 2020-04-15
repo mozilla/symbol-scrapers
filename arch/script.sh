@@ -21,9 +21,6 @@ function get_soname {
   local soname=$(objdump -p "${path}" | grep "^  SONAME *" | cut -b24-)
   if [ -n "${soname}" ]; then
     printf "${soname}"
-  else
-    local filename=$(basename "${path}")
-    printf "${filename}"
   fi
 }
 
@@ -82,7 +79,7 @@ for i in ${tarballs}; do
   full_hash=$(sha256sum "tarballs/${i}")
   hash=$(echo "${full_hash}" | cut -b 1-64)
   if ! grep -q ${hash} SHA256SUMS; then
-    tar -C tmp -x -a -v -f "tarballs/${i}"
+    tar -C tmp -x -a -f "tarballs/${i}"
     echo "${full_hash}" >> SHA256SUMS
   fi
 done
@@ -91,10 +88,16 @@ find tmp -name "*.so*" -type f | while read library; do
   if file "${library}" | grep -q "ELF 64-bit LSB shared object" ; then
     library_basename=$(basename "${library}")
     debugid=$("${DUMP_SYMS}" "${library}" | head -n 1 | cut -b 21-53)
+    filename=$(basename "${library}")
+    mkdir -p "symbols/${filename}/${debugid}"
+    "${DUMP_SYMS}" "${library}" > "symbols/${filename}/${debugid}/${filename}.sym"
     soname=$(get_soname "${library}")
-    mkdir -p "symbols/${soname}/${debugid}"
-    "${DUMP_SYMS}" "${library}" > "symbols/${soname}/${debugid}/${soname}.sym"
-    cp -v "${library}" "symbols/${soname}/${debugid}/${soname}"
+    if [ -n "${soname}" ]; then
+      if [ "${soname}" != "${filename}" ]; then
+        mkdir -p "symbols/${soname}/${debugid}"
+        cp "symbols/${filename}/${debugid}/${filename}.sym" "symbols/${soname}/${debugid}/${soname}.sym"
+      fi
+    fi
   fi
 done
 

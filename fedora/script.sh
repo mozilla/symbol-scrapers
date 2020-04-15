@@ -89,31 +89,8 @@ unpack_package() {
     mkdir -p "debug/${package_name}"
     rpm2cpio "${1}" | cpio --quiet -i -d -D "debug/${package_name}"
   else
-    mkdir -p "tmp/${package_name}"
-    rpm2cpio "${1}" | cpio --quiet -i -d -D "tmp/${package_name}"
-  fi
-}
-
-get_build_id() {
-  echo "${1}" | cut -d'=' -f2 | cut -d',' -f1
-}
-
-merge_debug_info() {
-  buildid=${2}
-  prefix=$(echo "${buildid}" | cut -b1-2)
-  suffix=$(echo "${buildid}" | cut -b3-)
-  debuginfo=$(find debug -path "*/${prefix}/${suffix}.debug" | head -n1)
-  file_output=$(file -L "${debuginfo}")
-  tbuildid=$(get_build_id "${file_output}")
-  if [ "$buildid" == "$tbuildid" ]; then
-    tmpfile=$(mktemp tmp.XXXXXXXX -u)
-    objcopy --decompress-debug-sections --no-adjust-warnings "${debuginfo}" "${tmpfile}"
-    eu-unstrip "${1}" "${tmpfile}"
-    printf "Merging ${tmpfile} to ${1}\n"
-    /bin/cp -f "${tmpfile}" "${1}"
-    rm -f "${tmpfile}"
-  else
-    printf "Could not find debuginfo for ${1}\n" >> error.log
+    mkdir -p "packages/${package_name}"
+    rpm2cpio "${1}" | cpio --quiet -i -d -D "packages/${package_name}"
   fi
 }
 
@@ -122,9 +99,6 @@ function get_soname {
   local soname=$(objdump -p "${path}" | grep "^  SONAME *" | cut -b24-)
   if [ -n "${soname}" ]; then
     printf "${soname}"
-  else
-    local filename=$(basename "${path}")
-    printf "${filename}"
   fi
 }
 
@@ -138,11 +112,32 @@ purge_old_packages() {
   done
 }
 
-rm -rf symbols debug tmp symbols*.zip error.log packages.txt package_names.txt
+find_elf_folders() {
+  local tmpfile=$(mktemp --tmpdir=tmp)
+  find "${1}" -type f > "${tmpfile}"
+  file --files-from "${tmpfile}" | grep ": *ELF" | cut -d':' -f1 | rev | cut -d'/' -f2- | rev | sort -u
+  rm -f "${tmpfile}"
+}
+
+find_executables() {
+  local tmpfile=$(mktemp --tmpdir=tmp)
+  find "${1}" -type f > "${tmpfile}"
+  file --files-from "${tmpfile}" | grep ": *ELF" | cut -d':' -f1
+  rm -f "${tmpfile}"
+}
+
+unpack_debuginfo() {
+  chmod -R +w debug packages
+  find_executables debug | xargs -I{} objcopy --decompress-debug-sections {}
+  find_executables packages | xargs -I{} objcopy --decompress-debug-sections {}
+}
+
+rm -rf symbols packages debug tmp symbols*.zip error.log packages.txt package_names.txt
+mkdir -p debug
 mkdir -p downloads
+mkdir -p packages
 mkdir -p symbols
 mkdir -p tmp
-mkdir -p debug
 
 packages="
 alsa-lib a
@@ -202,33 +197,54 @@ zlib z
 
 fetch_packages "${packages}"
 
-find downloads -name "*.rpm" -type f | while read path; do
-  filename="${path##downloads/}"
-  if ! grep -q -F "${filename}" SHA256SUMS; then
-    unpack_package "${path}"
-    echo "$filename" >> SHA256SUMS
-  fi
-done
-
-find tmp -type f | while read path; do
-  file_output=$(file "${path}")
-  if echo "${file_output}" | grep -q "ELF \(32\|64\)-bit LSB \(shared object\|pie executable\)" ; then
-    soname=$(get_soname "${path}")
-    buildid=$(get_build_id "${file_output}")
-    merge_debug_info "${path}" "${buildid}"
-    tmpfile=$(mktemp)
-    printf "Writing symbol file for ${path} ... "
-    ${DUMP_SYMS} "${path}" > "${tmpfile}"
-    printf "done\n"
-    debugid=$(head -n 1 "${tmpfile}" | cut -d' ' -f4)
-    mkdir -p "symbols/${soname}/${debugid}"
-    mv "${tmpfile}" "symbols/${soname}/${debugid}/${soname}.sym"
-    file_size=$(stat -c "%s" "${path}")
-    # Copy the object file only if it's not larger than roughly 2GiB
-    if [ $file_size -lt 2100000000 ]; then
-      /bin/cp -f "${path}" "symbols/${soname}/${debugid}/${soname}"
+function process_packages() {
+  local package_name="${1}"
+  find downloads -name "${package_name}-*.rpm" -type f  | while read path; do
+    local filename="${path##downloads/}"
+    if ! grep -q -F "${filename}" SHA256SUMS; then
+      unpack_package "${path}"
+      echo "$filename" >> SHA256SUMS
     fi
-  fi
+  done
+
+  unpack_debuginfo
+  debuginfo_folders="$(find_elf_folders packages) $(find_elf_folders debug)"
+
+  find packages -type f | while read path; do
+    if file "${path}" | grep -q ": *ELF" ; then
+      local tmpfile=$(mktemp --tmpdir=tmp)
+      printf "Writing symbol file for ${path} ... "
+      ${DUMP_SYMS} "${path}" ${debuginfo_folders} > "${tmpfile}"
+      if [ $? -ne 0 ]; then
+        ${DUMP_SYMS} "${path}" > "${tmpfile}"
+        if [ $? -ne 0 ]; then
+          printf "Something went terribly wrong with ${path}\n"
+          exit 1
+        fi
+      fi
+      printf "done\n"
+
+      local debugid=$(head -n 1 "${tmpfile}" | cut -d' ' -f4)
+      local filename=$(basename "${path}")
+      mkdir -p "symbols/${filename}/${debugid}"
+      cp "${tmpfile}" "symbols/${filename}/${debugid}/${filename}.sym"
+      local soname=$(get_soname "${path}")
+      if [ -n "${soname}" ]; then
+        if [ "${soname}" != "${filename}" ]; then
+          mkdir -p "symbols/${soname}/${debugid}"
+          cp "${tmpfile}" "symbols/${soname}/${debugid}/${soname}.sym"
+        fi
+      fi
+      rm -f "${tmpfile}"
+    fi
+  done
+}
+
+echo "${packages}" | while read line; do
+  [ -z "${line}" ] && continue
+  process_packages ${line}
+  rm -rf debug packages
+  mkdir -p debug packages
 done
 
 cd symbols
