@@ -48,6 +48,7 @@ https://www.archlinux.org/packages/community/x86_64/firefox-developer-edition/do
 https://www.archlinux.org/packages/core/x86_64/glib2/download/
 https://www.archlinux.org/packages/core/x86_64/glibc/download/
 https://www.archlinux.org/packages/core/x86_64/libffi/download/
+https://www.archlinux.org/packages/core/x86_64/nspr/download/
 https://www.archlinux.org/packages/extra/x86_64/atk/download/
 https://www.archlinux.org/packages/extra/x86_64/at-spi2-atk/download/
 https://www.archlinux.org/packages/extra/x86_64/at-spi2-core/download/
@@ -145,6 +146,7 @@ purge "glib2-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
 purge "glibc-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
 purge "gtk3-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "gvfs-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
+purge "nspr-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
 purge "libdrm-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libffi-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
 purge "libglvnd-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
