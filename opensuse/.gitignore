@@ -1,0 +1,10 @@
+SHA256SUMS
+symbols*
+data.tar
+debug
+downloads
+indexes.txt
+packages.txt
+package_names.txt
+tmp
+wget.log
