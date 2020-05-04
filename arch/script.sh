@@ -56,6 +56,7 @@ https://www.archlinux.org/packages/extra/x86_64/at-spi2-core/download/
 https://www.archlinux.org/packages/extra/x86_64/cairo/download/
 https://www.archlinux.org/packages/extra/x86_64/dconf/download/
 https://www.archlinux.org/packages/extra/x86_64/ffmpeg/download/
+https://www.archlinux.org/packages/extra/x86_64/gdk-pixbuf2/download/
 https://www.archlinux.org/packages/extra/x86_64/gtk3/download/
 https://www.archlinux.org/packages/extra/x86_64/gvfs/download/
 https://www.archlinux.org/packages/extra/x86_64/libdrm/download/
@@ -146,11 +147,11 @@ purge "cairo-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "dconf-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "ffmpeg-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "firefox-developer-edition-" "https://ind.mirror.pkgbuild.com/community/os/x86_64/"
+purge "gdk-pixbuf2-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "glib2-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
 purge "glibc-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
 purge "gtk3-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "gvfs-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "nspr-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
 purge "libdrm-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libffi-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
 purge "libglvnd-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
@@ -164,6 +165,7 @@ purge "libx11-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libxcb-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libxext-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "mesa-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
+purge "nspr-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
 purge "pixman-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "vulkan-intel-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "vulkan-radeon-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
