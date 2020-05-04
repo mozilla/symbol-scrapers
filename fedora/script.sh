@@ -178,6 +178,7 @@ libxcb l
 libXext l
 libxml2 l
 mesa-dri-drivers m
+mesa-vulkan-drivers m
 mesa-libEGL m
 mesa-libGL m
 nspr n

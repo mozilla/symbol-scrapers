@@ -161,6 +161,7 @@ libxext6 libx/libxext
 libxml2 libx/libxml2
 libxss1 libx/libxss
 libxvidcore4 x/xvidcore
+mesa-vulkan-drivers m/mesa
 opensc-pkcs11 o/opensc
 thunderbird t/thunderbird
 zlib1g z/zlib

@@ -49,6 +49,7 @@ https://www.archlinux.org/packages/core/x86_64/glib2/download/
 https://www.archlinux.org/packages/core/x86_64/glibc/download/
 https://www.archlinux.org/packages/core/x86_64/libffi/download/
 https://www.archlinux.org/packages/core/x86_64/nspr/download/
+https://www.archlinux.org/packages/extra/x86_64/amdvlk/download/
 https://www.archlinux.org/packages/extra/x86_64/atk/download/
 https://www.archlinux.org/packages/extra/x86_64/at-spi2-atk/download/
 https://www.archlinux.org/packages/extra/x86_64/at-spi2-core/download/
@@ -70,6 +71,8 @@ https://www.archlinux.org/packages/extra/x86_64/libxcb/download/
 https://www.archlinux.org/packages/extra/x86_64/libxext/download/
 https://www.archlinux.org/packages/extra/x86_64/mesa/download/
 https://www.archlinux.org/packages/extra/x86_64/pixman/download/
+https://www.archlinux.org/packages/extra/x86_64/vulkan-intel/download/
+https://www.archlinux.org/packages/extra/x86_64/vulkan-radeon/download/
 https://www.archlinux.org/packages/extra/x86_64/wayland/download/
 "
 wget -o ../wget.log -c --content-disposition ${packages}
@@ -135,6 +138,7 @@ find symbols -mindepth 2 -maxdepth 2 -type d | while read module; do
   fi
 done
 
+purge "amdvlk-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "atk-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "at-spi2-atk" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "at-spi2-core" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
@@ -161,4 +165,6 @@ purge "libxcb-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libxext-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "mesa-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "pixman-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
+purge "vulkan-intel-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
+purge "vulkan-radeon-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "wayland-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
