@@ -36,7 +36,7 @@ get_package_urls() {
     urls="${urls} ${alt_url}/${main_path}/ ${alt_url}/${universe_path}/"
   fi
 
-  wget -k --quiet ${urls}
+  wget -o wget.log --progress=dot:mega -k ${urls}
   for i in ${urls}; do
     grep -h -o "${i}\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" index.html* | cut -d'"' -f1
   done
@@ -50,7 +50,7 @@ fetch_packages() {
   done
 
   sed -i -e 's/%2b/+/g' packages.txt
-  sort packages.txt | wget -o wget.log -P downloads -c -i -
+  sort packages.txt | wget -o wget.log --progress=dot:mega -P downloads -c -i -
   rev packages.txt | cut -d'/' -f1 | rev > package_names.txt
 }
 

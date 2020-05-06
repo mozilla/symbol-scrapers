@@ -24,7 +24,7 @@ get_package_urls() {
   local dbg_package_name="${package_name}-debuginfo"
   local url=${3:-$URL}
 
-  grep -h -o "$url.*/\(${package_name}-[0-9].*.x86_64.rpm\|${dbg_package_name}-[0-9].*.x86_64.rpm\)\"" index.html* | cut -d'"' -f1
+  grep -h -o "${url}.*/\(${package_name}-[0-9].*.x86_64.rpm\|${dbg_package_name}-[0-9].*.x86_64.rpm\)\"" index.html* | cut -d'"' -f1
 }
 
 get_package_indexes() {
@@ -67,7 +67,7 @@ fetch_packages() {
     get_package_indexes ${line}
   done | sort -u > indexes.txt
 
-  wget -o wget.log --compression=auto -k -i indexes.txt
+  wget -o wget.log --progress=dot:mega --compression=auto -k -i indexes.txt
 
   echo "${1}" | while read line; do
     [ -z "${line}" ] && continue
@@ -76,7 +76,7 @@ fetch_packages() {
 
   rm -f index.html*
 
-  wget -o wget.log -P downloads -c -i packages.txt
+  wget -o wget.log --progress=dot:mega -P downloads -c -i packages.txt
 
   rev packages.txt | cut -d'/' -f1 | rev > package_names.txt
 }

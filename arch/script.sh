@@ -76,7 +76,7 @@ https://www.archlinux.org/packages/extra/x86_64/vulkan-intel/download/
 https://www.archlinux.org/packages/extra/x86_64/vulkan-radeon/download/
 https://www.archlinux.org/packages/extra/x86_64/wayland/download/
 "
-wget -o ../wget.log -c --content-disposition ${packages}
+wget -o ../wget.log --progress=dot:mega -c --content-disposition ${packages}
 tarballs=$(ls)
 cd ..
 

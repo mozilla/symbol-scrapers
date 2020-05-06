@@ -20,7 +20,7 @@ URL="http://packages.linuxmint.com/pool"
 
 get_package_urls() {
   url="${URL}/upstream/f/firefox/"
-  wget -k --quiet "${url}"
+  wget -o wget.log --progress=dot:mega -k "${url}"
 
   grep -h -o "${url}\firefox-mozsymbols_.*_\(i386\|amd64\).deb\"" index.html* | cut -d'"' -f1
   rm -f index.html*
@@ -29,7 +29,7 @@ get_package_urls() {
 fetch_packages() {
   get_package_urls ${line} >> packages.txt
   sed -i -e 's/%2b/+/g' packages.txt
-  sort packages.txt | wget -o wget.log -P downloads -c -i -
+  sort packages.txt | wget -o wget.log --progress=dot:mega -P downloads -c -i -
   rev packages.txt | cut -d'/' -f1 | rev > package_names.txt
 }
 
@@ -44,7 +44,7 @@ process_packages() {
       unzip -q -d symbols "${symbols_archive}"
 
       # Upload
-      curl -H "auth-token: ${SYMBOLS_API_TOKEN}" --form ${symbols_archive}=@${symbols_archive} https://symbols.mozilla.org/upload/
+      curl -H "auth-token: ${SYMBOLS_API_TOKEN}" --form $(basename ${symbols_archive})=@${symbols_archive} https://symbols.mozilla.org/upload/
 
       # Reprocess
       find symbols -mindepth 2 -maxdepth 2 -type d | while read module; do
