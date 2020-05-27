@@ -171,63 +171,65 @@ function process_packages() {
   local dbg_package_name="${3:-$package_name}"
   local dbgsym_package_name="${4:-$package_name}"
 
-  find downloads -regex "downloads/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.?eb" -type f  | while read path; do
-    local filename="${path##downloads/}"
-    if ! grep -q -F "${filename}" SHA256SUMS; then
-      7z -y x "${path}" > /dev/null
-      if [[ ${path} =~ -(dbg|dbgsym)_ ]]; then
-        mkdir -p "debug/${filename}"
-        tar -C "debug/${filename}" -x -a -f data.tar
-      else
-        mkdir -p "packages/${filename}"
-        tar -C "packages/${filename}" -x -a -f data.tar
+  for arch in i386 amd64; do
+    mkdir -p debug packages
+    find downloads -regex "downloads/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_${arch}.d.?eb" -type f  | while read path; do
+      local filename="${path##downloads/}"
+      if ! grep -q -F "${filename}" SHA256SUMS; then
+        7z -y x "${path}" > /dev/null
+        if [[ ${path} =~ -(dbg|dbgsym)_ ]]; then
+          mkdir -p "debug/${filename}"
+          tar -C "debug/${filename}" -x -a -f data.tar
+        else
+          mkdir -p "packages/${filename}"
+          tar -C "packages/${filename}" -x -a -f data.tar
+        fi
+        echo "${filename}" >> SHA256SUMS
       fi
-      echo "${filename}" >> SHA256SUMS
-    fi
-  done
+    done
 
-  unpack_debuginfo
-  debuginfo_folders="$(find_elf_folders packages) $(find_elf_folders debug)"
+    unpack_debuginfo
+    local debuginfo_folders="$(find_elf_folders debug) $(find_elf_folders packages)"
 
-  find packages -type f | while read path; do
-    if file "${path}" | grep -q ": *ELF" ; then
-      local tmpfile=$(mktemp --tmpdir=tmp)
-      printf "Writing symbol file for ${path} ... "
-      ${DUMP_SYMS} "${path}" ${debuginfo_folders} > "${tmpfile}"
-      if [ $? -ne 0 ]; then
-        printf "Writing symbol file with missing debuginfo ... "
-        ${DUMP_SYMS} "${path}" > "${tmpfile}"
+    find packages -type f | while read path; do
+      if file "${path}" | grep -q ": *ELF" ; then
+        local tmpfile=$(mktemp --tmpdir=tmp)
+        printf "Writing symbol file for ${path} ... "
+        ${DUMP_SYMS} "${path}" ${debuginfo_folders} > "${tmpfile}"
         if [ $? -ne 0 ]; then
-          printf "failed\nSomething went terribly wrong with ${path}\n"
-          exit 1
+          printf "Writing symbol file with missing debuginfo ... "
+          ${DUMP_SYMS} "${path}" > "${tmpfile}"
+          if [ $? -ne 0 ]; then
+            printf "failed\nSomething went terribly wrong with ${path}\n"
+            exit 1
+          else
+            printf "done\n"
+          fi
         else
           printf "done\n"
         fi
-      else
-        printf "done\n"
-      fi
 
-      local debugid=$(head -n 1 "${tmpfile}" | cut -d' ' -f4)
-      local filename=$(basename "${path}")
-      mkdir -p "symbols/${filename}/${debugid}"
-      cp "${tmpfile}" "symbols/${filename}/${debugid}/${filename}.sym"
-      local soname=$(get_soname "${path}")
-      if [ -n "${soname}" ]; then
-        if [ "${soname}" != "${filename}" ]; then
-          mkdir -p "symbols/${soname}/${debugid}"
-          cp "${tmpfile}" "symbols/${soname}/${debugid}/${soname}.sym"
+        local debugid=$(head -n 1 "${tmpfile}" | cut -d' ' -f4)
+        local filename=$(basename "${path}")
+        mkdir -p "symbols/${filename}/${debugid}"
+        cp "${tmpfile}" "symbols/${filename}/${debugid}/${filename}.sym"
+        local soname=$(get_soname "${path}")
+        if [ -n "${soname}" ]; then
+          if [ "${soname}" != "${filename}" ]; then
+            mkdir -p "symbols/${soname}/${debugid}"
+            cp "${tmpfile}" "symbols/${soname}/${debugid}/${soname}.sym"
+          fi
         fi
+        rm -f "${tmpfile}"
       fi
-      rm -f "${tmpfile}"
-    fi
+    done
+    rm -rf debug packages
   done
 }
 
 echo "${packages}" | while read line; do
   [ -z "${line}" ] && continue
   process_packages ${line}
-  rm -rf debug packages
-  mkdir -p debug packages
 done
 
 cd symbols
