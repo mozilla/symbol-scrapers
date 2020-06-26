@@ -24,7 +24,10 @@ get_package_urls() {
   local dbg_package_name="${package_name}-debuginfo"
   local url=${3:-$URL}
 
-  grep -h -o "${url}.*/\(${package_name}-[0-9].*.x86_64.rpm\|${dbg_package_name}-[0-9].*.x86_64.rpm\)\"" index.html* | cut -d'"' -f1
+  find . -name "index.html*" -print0 | \
+    xargs -0 -P0 -I"{}" xmllint --format --html "{}" | \
+    grep -o "${url}.*/\(${package_name}-[0-9].*.x86_64.rpm\|${dbg_package_name}-[0-9].*.x86_64.rpm\)\"" | \
+    cut -d'"' -f1
 }
 
 get_package_indexes() {

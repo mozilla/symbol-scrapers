@@ -56,7 +56,11 @@ get_package_urls() {
   local dbg_package_name="${package_name}-debuginfo"
   local url=${2:-$URL}
 
-  grep -h -o "${url}.*/\(${package_name}-[0-9].*.x86_64.rpm\|${dbg_package_name}-[0-9].*.x86_64.rpm\)\"" index.html* | cut -d'"' -f1 | grep -v 32bit
+  find . -name "index.html*" -print0 | \
+    xargs -0 -P0 -I"{}" xmllint --format --html "{}" | \
+    grep -o "${url}.*/\(${package_name}-[0-9].*.x86_64.rpm\|${dbg_package_name}-[0-9].*.x86_64.rpm\)\"" | \
+    cut -d'"' -f1 | \
+    grep -v 32bit
 }
 
 get_package_indexes() {
@@ -75,12 +79,6 @@ fetch_packages() {
   get_package_indexes
 
   wget -o wget.log --progress=dot:mega --compression=auto -k -i indexes.txt
-
-  find . -name "index.html*" | while read path; do
-    mv "${path}" "${path}.bak"
-    xmllint --format --html -o "${path}" "${path}.bak"
-    rm -f "${path}.bak"
-  done
 
   echo "${1}" | while read line; do
     [ -z "${line}" ] && continue
