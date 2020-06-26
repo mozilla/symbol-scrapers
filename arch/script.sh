@@ -111,7 +111,7 @@ zip_count=1
 total_size=0
 find . -mindepth 2 -type d | while read path; do
   size=$(du -s -b "${path}" | cut -f1)
-  zip -r "../symbols${zip_count}.zip" "${path##./}"
+  zip -q -r "../symbols${zip_count}.zip" "${path##./}"
   total_size=$((total_size + size))
   if [[ ${total_size} -gt 500000000 ]]; then
     zip_count=$((zip_count + 1))
