@@ -162,6 +162,7 @@ glib-networking g
 gnome-vfs2 g
 gtk2 g
 gtk3 g
+intel-media-driver i http://mirror.nl.leaseweb.net/rpmfusion/nonfree/fedora
 libdrm l
 libepoxy l
 libevent l
