@@ -114,6 +114,11 @@ libc6 g/glibc
 libcairo2 c/cairo
 libdbus-1-3 d/dbus
 libdbus-glib-1-2 d/dbus-glib
+libdrm2 libd/libdrm
+libdrm-amdgpu1 libd/libdrm
+libdrm-intel1 libd/libdrm
+libdrm-nouveau2 libd/libdrm
+libdrm-radeon1 libd/libdrm
 libegl1-mesa-drivers m/mesa
 libegl1-mesa m/mesa
 libegl-mesa0 m/mesa
