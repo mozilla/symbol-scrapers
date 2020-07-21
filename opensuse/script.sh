@@ -16,6 +16,8 @@ if [ -z "${CRASHSTATS_API_TOKEN}" ]; then
   exit 1
 fi
 
+cpu_count=$(grep -c ^processor /proc/cpuinfo)
+
 URL="https://ftp.lysator.liu.se/pub/opensuse"
 
 REPOS="
@@ -98,17 +100,37 @@ fetch_packages() {
   rev packages.txt | cut -d'/' -f1 | rev > package_names.txt
 }
 
-unpack_package() {
-  package_filename="${1##downloads/}"
-  package_name="${package_filename%%.rpm}"
+function get_version() {
+  package_name="${1}"
+  filename="${2}"
 
-  if [[ ${package_filename} =~ -debuginfo- ]]; then
-    mkdir -p "debug/${package_name}"
-    rpm2cpio "${1}" | cpio --quiet -i -d -D "debug/${package_name}"
-  else
-    mkdir -p "packages/${package_name}"
-    rpm2cpio "${1}" | cpio --quiet -i -d -D "packages/${package_name}"
-  fi
+  version="${filename##${package_name}-}"
+  version="${version%%.rpm}"
+  printf "${version}"
+}
+
+function find_debuginfo_package() {
+  package_name="${1}"
+  version="${2}"
+  find downloads -name "${package_name}-debuginfo-${version}.rpm" -type f
+}
+
+function unpack_package() {
+  mkdir packages
+  rpm2cpio "${1}" | cpio --quiet -i -d -D packages
+  rpm2cpio "${2}" | cpio --quiet -i -d -D packages
+}
+
+function get_build_id {
+  eu-readelf -n "${1}" | grep "^    Build ID:" | cut -b15-
+}
+
+function find_debuginfo() {
+  local buildid=$(get_build_id "${1}")
+  local prefix=$(echo "${buildid}" | cut -b1-2)
+  local suffix=$(echo "${buildid}" | cut -b3-)
+  local debuginfo=$(find packages -path "*/${prefix}/${suffix}*.debug" | head -n1)
+  printf "${debuginfo}"
 }
 
 function get_soname {
@@ -117,6 +139,22 @@ function get_soname {
   if [ -n "${soname}" ]; then
     printf "${soname}"
   fi
+}
+
+function zip_symbols() {
+  cd symbols
+  zip_count=1
+  total_size=0
+  find . -mindepth 2 -type d | while read path; do
+    size=$(du -s -b "${path}" | cut -f1)
+    zip -q -r "../symbols${zip_count}.zip" "${path##./}"
+    total_size=$((total_size + size))
+    if [[ ${total_size} -gt 500000000 ]]; then
+      zip_count=$((zip_count + 1))
+      total_size=0
+    fi
+  done
+  cd ..
 }
 
 purge_old_packages() {
@@ -129,32 +167,8 @@ purge_old_packages() {
   done
 }
 
-find_elf_folders() {
-  local tmpfile=$(mktemp --tmpdir=tmp)
-  find "${1}" -type f > "${tmpfile}"
-  file --files-from "${tmpfile}" | grep ": *ELF" | cut -d':' -f1 | rev | cut -d'/' -f2- | rev | sort -u
-  rm -f "${tmpfile}"
-}
-
-find_executables() {
-  local tmpfile=$(mktemp --tmpdir=tmp)
-  find "${1}" -type f > "${tmpfile}"
-  file --files-from "${tmpfile}" | grep ": *ELF" | cut -d':' -f1
-  rm -f "${tmpfile}"
-}
-
-unpack_debuginfo() {
-  chmod -R +w debug packages
-  find_executables debug | xargs -I{} objcopy --decompress-debug-sections {}
-  find_executables packages | xargs -I{} objcopy --decompress-debug-sections {}
-}
-
-rm -rf symbols packages debug tmp symbols*.zip error.log packages.txt package_names.txt
-mkdir -p debug
-mkdir -p downloads
-mkdir -p packages
-mkdir -p symbols
-mkdir -p tmp
+rm -rf symbols packages tmp symbols*.zip packages.txt package_names.txt
+mkdir -p downloads symbols tmp
 
 packages="
 alsa
@@ -244,43 +258,69 @@ fetch_packages "${packages}"
 
 function process_packages() {
   local package_name="${1}"
-  find downloads -name "${package_name}-*.rpm" -type f  | while read path; do
-    local filename="${path##downloads/}"
+  find downloads -name "${package_name}-[0-9]*.rpm" -type f | grep -v debuginfo | while read package; do
+    local filename="${package##downloads/}"
     if ! grep -q -F "${filename}" SHA256SUMS; then
-      unpack_package "${path}"
-      echo "$filename" >> SHA256SUMS
-    fi
-  done
+      local version=$(get_version "${package_name}" "${filename}")
+      local debuginfo_package=$(find_debuginfo_package "${package_name}" "${version}")
 
-  unpack_debuginfo
-  debuginfo_folders="$(find_elf_folders packages) $(find_elf_folders debug)"
+      [ -z "${debuginfo_package}" ] && printf "***** Could not find debuginfo for ${filename}\n" && continue
 
-  find packages -type f | while read path; do
-    if file "${path}" | grep -q ": *ELF" ; then
-      local tmpfile=$(mktemp --tmpdir=tmp)
-      printf "Writing symbol file for ${path} ... "
-      ${DUMP_SYMS} "${path}" ${debuginfo_folders} > "${tmpfile}"
-      if [ $? -ne 0 ]; then
-        ${DUMP_SYMS} "${path}" > "${tmpfile}"
-        if [ $? -ne 0 ]; then
-          printf "Something went terribly wrong with ${path}\n"
-          exit 1
+      echo package = $package version = $version debuginfo = $debuginfo_package
+      unpack_package ${package} ${debuginfo_package}
+
+      find packages -type f | grep -v debug | while read path; do
+        if file "${path}" | grep -q ": *ELF" ; then
+          local debuginfo_path="$(find_debuginfo "${path}")"
+
+          [ -z "${debuginfo_path}" ] && printf "Could not find debuginfo for ${path}\n" && continue
+
+          local tmpfile=$(mktemp --tmpdir=tmp)
+          printf "Writing symbol file for ${path} ${debuginfo_path} ... "
+          ${DUMP_SYMS} --type elf "${path}" "${debuginfo_path}" 1> "${tmpfile}" 2> error.log
+          if [ -s "${tmpfile}" ]; then
+            printf "done\n"
+          else
+            ${DUMP_SYMS} --type elf "${path}" > "${tmpfile}"
+            if [ -s "${tmpfile}" ]; then
+              printf "done w/o debuginfo\n"
+            else
+              printf "something went terribly wrong!\n"
+            fi
+          fi
+
+          if [ -s error.log ]; then
+            cat error.log
+          fi
+
+          # Copy the symbol file and debug information
+          debugid=$(head -n 1 "${tmpfile}" | cut -d' ' -f4)
+          filename="$(basename "${path}")"
+          mkdir -p "symbols/${filename}/${debugid}"
+          cp "${tmpfile}" "symbols/${filename}/${debugid}/${filename}.sym"
+          cp "${debuginfo_path}" "symbols/${filename}/${debugid}/${filename}.dbg"
+          local soname=$(get_soname "${path}")
+          if [ -n "${soname}" ]; then
+            if [ "${soname}" != "${filename}" ]; then
+              mkdir -p "symbols/${soname}/${debugid}"
+              cp "${tmpfile}" "symbols/${soname}/${debugid}/${soname}.sym"
+              cp "${debuginfo_path}" "symbols/${soname}/${debugid}/${soname}.dbg"
+            fi
+          fi
+
+          rm -f "${tmpfile}"
         fi
-      fi
-      printf "done\n"
+      done
 
-      local debugid=$(head -n 1 "${tmpfile}" | cut -d' ' -f4)
-      local filename=$(basename "${path}")
-      mkdir -p "symbols/${filename}/${debugid}"
-      cp "${tmpfile}" "symbols/${filename}/${debugid}/${filename}.sym"
-      local soname=$(get_soname "${path}")
-      if [ -n "${soname}" ]; then
-        if [ "${soname}" != "${filename}" ]; then
-          mkdir -p "symbols/${soname}/${debugid}"
-          cp "${tmpfile}" "symbols/${soname}/${debugid}/${soname}.sym"
-        fi
+      # Compress the debug information
+      find symbols -name "*.dbg" -type f -print0 | xargs -0 -P${cpu_count} -I{} gzip -f --best "{}"
+
+      rm -rf packages
+      printf "${filename}\n" >> SHA256SUMS
+      if [ -n "${debuginfo_package}" ]; then
+        local debuginfo_package_filename=$(basename "${debuginfo_package}")
+        printf "${debuginfo_package_filename}\n" >> SHA256SUMS
       fi
-      rm -f "${tmpfile}"
     fi
   done
 }
@@ -288,23 +328,9 @@ function process_packages() {
 echo "${packages}" | while read line; do
   [ -z "${line}" ] && continue
   process_packages ${line}
-  rm -rf debug packages
-  mkdir -p debug packages
 done
 
-cd symbols
-zip_count=1
-total_size=0
-find . -mindepth 2 -type d | while read path; do
-  size=$(du -s -b "${path}" | cut -f1)
-  zip -q -r "../symbols${zip_count}.zip" "${path##./}"
-  total_size=$((total_size + size))
-  if [[ ${total_size} -gt 500000000 ]]; then
-    zip_count=$((zip_count + 1))
-    total_size=0
-  fi
-done
-cd ..
+zip_symbols
 
 find . -name "*.zip" | while read myfile; do
   printf "Uploading ${myfile}\n"

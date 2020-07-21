@@ -4,6 +4,7 @@ data.tar
 debug
 downloads
 indexes.txt
+packages
 packages.txt
 package_names.txt
 tmp
