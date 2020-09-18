@@ -186,6 +186,7 @@ libepoxy0
 libevent-2_1-7
 libffi8
 libfribidi0
+libgbm1
 libgdk_pixbuf-2_0-0
 libgio-2_0-0
 libglib-2_0-0
