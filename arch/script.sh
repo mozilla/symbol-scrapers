@@ -67,6 +67,7 @@ https://www.archlinux.org/packages/extra/x86_64/libsm/download/
 https://www.archlinux.org/packages/extra/x86_64/libstdc++5/download/
 https://www.archlinux.org/packages/extra/x86_64/libva/download/
 https://www.archlinux.org/packages/extra/x86_64/libva-mesa-driver/download/
+https://www.archlinux.org/packages/extra/x86_64/libva-vdpau-driver/download/
 https://www.archlinux.org/packages/extra/x86_64/libx11/download/
 https://www.archlinux.org/packages/extra/x86_64/libxcb/download/
 https://www.archlinux.org/packages/extra/x86_64/libxext/download/
@@ -161,6 +162,7 @@ purge "libsm-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libstdc++5-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libva-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libva-mesa-driver-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
+purge "libva-vdpau-driver-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libx11-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libxcb-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libxext-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"

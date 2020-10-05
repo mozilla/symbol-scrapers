@@ -155,8 +155,10 @@ libsm6 libs/libsm
 libspeechd2 s/speech-dispatcher
 libsqlite3-0 s/sqlite3
 libstdc++6 g/gcc-9 libstdc++6-9
+libstdc++6 g/gcc-10 libstdc++6-10
 libsystemd0 s/systemd
 libthai0 libt/libthai
+libva2 libv/libva
 libvpx[0-9] libv/libvpx
 libwayland-client0 w/wayland
 libx11-6 libx/libx11
@@ -170,6 +172,7 @@ libxvidcore4 x/xvidcore
 mesa-vulkan-drivers m/mesa
 opensc-pkcs11 o/opensc
 thunderbird t/thunderbird
+vdpau-va-driver v/vdpau-video
 zlib1g z/zlib
 "
 

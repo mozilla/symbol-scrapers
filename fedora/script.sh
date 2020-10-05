@@ -177,12 +177,15 @@ libproxy l
 libSM l
 libstdc++ l
 libthai l
+libva-vdpau-driver l
 libvpx l
 libwayland-client l
-libx11 l
+libX11 l
+libX11-xcb l
 libxcb l
 libXext l
 libxml2 l
+libva l
 mesa-dri-drivers m
 mesa-libEGL m
 mesa-libgbm m
