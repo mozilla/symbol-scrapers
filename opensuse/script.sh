@@ -82,7 +82,7 @@ fetch_packages() {
 
   find . -name "index.html*" | while read path; do
     mv "${path}" "${path}.bak"
-    xmllint --nowarning --format --html --output "${path}" "${path}.bak"
+    xmllint --nowarning --format --html --output "${path}" "${path}.bak" 2>/dev/null
     rm -f "${path}.bak"
   done
 
