@@ -17,7 +17,7 @@ if [ -z "${CRASHSTATS_API_TOKEN}" ]; then
 fi
 
 URL="https://fedora.mirror.wearetriple.com/linux"
-RELEASES="31 32 33"
+RELEASES="31 32 33 test/33_Beta"
 
 cpu_count=$(grep -c ^processor /proc/cpuinfo)
 
