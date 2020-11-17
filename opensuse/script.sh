@@ -130,7 +130,11 @@ function find_debuginfo() {
   local prefix=$(echo "${buildid}" | cut -b1-2)
   local suffix=$(echo "${buildid}" | cut -b3-)
   local debuginfo=$(find packages -path "*/${prefix}/${suffix}*.debug" | head -n1)
-  printf "${debuginfo}"
+  if [ -e "${debuginfo}" ]; then
+    printf "${debuginfo}"
+  else
+    find packages/usr/lib/debug -name $(basename "${1}")-"${2}".debug -type f | head -n 1
+  fi
 }
 
 function get_soname {
@@ -271,7 +275,7 @@ function process_packages() {
 
       find packages -type f | grep -v debug | while read path; do
         if file "${path}" | grep -q ": *ELF" ; then
-          local debuginfo_path="$(find_debuginfo "${path}")"
+          local debuginfo_path="$(find_debuginfo "${path}" "${version}")"
 
           [ -z "${debuginfo_path}" ] && printf "Could not find debuginfo for ${path}\n" && continue
 
