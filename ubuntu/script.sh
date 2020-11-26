@@ -211,6 +211,7 @@ libxml2 libx/libxml2
 libxss1 libx/libxss
 libxvidcore4 x/xvidcore
 mesa-vulkan-drivers m/mesa
+mesa-va-drivers m/mesa
 opensc-pkcs11 o/opensc
 thunderbird t/thunderbird
 vdpau-va-driver v/vdpau-video
