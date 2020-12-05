@@ -182,6 +182,7 @@ libgtk-3-0 g/gtk+3.0
 libice6 libi/libice
 libicu[0-9][0-9] i/icu
 libnspr4 n/nspr
+libnuma1 n/numactl
 libopus0 o/opus libopus
 libpango-1.0-0 p/pango1.0
 libpcre3 p/pcre3

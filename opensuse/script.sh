@@ -213,6 +213,7 @@ libgtk-2_0-0
 libgtk-3-0
 libICE6
 libicu[0-9][0-9]
+libnuma1
 libopus0
 libpango-1_0-0
 libpcre1

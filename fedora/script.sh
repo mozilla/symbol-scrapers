@@ -206,6 +206,7 @@ mesa-libgbm m
 mesa-libGL m
 mesa-vulkan-drivers m
 nspr n
+numactl-libs n
 opus o
 pango p
 pcre p

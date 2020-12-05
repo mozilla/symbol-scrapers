@@ -185,6 +185,7 @@ libgtk-3-0 g/gtk+3.0
 libice6 libi/libice
 libicu[0-9][0-9] i/icu
 libnspr4 n/nspr
+libnuma1 n/numactl
 libopus0 o/opus libopus
 libpango-1.0-0 p/pango1.0
 libpcre3 p/pcre3
@@ -213,8 +214,8 @@ libxext6 libx/libxext
 libxml2 libx/libxml2
 libxss1 libx/libxss
 libxvidcore4 x/xvidcore
-mesa-vulkan-drivers m/mesa
 mesa-va-drivers m/mesa
+mesa-vulkan-drivers m/mesa
 opensc-pkcs11 o/opensc
 thunderbird t/thunderbird
 vdpau-va-driver v/vdpau-video
