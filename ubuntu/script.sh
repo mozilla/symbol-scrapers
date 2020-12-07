@@ -173,6 +173,7 @@ libfontconfig1 f/fontconfig
 libfreetype6 f/freetype
 libfribidi0 f/fribidi
 libgbm1 m/mesa
+libgdk-pixbuf-2.0-0 g/gdk-pixbuf
 libgdk-pixbuf2.0-0 g/gdk-pixbuf
 libgl1-mesa-dri m/mesa
 libgl1-mesa-glx m/mesa
