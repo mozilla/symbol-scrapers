@@ -183,6 +183,7 @@ libdrm l
 libepoxy l
 libevent l
 libffi l
+libglvnd l
 libICE l
 libicu l
 libpng12 l
@@ -191,6 +192,7 @@ libproxy l
 libSM l
 libstdc++ l
 libthai l
+libva l
 libva-vdpau-driver l
 libvpx l
 libwayland-client l
@@ -199,7 +201,7 @@ libX11-xcb l
 libxcb l
 libXext l
 libxml2 l
-libva l
+llvm-libs l
 mesa-dri-drivers m
 mesa-libEGL m
 mesa-libgbm m
