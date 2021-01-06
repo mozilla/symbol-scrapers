@@ -44,7 +44,6 @@ mkdir -p tmp
 
 cd tarballs
 packages="
-https://www.archlinux.org/packages/community/x86_64/firefox-developer-edition/download/
 https://www.archlinux.org/packages/core/x86_64/glib2/download/
 https://www.archlinux.org/packages/core/x86_64/glibc/download/
 https://www.archlinux.org/packages/core/x86_64/libffi/download/
@@ -148,7 +147,6 @@ purge "at-spi2-core" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "cairo-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "dconf-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "ffmpeg-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "firefox-developer-edition-" "https://ind.mirror.pkgbuild.com/community/os/x86_64/"
 purge "gdk-pixbuf2-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "glib2-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
 purge "glibc-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
