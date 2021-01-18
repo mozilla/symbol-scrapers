@@ -180,6 +180,7 @@ libgl1-mesa-glx m/mesa
 libglib2.0-0 g/glib2.0
 libglx-mesa0 m/mesa
 libgtk-3-0 g/gtk+3.0
+libibus-1.0-5 i/ibus
 libice6 libi/libice
 libicu[0-9][0-9] i/icu
 libnspr4 n/nspr

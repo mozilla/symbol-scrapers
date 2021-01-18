@@ -211,6 +211,7 @@ libglib-2_0-0
 libglvnd
 libgtk-2_0-0
 libgtk-3-0
+libibus-1_0-5
 libICE6
 libicu[0-9][0-9]
 libnuma1
@@ -229,7 +230,6 @@ libsoftokn3
 libsqlite3-0
 libstdc++6
 libswresample[0-9]
-libxvidcore4
 libswscale[0-9]
 libthai0
 libvpx4
@@ -241,6 +241,7 @@ libX11-6
 libxcb1
 libXext6
 libxml2-2
+libxvidcore4
 Mesa-dri
 Mesa-dri-nouveau
 Mesa-gallium

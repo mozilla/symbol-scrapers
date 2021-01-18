@@ -60,6 +60,7 @@ https://www.archlinux.org/packages/extra/x86_64/gtk3/download/
 https://www.archlinux.org/packages/extra/x86_64/gvfs/download/
 https://www.archlinux.org/packages/extra/x86_64/libdrm/download/
 https://www.archlinux.org/packages/extra/x86_64/libglvnd/download/
+https://www.archlinux.org/packages/extra/x86_64/libibus/download/
 https://www.archlinux.org/packages/extra/x86_64/libice/download/
 https://www.archlinux.org/packages/extra/x86_64/libpulse/download/
 https://www.archlinux.org/packages/extra/x86_64/libsm/download/
@@ -155,6 +156,7 @@ purge "gvfs-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libdrm-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libffi-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
 purge "libglvnd-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
+purge "libibus-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libice-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libpulse-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libsm-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"

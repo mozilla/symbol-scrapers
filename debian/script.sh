@@ -183,6 +183,7 @@ libgl1-mesa-glx m/mesa
 libglib2.0-0 g/glib2.0
 libglx-mesa0 m/mesa
 libgtk-3-0 g/gtk+3.0
+libibus-1.0-5 i/ibus
 libice6 libi/libice
 libicu[0-9][0-9] i/icu
 libnspr4 n/nspr
@@ -200,8 +201,8 @@ libpulse0 p/pulseaudio
 libsm6 libs/libsm
 libspeechd2 s/speech-dispatcher
 libsqlite3-0 s/sqlite3
-libstdc++6 g/gcc-9 libstdc++6-9
 libstdc++6 g/gcc-10 libstdc++6-10
+libstdc++6 g/gcc-9 libstdc++6-9
 libsystemd0 s/systemd
 libthai0 libt/libthai
 libva2 libv/libva
