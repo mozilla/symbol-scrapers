@@ -193,6 +193,7 @@ libpixman-1-0 p/pixman
 libpng12-0 libp/libpng
 libpng16-16 libp/libpng1.6
 libproxy1-plugin-gsettings libp/libproxy
+libnss-ldap libn/libnss-ldap
 libproxy1v5 libp/libproxy
 libpulse0 p/pulseaudio
 libsm6 libs/libsm
