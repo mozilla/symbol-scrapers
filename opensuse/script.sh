@@ -351,7 +351,7 @@ done
 
 find symbols -mindepth 2 -maxdepth 2 -type d | while read module; do
   module_name=${module##symbols/}
-  crashes=$(supersearch --num=all --modules_in_stack=${module_name//-})
+  crashes=$(supersearch --num=all --modules_in_stack=${module_name})
   if [ -n "${crashes}" ]; then
    echo "${crashes}" | reprocess
   fi
