@@ -17,7 +17,7 @@ if [ -z "${CRASHSTATS_API_TOKEN}" ]; then
 fi
 
 URL="https://fedora.mirror.wearetriple.com/linux"
-RELEASES="31 32 33 test/33_Beta"
+RELEASES="32 33 test/34_Beta"
 
 cpu_count=$(grep -c ^processor /proc/cpuinfo)
 
@@ -53,9 +53,9 @@ get_package_indexes() {
     printf "${url}/updates/testing/${release}/${everything_dir}/x86_64/debug/${packages_dir}/${pkg_path}/\n"
   done
 
-  # 33 beta
-  printf "${url}/development/33/${everything_dir}/x86_64/os/Packages/${pkg_path}/\n"
-  printf "${url}/development/33/${everything_dir}/x86_64/debug/${tree_dir}/${packages_dir}/${pkg_path}/\n"
+  # 34 beta
+  printf "${url}/development/34/${everything_dir}/x86_64/os/Packages/${pkg_path}/\n"
+  printf "${url}/development/34/${everything_dir}/x86_64/debug/${tree_dir}/${packages_dir}/${pkg_path}/\n"
 
   # Rawhide
   printf "${url}/development/rawhide/${everything_dir}/x86_64/os/Packages/${pkg_path}/\n"
