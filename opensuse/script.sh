@@ -24,14 +24,18 @@ REPOS="
 debug/distribution/leap/15.0/repo/oss/x86_64
 debug/distribution/leap/15.1/repo/oss/x86_64
 debug/distribution/leap/15.2/repo/oss/x86_64
+debug/distribution/leap/15.3/repo/oss/x86_64
 
 debug/update/leap/15.0/oss/rpms/x86_64
 debug/update/leap/15.1/oss/x86_64
 debug/update/leap/15.2/oss/x86_64
+debug/update/leap/15.3/oss/x86_64
+debug/update/leap/15.3-test/oss/x86_64
 
 distribution/leap/15.0/repo/oss/x86_64
 distribution/leap/15.1/repo/oss/x86_64
 distribution/leap/15.2/repo/oss/x86_64
+distribution/leap/15.3/repo/oss/x86_64
 
 tumbleweed/repo/oss/x86_64
 tumbleweed/repo/debug/x86_64
@@ -39,10 +43,13 @@ tumbleweed/repo/debug/x86_64
 update/leap/15.0/oss/rpms/x86_64/
 update/leap/15.1/oss/x86_64
 update/leap/15.2/oss/x86_64/
+update/leap/15.3/oss/x86_64/
+update/leap/15.3-test/oss/x86_64/
 
 repositories/mozilla/openSUSE_Leap_15.0/x86_64
 repositories/mozilla/openSUSE_Leap_15.1/x86_64
 repositories/mozilla/openSUSE_Leap_15.2/x86_64
+repositories/mozilla/openSUSE_Leap_15.3/x86_64
 repositories/mozilla/openSUSE_Tumbleweed/x86_64
 "
 
