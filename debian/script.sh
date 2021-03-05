@@ -204,6 +204,7 @@ libsqlite3-0 s/sqlite3
 libstdc++6 g/gcc-10 libstdc++6-10
 libstdc++6 g/gcc-9 libstdc++6-9
 libsystemd0 s/systemd
+libtcmalloc-minimal4 g/google-perftools
 libthai0 libt/libthai
 libva2 libv/libva
 libvpx[0-9] libv/libvpx
