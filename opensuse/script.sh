@@ -50,6 +50,7 @@ repositories/mozilla/openSUSE_Leap_15.0/x86_64
 repositories/mozilla/openSUSE_Leap_15.1/x86_64
 repositories/mozilla/openSUSE_Leap_15.2/x86_64
 repositories/mozilla/openSUSE_Leap_15.3/x86_64
+repositories/mozilla/openSUSE_Leap_15.3_debug/x86_64
 repositories/mozilla/openSUSE_Tumbleweed/x86_64
 "
 
