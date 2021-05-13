@@ -178,6 +178,7 @@ libgdk-pixbuf2.0-0 g/gdk-pixbuf
 libgl1-mesa-dri m/mesa
 libgl1-mesa-glx m/mesa
 libglib2.0-0 g/glib2.0
+libglx0 libg/libglvnd
 libglx-mesa0 m/mesa
 libgtk-3-0 g/gtk+3.0
 libibus-1.0-5 i/ibus
