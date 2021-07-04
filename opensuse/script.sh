@@ -230,6 +230,8 @@ libstdc++6
 libswresample[0-9]
 libswscale[0-9]
 libthai0
+libva2
+libva-vdpau-driver
 libvpx4
 libvulkan1
 libvulkan_intel
