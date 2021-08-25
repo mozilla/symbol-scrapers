@@ -171,7 +171,9 @@ ffmpeg-libs f http://mirror.nl.leaseweb.net/rpmfusion/free/fedora
 fontconfig f
 freetype f
 fribidi f
+gamin g
 gdk-pixbuf2 g
+glib2-fam g
 glib2 g
 glibc g
 glib-networking g
@@ -212,6 +214,7 @@ numactl-libs n
 opus o
 pango p
 pcre p
+pcre2 p
 pcsc-lite-libs p
 pixman p
 pulseaudio-libs p

@@ -73,6 +73,7 @@ https://www.archlinux.org/packages/extra/x86_64/libxcb/download/
 https://www.archlinux.org/packages/extra/x86_64/libxext/download/
 https://www.archlinux.org/packages/extra/x86_64/mesa/download/
 https://www.archlinux.org/packages/extra/x86_64/numactl/download/
+https://www.archlinux.org/packages/extra/x86_64/pcre2/download/
 https://www.archlinux.org/packages/extra/x86_64/pixman/download/
 https://www.archlinux.org/packages/extra/x86_64/vulkan-intel/download/
 https://www.archlinux.org/packages/extra/x86_64/vulkan-radeon/download/
@@ -170,6 +171,7 @@ purge "libxext-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "mesa-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "nspr-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
 purge "numactl-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
+purge "pcre2-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
 purge "pixman-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "vulkan-intel-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "vulkan-radeon-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"

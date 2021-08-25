@@ -200,11 +200,13 @@ libdrm_nouveau2
 libdrm_radeon1
 libepoxy0
 libevent-2_1-7
+libfam0-gamin
 libffi8
 libfribidi0
 libgbm1
 libgdk_pixbuf-2_0-0
 libgio-2_0-0
+libgiofam
 libglib-2_0-0
 libglvnd
 libgtk-2_0-0
@@ -216,19 +218,23 @@ libnuma1
 libopus0
 libpango-1_0-0
 libpcre1
+libpcre2-8-0
 libpcslite1
+libpixman-1-0
 libpng12-0
 libpng16-16
 libpostproc[0-9][0-9]
 libproxy1
 libproxy1
 libproxy1-config-kde
+libpulse0
 libSM6
 libsoftokn3
 libsqlite3-0
 libstdc++6
 libswresample[0-9]
 libswscale[0-9]
+libsystemd0
 libthai0
 libva2
 libva-vdpau-driver
@@ -238,10 +244,13 @@ libvulkan_intel
 libvulkan_radeon
 libwayland-client0
 libX11-6
+libx264-[0-9][0-9][0-9] http://packman.inode.at/suse
+libx265-[0-9][0-9][0-9] http://packman.inode.at/suse
 libxcb1
 libXext6
 libxml2-2
 libxvidcore4
+libz1
 Mesa-dri
 Mesa-dri-nouveau
 Mesa-gallium
@@ -251,13 +260,7 @@ Mesa-libva
 MozillaFirefox
 mozilla-nspr
 mozilla-nss
-libpixman-1-0
-libpulse0
 speech-dispatcher
-libsystemd0
-libx264-[0-9][0-9][0-9] http://packman.inode.at/suse
-libx265-[0-9][0-9][0-9] http://packman.inode.at/suse
-libz1
 "
 
 fetch_packages "${packages}"

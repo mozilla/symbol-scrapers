@@ -179,10 +179,12 @@ libegl1-mesa m/mesa
 libegl-mesa0 m/mesa
 libepoxy0 libe/libepoxy
 libevent-2.[0-9]-[0-9] libe/libevent libevent libevent-2.[0-9]-[0-9]
+libfam0 f/fam
 libffi[0-9] libf/libffi
 libfontconfig1 f/fontconfig
 libfreetype6 f/freetype
 libfribidi0 f/fribidi
+libgamin0 g/gamin
 libgbm1 m/mesa
 libgdk-pixbuf-2.0-0 g/gdk-pixbuf
 libgdk-pixbuf2.0-0 g/gdk-pixbuf
@@ -196,10 +198,12 @@ libibus-1.0-5 i/ibus
 libice6 libi/libice
 libicu[0-9][0-9] i/icu
 libnspr4 n/nspr
+libnss-ldap libn/libnss-ldap
 libnuma1 n/numactl
 libopus0 o/opus libopus
 libpango-1.0-0 p/pango1.0
 libpcre3 p/pcre3
+libpcre2-8-0 p/pcre2
 libpcsclite1 p/pcsc-lite
 libpixman-1-0 p/pixman
 libpng12-0 libp/libpng
@@ -211,6 +215,8 @@ libsm6 libs/libsm
 libspeechd2 s/speech-dispatcher
 libsqlite3-0 s/sqlite3
 libstdc++6 g/gcc-10 libstdc++6-10
+libstdc++6 g/gcc-11 libstdc++6-11
+libstdc++6 g/gcc-8 libstdc++6-8
 libstdc++6 g/gcc-9 libstdc++6-9
 libsystemd0 s/systemd
 libtcmalloc-minimal4 g/google-perftools
