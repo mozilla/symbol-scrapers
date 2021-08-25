@@ -38,7 +38,7 @@ get_package_urls() {
     urls="${urls} ${alt_url}/${main_path}/"
   fi
 
-  wget -k -o wget.log --progress=dot:mega ${urls}
+  wget -o wget.log --progress=dot:mega -k ${urls}
   for i in ${urls}; do
     grep -h -o "${i}\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).deb\"" index.html* | cut -d'"' -f1
   done
@@ -77,13 +77,21 @@ function find_debuginfo_package() {
 }
 
 function unpack_package() {
+  local package_name="${1}"
+  local debug_package_name="${2}"
   mkdir packages
-  7z -y x "${1}" > /dev/null
-  tar -C packages -x -a -f data.tar
+  7z -y x "${package_name}" > /dev/null
+  tar -C packages -x -a -f data.tar 2>error.log
+  if [ $? -ne 0 ]; then
+    printf "Failed to extract ${package_name}\n" 2>>error.log
+  fi
   rm -f data.tar
-  if [ -n "${2}" ]; then
-    7z -y x "${2}" > /dev/null
+  if [ -n "${debug_package_name}" ]; then
+    7z -y x "${debug_package_name}" > /dev/null
     tar -C packages -x -a -f data.tar
+    if [ $? -ne 0 ]; then
+      printf "Failed to extract ${debug_package_name}\n" 2>>error.log
+    fi
     rm -f data.tar
   fi
 }
@@ -252,7 +260,7 @@ function process_packages() {
 
             local tmpfile=$(mktemp --tmpdir=tmp)
             printf "Writing symbol file for ${path} ${debuginfo_path} ... "
-            ${DUMP_SYMS} --type elf "${path}" "${debuginfo_path}" 1> "${tmpfile}" 2> error.log
+            ${DUMP_SYMS} --type elf "${path}" "${debuginfo_path}" 1> "${tmpfile}" 2>>error.log
             if [ -s "${tmpfile}" ]; then
               printf "done\n"
             else
@@ -265,7 +273,9 @@ function process_packages() {
             fi
 
             if [ -s error.log ]; then
+              printf "***** error log for package ${filename}\n"
               cat error.log
+              printf "***** error log for package ${filename} ends here\n"
             fi
 
             # Copy the symbol file and debug information
