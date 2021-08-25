@@ -39,7 +39,10 @@ process_packages() {
     if ! grep -q -F "${filename}" SHA256SUMS; then
       7z -y x "${path}" > /dev/null
       mkdir -p debug symbols
-      tar -C "debug" -x -a -f data.tar
+      tar -C "debug" -x -a -f data.tar 2>>error.log
+      if [ $? -ne 0 ]; then
+        printf "Failed to extract ${filename}\n"
+      fi
       symbols_archive="$(find debug/ -name "firefox-*.crashreporter-symbols.zip")"
       unzip -q -d symbols "${symbols_archive}"
 
