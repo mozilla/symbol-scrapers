@@ -206,7 +206,7 @@ libfribidi0
 libgbm1
 libgdk_pixbuf-2_0-0
 libgio-2_0-0
-libgiofam
+libgio-fam
 libglib-2_0-0
 libglvnd
 libgtk-2_0-0
