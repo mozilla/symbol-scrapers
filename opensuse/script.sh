@@ -209,6 +209,7 @@ libgio-2_0-0
 libgio-fam
 libglib-2_0-0
 libglvnd
+libgobject-2_0-0
 libgtk-2_0-0
 libgtk-3-0
 libibus-1_0-5
@@ -260,6 +261,7 @@ Mesa-libva
 MozillaFirefox
 mozilla-nspr
 mozilla-nss
+opensc
 speech-dispatcher
 "
 
