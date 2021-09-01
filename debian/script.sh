@@ -80,19 +80,19 @@ function unpack_package() {
   local package_name="${1}"
   local debug_package_name="${2}"
   mkdir packages
-  7z -y x "${package_name}" > /dev/null
-  tar -C packages -x -a -f data.tar 2>error.log
+  ar x "${package_name}" && \
+  tar -C packages -x -a -f data.tar*
   if [ $? -ne 0 ]; then
     printf "Failed to extract ${package_name}\n" 2>>error.log
   fi
-  rm -f data.tar
+  rm -f data.tar* control.tar* debian-binary
   if [ -n "${debug_package_name}" ]; then
-    7z -y x "${debug_package_name}" > /dev/null
-    tar -C packages -x -a -f data.tar
+    ar x "${debug_package_name}" && \
+    tar -C packages -x -a -f data.tar*
     if [ $? -ne 0 ]; then
       printf "Failed to extract ${debug_package_name}\n" 2>>error.log
     fi
-    rm -f data.tar
+    rm -f data.tar* control.tar* debian-binary
   fi
 }
 
