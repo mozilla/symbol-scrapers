@@ -301,7 +301,9 @@ function process_packages() {
           fi
 
           if [ -s error.log ]; then
+            printf "***** error log for package ${package} ${path} ${debuginfo_path}\n"
             cat error.log
+            printf "***** error log for package ${package} ${path} ${debuginfo_path} ends here\n"
           fi
 
           # Copy the symbol file and debug information

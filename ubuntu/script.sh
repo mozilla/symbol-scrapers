@@ -253,6 +253,7 @@ function process_packages() {
         [ -z "${debuginfo_package}" ] && printf "***** Could not find debuginfo for ${filename}\n" && continue
 
         echo package = $package version = $version debuginfo = $debuginfo_package
+        truncate --size=0 error.log
         unpack_package ${package} ${debuginfo_package}
 
         find packages -type f | grep -v debug | while read path; do
@@ -275,12 +276,6 @@ function process_packages() {
               fi
             fi
 
-            if [ -s error.log ]; then
-              printf "***** error log for package ${filename}\n"
-              cat error.log
-              printf "***** error log for package ${filename} ends here\n"
-            fi
-
             # Copy the symbol file and debug information
             debugid=$(head -n 1 "${tmpfile}" | cut -d' ' -f4)
             filename="$(basename "${path}")"
@@ -299,6 +294,12 @@ function process_packages() {
             rm -f "${tmpfile}"
           fi
         done
+
+        if [ -s error.log ]; then
+          printf "***** error log for package ${package}\n"
+          cat error.log
+          printf "***** error log for package ${package} ends here\n"
+        fi
 
         # Compress the debug information
         find symbols -name "*.dbg" -type f -print0 | xargs -0 -P${cpu_count} -I{} gzip -f --best "{}"
