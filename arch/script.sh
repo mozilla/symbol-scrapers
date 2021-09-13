@@ -44,6 +44,7 @@ mkdir -p tmp
 
 cd tarballs
 packages="
+https://www.archlinux.org/packages/core/x86_64/gcc-libs/download/
 https://www.archlinux.org/packages/core/x86_64/glib2/download/
 https://www.archlinux.org/packages/core/x86_64/glibc/download/
 https://www.archlinux.org/packages/core/x86_64/libffi/download/
@@ -55,6 +56,7 @@ https://www.archlinux.org/packages/extra/x86_64/at-spi2-core/download/
 https://www.archlinux.org/packages/extra/x86_64/cairo/download/
 https://www.archlinux.org/packages/extra/x86_64/dconf/download/
 https://www.archlinux.org/packages/extra/x86_64/ffmpeg/download/
+https://www.archlinux.org/packages/extra/x86_64/fontconfig/download/
 https://www.archlinux.org/packages/extra/x86_64/gdk-pixbuf2/download/
 https://www.archlinux.org/packages/extra/x86_64/gtk3/download/
 https://www.archlinux.org/packages/extra/x86_64/gvfs/download/
@@ -64,6 +66,7 @@ https://www.archlinux.org/packages/extra/x86_64/libibus/download/
 https://www.archlinux.org/packages/extra/x86_64/libice/download/
 https://www.archlinux.org/packages/extra/x86_64/libpulse/download/
 https://www.archlinux.org/packages/extra/x86_64/libsm/download/
+https://www.archlinux.org/packages/extra/x86_64/libspeechd/download/
 https://www.archlinux.org/packages/extra/x86_64/libstdc++5/download/
 https://www.archlinux.org/packages/extra/x86_64/libva/download/
 https://www.archlinux.org/packages/extra/x86_64/libva-mesa-driver/download/
@@ -73,6 +76,7 @@ https://www.archlinux.org/packages/extra/x86_64/libxcb/download/
 https://www.archlinux.org/packages/extra/x86_64/libxext/download/
 https://www.archlinux.org/packages/extra/x86_64/mesa/download/
 https://www.archlinux.org/packages/extra/x86_64/numactl/download/
+https://www.archlinux.org/packages/extra/x86_64/nvidia-utils/download/
 https://www.archlinux.org/packages/extra/x86_64/pcre2/download/
 https://www.archlinux.org/packages/extra/x86_64/pixman/download/
 https://www.archlinux.org/packages/extra/x86_64/vulkan-intel/download/
@@ -149,6 +153,8 @@ purge "at-spi2-core" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "cairo-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "dconf-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "ffmpeg-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
+purge "fontconfig-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
+purge "gcc-libs-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
 purge "gdk-pixbuf2-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "glib2-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
 purge "glibc-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
@@ -161,6 +167,7 @@ purge "libibus-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libice-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libpulse-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libsm-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
+purge "libspeechd-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libstdc++5-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libva-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libva-mesa-driver-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
@@ -171,6 +178,7 @@ purge "libxext-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "mesa-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "nspr-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
 purge "numactl-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
+purge "nvidia-utils-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "pcre2-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
 purge "pixman-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "vulkan-intel-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
