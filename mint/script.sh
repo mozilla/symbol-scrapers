@@ -38,14 +38,16 @@ process_packages() {
     filename="$(basename ${path})"
     if ! grep -q -F "${filename}" SHA256SUMS; then
       mkdir -p debug symbols
+      data_file=$(ar t "${path}" | grep ^data)
       ar x "${path}" && \
-      tar -C "debug" -x -a -f data.tar*
+      tar -C "debug" -x -a -f "${data_file}"
       if [ $? -ne 0 ]; then
         printf "Failed to extract ${filename}\n"
         continue
       fi
       symbols_archive="$(find debug/ -name "firefox-*.crashreporter-symbols.zip")"
       unzip -q -d symbols "${symbols_archive}"
+      rm -f data.tar* control.tar* debian-binary
 
       # Upload
       curl -H "auth-token: ${SYMBOLS_API_TOKEN}" --form $(basename ${symbols_archive})=@${symbols_archive} https://symbols.mozilla.org/upload/
