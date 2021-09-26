@@ -179,7 +179,6 @@ at-spi2-core
 dbus-1-glib
 firefox-esr
 fontconfig
-freetype
 glibc
 glib-networking
 gnome-vfs2
@@ -202,6 +201,7 @@ libepoxy0
 libevent-2_1-7
 libfam0-gamin
 libffi8
+libfreetype6
 libfribidi0
 libgbm1
 libgdk_pixbuf-2_0-0
