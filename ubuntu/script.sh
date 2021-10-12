@@ -156,6 +156,7 @@ mkdir -p downloads symbols tmp
 packages="
 dconf-gsettings-backend d/dconf
 firefox f/firefox firefox firefox http://ppa.launchpad.net/mozillateam/firefox-next/ubuntu/pool
+firefox-trunk f/firefox-trunk firefox-trunk firefox-trunk http://ppa.launchpad.net/ubuntu-mozilla-daily/ppa/ubuntu/pool
 glib-networking g/glib-networking
 gvfs g/gvfs
 libasound2 a/alsa-lib
