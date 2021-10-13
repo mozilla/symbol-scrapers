@@ -159,6 +159,8 @@ firefox f/firefox firefox firefox http://ppa.launchpad.net/mozillateam/firefox-n
 firefox-trunk f/firefox-trunk firefox-trunk firefox-trunk http://ppa.launchpad.net/ubuntu-mozilla-daily/ppa/ubuntu/pool
 glib-networking g/glib-networking
 gvfs g/gvfs
+intel-media-va-driver i/intel-media-driver
+intel-media-va-driver-non-free i/intel-media-driver-non-free
 libasound2 a/alsa-lib
 libatk1.0-0 a/atk1.0
 libatk-bridge2.0-0 a/at-spi2-atk

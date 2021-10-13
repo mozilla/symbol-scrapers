@@ -183,6 +183,8 @@ glibc
 glib-networking
 gnome-vfs2
 gsettings-backend-dconf
+intel-media-driver
+intel-vaapi-driver
 libatk-1_0-0
 libavcodec[0-9][0-9]
 libavfilter[0-9]

@@ -44,44 +44,44 @@ mkdir -p tmp
 
 cd tarballs
 packages="
-https://www.archlinux.org/packages/core/x86_64/gcc-libs/download/
-https://www.archlinux.org/packages/core/x86_64/glib2/download/
-https://www.archlinux.org/packages/core/x86_64/glibc/download/
-https://www.archlinux.org/packages/core/x86_64/libffi/download/
-https://www.archlinux.org/packages/core/x86_64/nspr/download/
-https://www.archlinux.org/packages/extra/x86_64/amdvlk/download/
-https://www.archlinux.org/packages/extra/x86_64/atk/download/
-https://www.archlinux.org/packages/extra/x86_64/at-spi2-atk/download/
-https://www.archlinux.org/packages/extra/x86_64/at-spi2-core/download/
-https://www.archlinux.org/packages/extra/x86_64/cairo/download/
-https://www.archlinux.org/packages/extra/x86_64/dconf/download/
-https://www.archlinux.org/packages/extra/x86_64/ffmpeg/download/
-https://www.archlinux.org/packages/extra/x86_64/fontconfig/download/
-https://www.archlinux.org/packages/extra/x86_64/gdk-pixbuf2/download/
-https://www.archlinux.org/packages/extra/x86_64/gtk3/download/
-https://www.archlinux.org/packages/extra/x86_64/gvfs/download/
-https://www.archlinux.org/packages/extra/x86_64/libdrm/download/
-https://www.archlinux.org/packages/extra/x86_64/libglvnd/download/
-https://www.archlinux.org/packages/extra/x86_64/libibus/download/
-https://www.archlinux.org/packages/extra/x86_64/libice/download/
-https://www.archlinux.org/packages/extra/x86_64/libpulse/download/
-https://www.archlinux.org/packages/extra/x86_64/libsm/download/
-https://www.archlinux.org/packages/extra/x86_64/libspeechd/download/
-https://www.archlinux.org/packages/extra/x86_64/libstdc++5/download/
-https://www.archlinux.org/packages/extra/x86_64/libva/download/
-https://www.archlinux.org/packages/extra/x86_64/libva-mesa-driver/download/
-https://www.archlinux.org/packages/extra/x86_64/libva-vdpau-driver/download/
-https://www.archlinux.org/packages/extra/x86_64/libx11/download/
-https://www.archlinux.org/packages/extra/x86_64/libxcb/download/
-https://www.archlinux.org/packages/extra/x86_64/libxext/download/
-https://www.archlinux.org/packages/extra/x86_64/mesa/download/
-https://www.archlinux.org/packages/extra/x86_64/numactl/download/
-https://www.archlinux.org/packages/extra/x86_64/nvidia-utils/download/
-https://www.archlinux.org/packages/extra/x86_64/pcre2/download/
-https://www.archlinux.org/packages/extra/x86_64/pixman/download/
-https://www.archlinux.org/packages/extra/x86_64/vulkan-intel/download/
-https://www.archlinux.org/packages/extra/x86_64/vulkan-radeon/download/
-https://www.archlinux.org/packages/extra/x86_64/wayland/download/
+https://archlinux.org/packages/community/x86_64/intel-media-driver/download/
+https://archlinux.org/packages/core/x86_64/gcc-libs/download/
+https://archlinux.org/packages/core/x86_64/glib2/download/
+https://archlinux.org/packages/core/x86_64/glibc/download/
+https://archlinux.org/packages/core/x86_64/libffi/download/
+https://archlinux.org/packages/core/x86_64/nspr/download/
+https://archlinux.org/packages/extra/x86_64/amdvlk/download/
+https://archlinux.org/packages/extra/x86_64/atk/download/
+https://archlinux.org/packages/extra/x86_64/at-spi2-atk/download/
+https://archlinux.org/packages/extra/x86_64/at-spi2-core/download/
+https://archlinux.org/packages/extra/x86_64/cairo/download/
+https://archlinux.org/packages/extra/x86_64/dconf/download/
+https://archlinux.org/packages/extra/x86_64/ffmpeg/download/
+https://archlinux.org/packages/extra/x86_64/gdk-pixbuf2/download/
+https://archlinux.org/packages/extra/x86_64/gtk3/download/
+https://archlinux.org/packages/extra/x86_64/gvfs/download/
+https://archlinux.org/packages/extra/x86_64/libdrm/download/
+https://archlinux.org/packages/extra/x86_64/libglvnd/download/
+https://archlinux.org/packages/extra/x86_64/libibus/download/
+https://archlinux.org/packages/extra/x86_64/libice/download/
+https://archlinux.org/packages/extra/x86_64/libpulse/download/
+https://archlinux.org/packages/extra/x86_64/libsm/download/
+https://archlinux.org/packages/extra/x86_64/libspeechd/download/
+https://archlinux.org/packages/extra/x86_64/libstdc++5/download/
+https://archlinux.org/packages/extra/x86_64/libva/download/
+https://archlinux.org/packages/extra/x86_64/libva-mesa-driver/download/
+https://archlinux.org/packages/extra/x86_64/libva-vdpau-driver/download/
+https://archlinux.org/packages/extra/x86_64/libx11/download/
+https://archlinux.org/packages/extra/x86_64/libxcb/download/
+https://archlinux.org/packages/extra/x86_64/libxext/download/
+https://archlinux.org/packages/extra/x86_64/mesa/download/
+https://archlinux.org/packages/extra/x86_64/numactl/download/
+https://archlinux.org/packages/extra/x86_64/nvidia-utils/download/
+https://archlinux.org/packages/extra/x86_64/pcre2/download/
+https://archlinux.org/packages/extra/x86_64/pixman/download/
+https://archlinux.org/packages/extra/x86_64/vulkan-intel/download/
+https://archlinux.org/packages/extra/x86_64/vulkan-radeon/download/
+https://archlinux.org/packages/extra/x86_64/wayland/download/
 "
 wget -o ../wget.log --progress=dot:mega -c --content-disposition ${packages}
 tarballs=$(ls)
@@ -160,6 +160,7 @@ purge "glib2-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
 purge "glibc-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
 purge "gtk3-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "gvfs-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
+purge "intel-media-driver-" "http://mirror.f4st.host/archlinux/community/os/x86_64/"
 purge "libdrm-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libffi-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
 purge "libglvnd-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
