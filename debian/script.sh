@@ -150,7 +150,11 @@ purge_old_packages() {
   done
 }
 
-rm -rf symbols packages tmp symbols*.zip packages.txt package_names.txt
+remove_temp_files() {
+  rm -rf symbols packages tmp symbols*.zip packages.txt package_names.txt
+}
+
+remove_temp_files
 mkdir -p downloads symbols tmp
 
 packages="
@@ -349,3 +353,4 @@ find symbols -mindepth 2 -maxdepth 2 -type d | while read module; do
 done
 
 purge_old_packages
+remove_temp_files

@@ -77,9 +77,14 @@ purge_old_packages() {
   done
 }
 
-rm -rf debug symbols wget.log packages.txt package_names.txt
+remove_temp_files() {
+  rm -rf symbols packages tmp symbols*.zip packages.txt package_names.txt
+}
+
+remove_temp_files
 mkdir -p downloads
 
 fetch_packages
 process_packages
 purge_old_packages
+remove_temp_files
