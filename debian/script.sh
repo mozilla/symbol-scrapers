@@ -26,13 +26,14 @@ get_package_urls() {
   local package_name="${1}"
   local pkg_path="${2}"
   local main_path="main/${pkg_path}"
+  local non_free_path="non-free/${pkg_path}"
   local dbg_package_name="${3:-$package_name}"
   local dbgsym_package_name="${4:-$package_name}"
   local alt_url="${5:-$UPDATES_URL}"
   local url="${URL}"
   local ddeb_url="${DDEB_URL}"
 
-  local urls="${url}/${main_path}/ ${ddeb_url}/${main_path}/ "
+  local urls="${url}/${main_path}/ ${url}/${non_free_path}/ ${ddeb_url}/${main_path}/ ${ddeb_url}/${non_free_path}/"
 
   if [ -n "${alt_url}" ]; then
     urls="${urls} ${alt_url}/${main_path}/"
@@ -164,6 +165,7 @@ firefox f/firefox
 glib-networking g/glib-networking
 gvfs g/gvfs
 intel-media-va-driver i/intel-media-driver
+intel-media-va-driver-non-free i/intel-media-driver-non-free
 libasound2 a/alsa-lib
 libatk1.0-0 a/atk1.0
 libatk-bridge2.0-0 a/at-spi2-atk
@@ -181,6 +183,7 @@ libdrm-amdgpu1 libd/libdrm
 libdrm-intel1 libd/libdrm
 libdrm-nouveau2 libd/libdrm
 libdrm-radeon1 libd/libdrm
+libegl1 libg/libglvnd
 libegl1-mesa-drivers m/mesa
 libegl1-mesa m/mesa
 libegl-mesa0 m/mesa

@@ -26,13 +26,14 @@ get_package_urls() {
   local pkg_path="${2}"
   local main_path="main/${pkg_path}"
   local universe_path="universe/${pkg_path}"
+  local multiverse_path="multiverse/${pkg_path}"
   local dbg_package_name="${3:-$package_name}"
   local dbgsym_package_name="${4:-$package_name}"
   local alt_url="${5}"
   local url="${URL}"
   local ddeb_url="${DDEB_URL}"
 
-  local urls="${url}/${main_path}/ ${url}/${universe_path}/ ${ddeb_url}/${main_path}/ ${ddeb_url}/${universe_path}/"
+  local urls="${url}/${main_path}/ ${url}/${universe_path}/ ${url}/${multiverse_path} ${ddeb_url}/${main_path}/ ${ddeb_url}/${universe_path}/ ${ddeb_url}/${multiverse_path}/"
 
   if [ -n "${alt_url}" ]; then
     urls="${urls} ${alt_url}/${main_path}/ ${alt_url}/${universe_path}/"
@@ -180,6 +181,7 @@ libdrm-amdgpu1 libd/libdrm
 libdrm-intel1 libd/libdrm
 libdrm-nouveau2 libd/libdrm
 libdrm-radeon1 libd/libdrm
+libegl1 libg/libglvnd
 libegl1-mesa-drivers m/mesa
 libegl1-mesa m/mesa
 libegl-mesa0 m/mesa
