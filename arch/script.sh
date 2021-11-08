@@ -56,6 +56,7 @@ https://archlinux.org/packages/extra/x86_64/atk/download/
 https://archlinux.org/packages/extra/x86_64/at-spi2-atk/download/
 https://archlinux.org/packages/extra/x86_64/at-spi2-core/download/
 https://archlinux.org/packages/extra/x86_64/cairo/download/
+https://archlinux.org/packages/extra/x86_64/dbus-glib/download/
 https://archlinux.org/packages/extra/x86_64/dconf/download/
 https://archlinux.org/packages/extra/x86_64/ffmpeg/download/
 https://archlinux.org/packages/extra/x86_64/gdk-pixbuf2/download/
@@ -153,6 +154,7 @@ purge "at-spi2-atk" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "at-spi2-core" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "cairo-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "dbus-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
+purge "dbus-glib-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "dconf-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "ffmpeg-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "fontconfig-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
