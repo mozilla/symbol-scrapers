@@ -45,6 +45,7 @@ mkdir -p tmp
 cd tarballs
 packages="
 https://archlinux.org/packages/community/x86_64/intel-media-driver/download/
+https://archlinux.org/packages/core/x86_64/dbus/download/
 https://archlinux.org/packages/core/x86_64/gcc-libs/download/
 https://archlinux.org/packages/core/x86_64/glib2/download/
 https://archlinux.org/packages/core/x86_64/glibc/download/
@@ -151,6 +152,7 @@ purge "atk-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "at-spi2-atk" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "at-spi2-core" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "cairo-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
+purge "dbus-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
 purge "dconf-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "ffmpeg-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "fontconfig-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
