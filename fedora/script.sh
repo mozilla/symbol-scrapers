@@ -17,7 +17,7 @@ if [ -z "${CRASHSTATS_API_TOKEN}" ]; then
 fi
 
 URL="https://fedora.mirror.wearetriple.com/linux"
-RELEASES="33 34 35 test/35_Beta"
+RELEASES="33 34 35 test/35_Beta 36 test/36_Beta"
 
 cpu_count=$(grep -c ^processor /proc/cpuinfo)
 
@@ -171,7 +171,7 @@ cairo c
 dbus-glib d
 dbus-libs d
 dconf d
-ffmpeg-libs f http://mirror.nl.leaseweb.net/rpmfusion/free/fedora
+ffmpeg-libs f https://mirror.nl.leaseweb.net/rpmfusion/free/fedora
 fontconfig f
 freetype f
 fribidi f
@@ -185,7 +185,7 @@ gnome-vfs2 g
 gtk2 g
 gtk3 g
 ibus-libs i
-intel-media-driver i http://mirror.nl.leaseweb.net/rpmfusion/nonfree/fedora
+intel-media-driver i https://mirror.nl.leaseweb.net/rpmfusion/nonfree/fedora
 libdrm l
 libepoxy l
 libevent l
@@ -225,10 +225,12 @@ pixman p
 pulseaudio-libs p
 speech-dispatcher s
 systemd-libs s
-x264-libs x http://mirror.nl.leaseweb.net/rpmfusion/free/fedora
-x265-libs x http://mirror.nl.leaseweb.net/rpmfusion/free/fedora
-xvidcore x http://mirror.nl.leaseweb.net/rpmfusion/free/fedora
+x264-libs x https://mirror.nl.leaseweb.net/rpmfusion/free/fedora
+x265-libs x https://mirror.nl.leaseweb.net/rpmfusion/free/fedora
+xvidcore x https://mirror.nl.leaseweb.net/rpmfusion/free/fedora
 zlib z
+xorg-x11-drv-nvidia-[0-9][0-9][0-9]xx-libs x https://mirror.nl.leaseweb.net/rpmfusion/nonfree/fedora
+xorg-x11-drv-nvidia-libs x https://mirror.nl.leaseweb.net/rpmfusion/nonfree/fedora
 "
 
 fetch_packages "${packages}"

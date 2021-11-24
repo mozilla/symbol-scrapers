@@ -269,6 +269,7 @@ mozilla-nspr
 mozilla-nss
 opensc
 speech-dispatcher
+x11-video-nvidiaG[0-9][0-9]
 "
 
 fetch_packages "${packages}"
