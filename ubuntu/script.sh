@@ -217,6 +217,7 @@ libpixman-1-0 p/pixman
 libpng12-0 libp/libpng
 libpng16-16 libp/libpng1.6
 libproxy1-plugin-gsettings libp/libproxy
+libnss-ldap libn/libnss-ldap
 libproxy1v5 libp/libproxy
 libpulse0 p/pulseaudio
 libsm6 libs/libsm
@@ -237,6 +238,7 @@ libx264-[0-9][0-9][0-9] x/x264
 libx265-[0-9][0-9][0-9] x/x265
 libxcb1 libx/libxcb
 libxext6 libx/libxext
+libxkbcommon0 libx/libxkbcommon
 libxml2 libx/libxml2
 libxss1 libx/libxss
 libxvidcore4 x/xvidcore

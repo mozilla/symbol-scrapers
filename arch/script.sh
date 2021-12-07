@@ -76,6 +76,7 @@ https://archlinux.org/packages/extra/x86_64/libva-vdpau-driver/download/
 https://archlinux.org/packages/extra/x86_64/libx11/download/
 https://archlinux.org/packages/extra/x86_64/libxcb/download/
 https://archlinux.org/packages/extra/x86_64/libxext/download/
+https://archlinux.org/packages/extra/x86_64/libxkbcommon/download/
 https://archlinux.org/packages/extra/x86_64/mesa/download/
 https://archlinux.org/packages/extra/x86_64/numactl/download/
 https://archlinux.org/packages/extra/x86_64/nvidia-utils/download/
@@ -180,6 +181,7 @@ purge "libva-vdpau-driver-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libx11-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libxcb-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "libxext-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
+purge "libxkbcommon-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "mesa-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
 purge "nspr-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
 purge "numactl-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"

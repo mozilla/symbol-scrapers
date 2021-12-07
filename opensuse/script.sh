@@ -255,6 +255,7 @@ libx264-[0-9][0-9][0-9] http://packman.inode.at/suse
 libx265-[0-9][0-9][0-9] http://packman.inode.at/suse
 libxcb1
 libXext6
+libxkbcommon0
 libxml2-2
 libxvidcore4
 libz1

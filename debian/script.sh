@@ -240,6 +240,7 @@ libx264-[0-9][0-9][0-9] x/x264
 libx265-[0-9][0-9][0-9] x/x265
 libxcb1 libx/libxcb
 libxext6 libx/libxext
+libxkbcommon0 libx/libxkbcommon
 libxml2 libx/libxml2
 libxss1 libx/libxss
 libxvidcore4 x/xvidcore

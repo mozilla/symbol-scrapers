@@ -207,6 +207,7 @@ libX11 l
 libX11-xcb l
 libxcb l
 libXext l
+libxkbcommon l
 libxml2 l
 llvm-libs l
 mesa-dri-drivers m
