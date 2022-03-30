@@ -17,7 +17,7 @@ if [ -z "${CRASHSTATS_API_TOKEN}" ]; then
 fi
 
 URL="https://fedora.mirror.wearetriple.com/linux"
-RELEASES="33 34 35 test/35_Beta 36 test/36_Beta"
+RELEASES="34 35 36 test/36_Beta 37 test/36_Beta"
 
 cpu_count=$(grep -c ^processor /proc/cpuinfo)
 
@@ -172,6 +172,7 @@ dbus-glib d
 dbus-libs d
 dconf d
 ffmpeg-libs f https://mirror.nl.leaseweb.net/rpmfusion/free/fedora
+firefox f
 fontconfig f
 freetype f
 fribidi f
@@ -226,6 +227,7 @@ pixman p
 pulseaudio-libs p
 speech-dispatcher s
 systemd-libs s
+thunderbird t
 x264-libs x https://mirror.nl.leaseweb.net/rpmfusion/free/fedora
 x265-libs x https://mirror.nl.leaseweb.net/rpmfusion/free/fedora
 xvidcore x https://mirror.nl.leaseweb.net/rpmfusion/free/fedora
