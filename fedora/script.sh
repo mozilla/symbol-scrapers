@@ -217,8 +217,12 @@ mesa-libgbm m
 mesa-libGL m
 mesa-vulkan-drivers m
 nspr n
+nss n
+nss-util n
 numactl-libs n
+opencryptoki-libs o
 opus o
+p11-kit p
 pango p
 pcre p
 pcre2 p

@@ -270,7 +270,9 @@ Mesa-libva
 MozillaFirefox
 mozilla-nspr
 mozilla-nss
+openCryptoki-64bit
 opensc
+libp11-kit0
 speech-dispatcher
 x11-video-nvidiaG[0-9][0-9]
 "
