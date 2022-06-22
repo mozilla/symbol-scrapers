@@ -269,11 +269,14 @@ function process_packages() {
         printf "package_name = ${package_name} version = ${version} dbg_package_name = ${debug_package_name}\n"
         local debuginfo_package=$(find_debuginfo_package "${package_name}" "${version}" "${debug_package_name}")
 
-        [ -z "${debuginfo_package}" ] && printf "***** Could not find debuginfo for ${package_filename}\n" && continue
-
-        echo package = $package version = $version debuginfo = $debuginfo_package
         truncate --size=0 error.log
-        unpack_package ${package} ${debuginfo_package}
+
+        if [ -n "${debuginfo_package}" ]; then
+          unpack_package ${package} ${debuginfo_package}
+        else
+          printf "***** Could not find debuginfo for ${package_filename}\n"
+          unpack_package ${package}
+        fi
 
         find packages -type f | grep -v debug | while read path; do
           if file "${path}" | grep -q ": *ELF" ; then
