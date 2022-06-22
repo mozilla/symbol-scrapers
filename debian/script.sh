@@ -185,7 +185,6 @@ libdrm-nouveau2 libd/libdrm
 libdrm-radeon1 libd/libdrm
 libegl1 libg/libglvnd
 libegl1-mesa-drivers m/mesa
-libegl1-mesa m/mesa
 libegl-mesa0 m/mesa
 libepoxy0 libe/libepoxy
 libevent-2.[0-9]-[0-9] libe/libevent libevent libevent-2.[0-9]-[0-9]
@@ -199,7 +198,6 @@ libgbm1 m/mesa
 libgdk-pixbuf-2.0-0 g/gdk-pixbuf
 libgdk-pixbuf2.0-0 g/gdk-pixbuf
 libgl1-mesa-dri m/mesa
-libgl1-mesa-glx m/mesa
 libglib2.0-0 g/glib2.0
 libglx0 libg/libglvnd
 libglx-mesa0 m/mesa
