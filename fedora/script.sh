@@ -242,15 +242,23 @@ xorg-x11-drv-nvidia-libs x https://mirror.nl.leaseweb.net/rpmfusion/nonfree/fedo
 
 fetch_packages "${packages}"
 
+# Empties a file but retains its apparent size so that it doesn't get
+# downloaded again.
+function truncate_file() {
+    size=$(stat -c"%s" "${1}")
+    truncate --size 0 "${1}"
+    truncate --size "${size}" "${1}"
+}
+
 function process_packages() {
   local package_name="${1}"
   find downloads -name "${package_name}-[0-9]*.rpm" -type f | grep -v debuginfo | while read package; do
-    local filename="${package##downloads/}"
-    if ! grep -q -F "${filename}" SHA256SUMS; then
-      local version=$(get_version "${package_name}" "${filename}")
+    local package_filename="${package##downloads/}"
+    if ! grep -q -F "${package_filename}" SHA256SUMS; then
+      local version=$(get_version "${package_name}" "${package_filename}")
       local debuginfo_package=$(find_debuginfo_package "${package_name}" "${version}")
 
-      [ -z "${debuginfo_package}" ] && printf "***** Could not find debuginfo for ${filename}\n" && continue
+      [ -z "${debuginfo_package}" ] && printf "***** Could not find debuginfo for ${package_filename}\n" && continue
 
       echo package = $package version = $version debuginfo = $debuginfo_package
       unpack_package ${package} ${debuginfo_package}
@@ -304,10 +312,12 @@ function process_packages() {
       find symbols -name "*.dbg" -type f -print0 | xargs -0 -P${cpu_count} -I{} gzip -f --best "{}"
 
       rm -rf packages
-      printf "${filename}\n" >> SHA256SUMS
+      printf "${package_filename}\n" >> SHA256SUMS
+      truncate_file "${package}"
       if [ -n "${debuginfo_package}" ]; then
         local debuginfo_package_filename=$(basename "${debuginfo_package}")
         printf "${debuginfo_package_filename}\n" >> SHA256SUMS
+        truncate_file "${debuginfo_package}"
       fi
     fi
   done

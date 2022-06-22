@@ -33,6 +33,14 @@ fetch_packages() {
   rev packages.txt | cut -d'/' -f1 | rev > package_names.txt
 }
 
+# Empties a file but retains its apparent size so that it doesn't get
+# downloaded again.
+function truncate_file() {
+    size=$(stat -c"%s" "${1}")
+    truncate --size 0 "${1}"
+    truncate --size "${size}" "${1}"
+}
+
 process_packages() {
   find downloads -regex "downloads/firefox-mozsymbols_.*.deb" -type f  | while read path; do
     filename="$(basename ${path})"
@@ -63,6 +71,7 @@ process_packages() {
 
       rm -rf debug symbols
       echo "${filename}" >> SHA256SUMS
+      truncate_file "${path}"
     fi
   done
 }

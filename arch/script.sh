@@ -24,6 +24,14 @@ function get_soname {
   fi
 }
 
+# Empties a file but retains its apparent size so that it doesn't get
+# downloaded again.
+function truncate_file() {
+    size=$(stat -c"%s" "${1}")
+    truncate --size 0 "${1}"
+    truncate --size "${size}" "${1}"
+}
+
 function purge {
   package_name="${1}"
   package_url="${2}"
@@ -96,6 +104,7 @@ for i in ${tarballs}; do
   if ! grep -q ${hash} SHA256SUMS; then
     tar -C tmp -x -a -f "tarballs/${i}"
     echo "${full_hash}" >> SHA256SUMS
+    truncate_file "tarballs/${i}"
   fi
 done
 
