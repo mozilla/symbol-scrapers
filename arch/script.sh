@@ -32,19 +32,6 @@ function truncate_file() {
     truncate --size "${size}" "${1}"
 }
 
-function purge {
-  package_name="${1}"
-  package_url="${2}"
-  find tarballs -name "${package_name}*.tar.*" | while read path; do
-    package=$(basename "${path}")
-    if wget -q --method HEAD "${package_url}${package}" ; then
-      :
-    else
-      rm -f "${path}"
-    fi
-  done
-}
-
 rm -rf symbols* tmp
 mkdir -p symbols
 mkdir -p tarballs
@@ -157,46 +144,3 @@ find symbols -mindepth 2 -maxdepth 2 -type d | while read module; do
    echo "${crashes}" | reprocess
   fi
 done
-
-purge "amdvlk-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "atk-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "at-spi2-atk" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "at-spi2-core" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "cairo-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "dbus-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
-purge "dbus-glib-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "dconf-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "ffmpeg-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "fontconfig-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "gcc-libs-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
-purge "gdk-pixbuf2-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "glib2-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
-purge "glibc-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
-purge "gtk3-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "gvfs-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "intel-media-driver-" "http://mirror.f4st.host/archlinux/community/os/x86_64/"
-purge "libdrm-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "libffi-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
-purge "libglvnd-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "libibus-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "libice-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "libpulse-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "libsm-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "libspeechd-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "libstdc++5-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "libva-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "libva-mesa-driver-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "libva-vdpau-driver-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "libx11-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "libxcb-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "libxext-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "libxkbcommon-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "mesa-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "nspr-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
-purge "numactl-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "nvidia-utils-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "pcre2-" "http://mirror.f4st.host/archlinux/core/os/x86_64/"
-purge "pixman-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "vulkan-intel-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "vulkan-radeon-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"
-purge "wayland-" "http://mirror.f4st.host/archlinux/extra/os/x86_64/"

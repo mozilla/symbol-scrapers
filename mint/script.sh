@@ -76,16 +76,6 @@ process_packages() {
   done
 }
 
-purge_old_packages() {
-  find downloads | while read line; do
-    name=$(echo "${line}" | cut -d'/' -f2)
-
-    if ! grep -q ${name} package_names.txt; then
-      rm -vf "downloads/${name}"
-    fi
-  done
-}
-
 remove_temp_files() {
   rm -rf symbols packages tmp symbols*.zip packages.txt package_names.txt
 }
@@ -95,5 +85,4 @@ mkdir -p downloads
 
 fetch_packages
 process_packages
-purge_old_packages
 remove_temp_files

@@ -161,16 +161,6 @@ function zip_symbols() {
   cd ..
 }
 
-purge_old_packages() {
-  find downloads | while read line; do
-    name=$(echo "${line}" | cut -d'/' -f2)
-
-    if ! grep -q ${name} package_names.txt; then
-      rm -vf "downloads/${name}"
-    fi
-  done
-}
-
 remove_temp_files() {
   rm -rf symbols packages tmp symbols*.zip packages.txt package_names.txt
 }
@@ -391,5 +381,4 @@ find symbols -mindepth 2 -maxdepth 2 -type d | while read module; do
   fi
 done
 
-purge_old_packages
 remove_temp_files
