@@ -85,13 +85,12 @@ wget -o ../wget.log --progress=dot:mega -c --content-disposition ${packages}
 tarballs=$(ls)
 cd ..
 
-for i in ${tarballs}; do
-  full_hash=$(sha256sum "tarballs/${i}")
-  hash=$(echo "${full_hash}" | cut -b 1-64)
-  if ! grep -q ${hash} SHA256SUMS; then
-    tar -C tmp -x -a -f "tarballs/${i}"
-    echo "${full_hash}" >> SHA256SUMS
-    truncate_file "tarballs/${i}"
+find tarballs -type f | while read path; do
+  tarball_filename=$(basename ${path})
+  if ! grep -q -F "${tarball_filename}" SHA256SUMS; then
+    tar -C tmp -x -a -f "${path}"
+    echo "${tarball_filename}" >> SHA256SUMS
+    truncate_file "${path}"
   fi
 done
 
