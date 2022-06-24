@@ -295,13 +295,11 @@ function process_packages() {
             filename="$(basename "${path}")"
             mkdir -p "symbols/${filename}/${debugid}"
             cp "${tmpfile}" "symbols/${filename}/${debugid}/${filename}.sym"
-            cp "${debuginfo_path}" "symbols/${filename}/${debugid}/${filename}.dbg"
             local soname=$(get_soname "${path}")
             if [ -n "${soname}" ]; then
               if [ "${soname}" != "${filename}" ]; then
                 mkdir -p "symbols/${soname}/${debugid}"
                 cp "${tmpfile}" "symbols/${soname}/${debugid}/${soname}.sym"
-                cp "${debuginfo_path}" "symbols/${soname}/${debugid}/${soname}.dbg"
               fi
             fi
 
@@ -314,9 +312,6 @@ function process_packages() {
           cat error.log
           printf "***** error log for package ${package} ends here\n"
         fi
-
-        # Compress the debug information
-        find symbols -name "*.dbg" -type f -print0 | xargs -0 -P${cpu_count} -I{} gzip -f --best "{}"
 
         rm -rf packages
         printf "${package_filename}\n" >> SHA256SUMS
