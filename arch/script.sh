@@ -24,18 +24,25 @@ function get_soname {
   fi
 }
 
-# Empties a file but retains its apparent size so that it doesn't get
-# downloaded again.
-function truncate_file() {
-    size=$(stat -c"%s" "${1}")
-    truncate --size 0 "${1}"
-    truncate --size "${size}" "${1}"
+function generate_fake_packages() {
+  cat SHA256SUMS | while read line; do
+    local package_name=$(echo ${line} | cut -d',' -f1)
+    local package_size=$(echo ${line} | cut -d',' -f2)
+    truncate --size "${package_size}" "tarballs/${package_name}"
+  done
+}
+
+function add_package_to_list() {
+  local package_size=$(stat -c"%s" "${1}")
+  local package_filename=$(basename "${1}")
+  printf "${package_filename},${package_size}\n" >> SHA256SUMS
+  truncate --size 0 "${1}"
+  truncate --size "${package_size}" "${1}"
 }
 
 rm -rf symbols* tmp
-mkdir -p symbols
-mkdir -p tarballs
-mkdir -p tmp
+mkdir -p symbols tarballs tmp
+generate_fake_packages
 
 cd tarballs
 packages="
@@ -89,8 +96,7 @@ find tarballs -type f | while read path; do
   tarball_filename=$(basename ${path})
   if ! grep -q -F "${tarball_filename}" SHA256SUMS; then
     tar -C tmp -x -a -f "${path}"
-    echo "${tarball_filename}" >> SHA256SUMS
-    truncate_file "${path}"
+    add_package_to_list "${tarball_filename}"
   fi
 done
 

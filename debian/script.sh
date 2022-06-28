@@ -141,12 +141,21 @@ function zip_symbols() {
   cd ..
 }
 
-remove_temp_files() {
+function remove_temp_files() {
   rm -rf symbols packages tmp symbols*.zip packages.txt package_names.txt
+}
+
+function generate_fake_packages() {
+  cat SHA256SUMS | while read line; do
+    local package_name=$(echo ${line} | cut -d',' -f1)
+    local package_size=$(echo ${line} | cut -d',' -f2)
+    truncate --size "${package_size}" "downloads/${package_name}"
+  done
 }
 
 remove_temp_files
 mkdir -p downloads symbols tmp
+generate_fake_packages
 
 packages="
 dconf-gsettings-backend d/dconf
@@ -242,12 +251,20 @@ zlib1g z/zlib
 
 fetch_packages "${packages}"
 
-# Empties a file but retains its apparent size so that it doesn't get
-# downloaded again.
-function truncate_file() {
-    size=$(stat -c"%s" "${1}")
-    truncate --size 0 "${1}"
-    truncate --size "${size}" "${1}"
+function add_package_to_list() {
+  local package_size=$(stat -c"%s" "${1}")
+  local package_filename=$(basename "${1}")
+  printf "${package_filename},${package_size}\n" >> SHA256SUMS
+  truncate --size 0 "${1}"
+  truncate --size "${package_size}" "${1}"
+
+  if [ -n "${2}" ]; then
+    local debuginfo_package_filename=$(basename "${2}")
+    local debuginfo_package_size=$(stat -c"%s" "${2}")
+    printf "${debuginfo_package_filename},${debuginfo_package_size}\n" >> SHA256SUMS
+    truncate --size 0 "${2}"
+    truncate --size "${debuginfo_package_size}" "${2}"
+  fi
 }
 
 function process_packages() {
@@ -314,13 +331,7 @@ function process_packages() {
         fi
 
         rm -rf packages
-        printf "${package_filename}\n" >> SHA256SUMS
-        truncate_file "${package}"
-        if [ -n "${debuginfo_package}" ]; then
-          local debuginfo_package_filename=$(basename "${debuginfo_package}")
-          printf "${debuginfo_package_filename}\n" >> SHA256SUMS
-          truncate_file "${debuginfo_package}"
-        fi
+        add_package_to_list "${package}" "${debuginfo_package}"
       fi
     done
   done

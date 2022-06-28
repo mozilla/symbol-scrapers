@@ -33,12 +33,12 @@ fetch_packages() {
   rev packages.txt | cut -d'/' -f1 | rev > package_names.txt
 }
 
-# Empties a file but retains its apparent size so that it doesn't get
-# downloaded again.
-function truncate_file() {
-    size=$(stat -c"%s" "${1}")
-    truncate --size 0 "${1}"
-    truncate --size "${size}" "${1}"
+function add_package_to_list() {
+  local package_size=$(stat -c"%s" "${1}")
+  local package_filename=$(basename "${1}")
+  printf "${package_filename},${package_size}\n" >> SHA256SUMS
+  truncate --size 0 "${1}"
+  truncate --size "${package_size}" "${1}"
 }
 
 process_packages() {
@@ -70,18 +70,26 @@ process_packages() {
       done
 
       rm -rf debug symbols
-      echo "${filename}" >> SHA256SUMS
-      truncate_file "${path}"
+      add_package_to_list "${filename}"
     fi
   done
 }
 
-remove_temp_files() {
+function remove_temp_files() {
   rm -rf symbols packages tmp symbols*.zip packages.txt package_names.txt
+}
+
+function generate_fake_packages() {
+  cat SHA256SUMS | while read line; do
+    local package_name=$(echo ${line} | cut -d',' -f1)
+    local package_size=$(echo ${line} | cut -d',' -f2)
+    truncate --size "${package_size}" "downloads/${package_name}"
+  done
 }
 
 remove_temp_files
 mkdir -p downloads
+generate_fake_packages
 
 fetch_packages
 process_packages
