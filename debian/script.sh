@@ -1,22 +1,6 @@
 #!/bin/sh
-unalias -a
 
-if [ -z "${DUMP_SYMS}" ]; then
-  printf "You must set the \`DUMP_SYMS\` enviornment variable before running the script\n"
-  exit 1
-fi
-
-if [ -z "${SYMBOLS_API_TOKEN}" ]; then
-  printf "You must set the \`SYMBOLS_API_TOKEN\` enviornment variable before running the script\n"
-  exit 1
-fi
-
-if [ -z "${CRASHSTATS_API_TOKEN}" ]; then
-  printf "You must set the \`CRASHSTATS_API_TOKEN\` enviornment variable before running the script\n"
-  exit 1
-fi
-
-cpu_count=$(grep -c ^processor /proc/cpuinfo)
+. $(dirname $0)/../common.sh
 
 URL="http://ftp.nl.debian.org/debian/pool"
 UPDATES_URL="http://security-cdn.debian.org/debian-security/pool/updates"
@@ -344,23 +328,8 @@ done
 
 zip_symbols
 
-find . -name "*.zip" | while read myfile; do
-  printf "Uploading ${myfile}\n"
-  while : ; do
-    res=$(curl -H "auth-token: ${SYMBOLS_API_TOKEN}" --form ${myfile}=@${myfile} https://symbols.mozilla.org/upload/)
-    if [ -n "${res}" ]; then
-      echo "${res}"
-      break
-    fi
-  done
-done
+upload_symbols
 
-find symbols -mindepth 2 -maxdepth 2 -type d | while read module; do
-  module_name=${module##symbols/}
-  crashes=$(supersearch --num=all --modules_in_stack=${module_name})
-  if [ -n "${crashes}" ]; then
-   echo "${crashes}" | reprocess
-  fi
-done
+reprocess_crashes
 
 remove_temp_files

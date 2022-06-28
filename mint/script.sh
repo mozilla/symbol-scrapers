@@ -1,20 +1,6 @@
 #!/bin/sh
-unalias -a
 
-if [ -z "${DUMP_SYMS}" ]; then
-  printf "You must set the \`DUMP_SYMS\` enviornment variable before running the script\n"
-  exit 1
-fi
-
-if [ -z "${SYMBOLS_API_TOKEN}" ]; then
-  printf "You must set the \`SYMBOLS_API_TOKEN\` enviornment variable before running the script\n"
-  exit 1
-fi
-
-if [ -z "${CRASHSTATS_API_TOKEN}" ]; then
-  printf "You must set the \`CRASHSTATS_API_TOKEN\` enviornment variable before running the script\n"
-  exit 1
-fi
+. $(dirname $0)/../common.sh
 
 URL="http://packages.linuxmint.com/pool"
 
