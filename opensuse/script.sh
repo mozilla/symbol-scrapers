@@ -129,22 +129,6 @@ function get_soname {
   fi
 }
 
-function zip_symbols() {
-  cd symbols
-  zip_count=1
-  total_size=0
-  find . -mindepth 2 -type d | while read path; do
-    size=$(du -s -b "${path}" | cut -f1)
-    zip -q -r "../symbols${zip_count}.zip" "${path##./}"
-    total_size=$((total_size + size))
-    if [[ ${total_size} -gt 500000000 ]]; then
-      zip_count=$((zip_count + 1))
-      total_size=0
-    fi
-  done
-  cd ..
-}
-
 function remove_temp_files() {
   rm -rf symbols packages tmp symbols*.zip packages.txt package_names.txt
 }
