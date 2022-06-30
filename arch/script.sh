@@ -82,7 +82,7 @@ find tarballs -type f | while read path; do
   tarball_filename=$(basename ${path})
   if ! grep -q -F "${tarball_filename}" SHA256SUMS; then
     tar -C tmp -x -a -f "${path}"
-    add_package_to_list "${tarball_filename}"
+    add_package_to_list "${path}"
   fi
 done
 
@@ -102,6 +102,8 @@ find tmp -name "*.so*" -type f | while read library; do
     fi
   fi
 done
+
+rm -rf tmp
 
 cd symbols
 zip_count=1
