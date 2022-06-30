@@ -6,7 +6,7 @@ URL="http://packages.linuxmint.com/pool"
 
 get_package_urls() {
   url="${URL}/upstream/f/firefox/"
-  wget -o wget.log --progress=dot:mega -k "${url}"
+  wget -o wget_packages_urls.log --progress=dot:mega -k "${url}"
 
   find . -name "index.html*" -exec grep -o "${url}\firefox-mozsymbols_.*_\(i386\|amd64\).deb\"" {} \; | cut -d'"' -f1
   find . -name "index.html*" -exec rm -f {} \;
@@ -15,7 +15,7 @@ get_package_urls() {
 fetch_packages() {
   get_package_urls ${line} >> packages.txt
   sed -i -e 's/%2b/+/g' packages.txt
-  sort packages.txt | wget -o wget.log --progress=dot:mega -P downloads -c -i -
+  sort packages.txt | wget -o wget_packages.log --progress=dot:mega -P downloads -c -i -
   rev packages.txt | cut -d'/' -f1 | rev > package_names.txt
 }
 

@@ -52,9 +52,9 @@ fetch_packages() {
     get_package_indexes ${line}
   done | sort -u > indexes.txt
 
-  wget -o wget.log --progress=dot:mega --compression=auto -k -i indexes.txt
+  wget -o wget_packages_urls.log --progress=dot:mega --compression=auto -k -i indexes.txt
 
-  find . -name "index.html*" | while read path; do
+  find . -type f -name "index.html*" | while read path; do
     mv "${path}" "${path}.bak"
     xmllint --nowarning --format --html --output "${path}" "${path}.bak" 2>/dev/null
     rm -f "${path}.bak"
@@ -67,7 +67,7 @@ fetch_packages() {
 
   find . -name "index.html*" -exec rm -f {} \;
 
-  wget -o wget.log --progress=dot:mega -P downloads -c -i packages.txt
+  wget -o wget_packages.log --progress=dot:mega -P downloads -c -i packages.txt
 
   rev packages.txt | cut -d'/' -f1 | rev > package_names.txt
 }
