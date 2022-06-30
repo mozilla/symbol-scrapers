@@ -3,6 +3,7 @@
 unalias -a
 
 cpu_count=$(grep -c ^processor /proc/cpuinfo)
+declare -r artifact_filename="target.crashreporter-symbols.zip"
 
 function is_taskcluster()
 {
@@ -17,16 +18,21 @@ function is_taskcluster()
 
 function upload_symbols_directly()
 {
-  find . -name "*.zip" | while read myfile; do
-    printf "Uploading ${myfile}\n"
-    while : ; do
-      res=$(curl -H "auth-token: ${SYMBOLS_API_TOKEN}" --form ${myfile}=@${myfile} https://symbols.mozilla.org/upload/)
-      if [ -n "${res}" ]; then
-        echo "${res}"
-        break
-      fi
-    done
+  local myfile="${artifact_filename}"
+  printf "Uploading ${myfile}\n"
+  while : ; do
+    res=$(curl -H "auth-token: ${SYMBOLS_API_TOKEN}" --form ${myfile}=@${myfile} https://symbols.mozilla.org/upload/)
+    if [ -n "${res}" ]; then
+      echo "${res}"
+      break
+    fi
   done
+}
+
+function zip_symbols() {
+  cd symbols
+  zip -r -9 "../${artifact_filename}" .
+  cd ..
 }
 
 function upload_symbols()
@@ -34,13 +40,8 @@ function upload_symbols()
   if is_taskcluster; then
     # When we are running on taskcluster, repackage everything to
     # /builds/worker/artifacts/target.crashreporter-symbols.zip
-    mkdir tmp
-    find . -name "*.zip" | while read zipfile; do
-      unzip "${zipfile}" -d tmp/ && rm "${zipfile}"
-    done;
-    cd tmp/ && zip -r9 /builds/worker/artifacts/target.crashreporter-symbols.zip .
-    ls -hal /builds/worker/artifacts/target.crashreporter-symbols.zip
-    rm -fr tmp/
+    mv "${artifact_filename}" "/builds/worker/artifacts/${artifact_filename}"
+    ls -hal "/builds/worker/artifacts/${artifact_filename}"
   else
     # Otherwise perform the upload ourselves
     upload_symbols_directly
