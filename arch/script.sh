@@ -1,20 +1,6 @@
 #!/bin/bash
-unalias -a
 
-if [ -z "${DUMP_SYMS}" ]; then
-  printf "You must set the \`DUMP_SYMS\` enviornment variable before running the script\n"
-  exit 1
-fi
-
-if [ -z "${SYMBOLS_API_TOKEN}" ]; then
-  printf "You must set the \`SYMBOLS_API_TOKEN\` enviornment variable before running the script\n"
-  exit 1
-fi
-
-if [ -z "${CRASHSTATS_API_TOKEN}" ]; then
-  printf "You must set the \`CRASHSTATS_API_TOKEN\` enviornment variable before running the script\n"
-  exit 1
-fi
+. $(dirname $0)/../common.sh
 
 function get_soname {
   local path="${1}"
@@ -131,21 +117,6 @@ find . -mindepth 2 -type d | while read path; do
 done
 cd ..
 
-find . -name "*.zip" | while read myfile; do
-  printf "Uploading ${myfile}\n"
-  while : ; do
-    res=$(curl -H "auth-token: ${SYMBOLS_API_TOKEN}" --form "${myfile}=@${myfile}" https://symbols.mozilla.org/upload/)
-    if [ -n "${res}" ]; then
-      echo "${res}"
-      break
-    fi
-  done
-done
+upload_symbols
 
-find symbols -mindepth 2 -maxdepth 2 -type d | while read module; do
-  module_name=${module##symbols/}
-  crashes=$(supersearch --num=all --modules_in_stack=${module_name})
-  if [ -n "${crashes}" ]; then
-   echo "${crashes}" | reprocess
-  fi
-done
+reprocess_crashes
