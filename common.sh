@@ -35,6 +35,17 @@ function zip_symbols() {
   cd ..
 }
 
+function unpack_rpm_package() {
+  mkdir packages
+  if [ -n "${1}" ]; then
+    rpm2cpio "${1}" | cpio --quiet -i -d -D packages
+  fi
+
+  if [ -n "${2}" ]; then
+    rpm2cpio "${2}" | cpio --quiet -i -d -D packages
+  fi
+}
+
 function upload_symbols()
 {
   if is_taskcluster; then
