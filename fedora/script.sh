@@ -87,12 +87,6 @@ function find_debuginfo_package() {
   find downloads -name "${package_name}-debuginfo-${version}.rpm" -type f
 }
 
-function unpack_package() {
-  mkdir packages
-  rpm2cpio "${1}" | cpio --quiet -i -d -D packages
-  rpm2cpio "${2}" | cpio --quiet -i -d -D packages
-}
-
 function get_build_id {
   eu-readelf -n "${1}" | grep "^    Build ID:" | cut -b15-
 }
@@ -238,10 +232,10 @@ function process_packages() {
       truncate --size=0 error.log
 
       if [ -n "${debuginfo_package}" ]; then
-        unpack_package ${package} ${debuginfo_package}
+        unpack_rpm_package ${package} ${debuginfo_package}
       else
         printf "***** Could not find debuginfo for ${package_filename}\n"
-        unpack_package ${package}
+        unpack_rpm_package ${package}
       fi
 
       find packages -type f | grep -v debug | while read path; do
