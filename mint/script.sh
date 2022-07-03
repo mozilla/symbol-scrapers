@@ -8,8 +8,8 @@ get_package_urls() {
   url="${URL}/upstream/f/firefox/"
   wget -o wget.log --progress=dot:mega -k "${url}"
 
-  grep -h -o "${url}\firefox-mozsymbols_.*_\(i386\|amd64\).deb\"" index.html* | cut -d'"' -f1
-  rm -f index.html*
+  find . -name "index.html*" -exec grep -o "${url}\firefox-mozsymbols_.*_\(i386\|amd64\).deb\"" {} \; | cut -d'"' -f1
+  find . -name "index.html*" -exec rm -f {} \;
 }
 
 fetch_packages() {
