@@ -158,6 +158,7 @@ libdrm l
 libepoxy l
 libevent l
 libffi l
+libglvnd-devel l
 libglvnd-glx l
 libglvnd l
 libICE l
