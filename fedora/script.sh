@@ -10,7 +10,7 @@ get_package_urls() {
   local dbg_package_name="${package_name}-debuginfo"
   local url=${3:-$URL}
 
-  grep -h -o "${url}.*/\(${package_name}-[0-9].*.x86_64.rpm\|${dbg_package_name}-[0-9].*.x86_64.rpm\)\"" index.html*| \
+  find . -name "index.html*" -exec grep -h -o "${url}.*/\(${package_name}-[0-9].*.x86_64.rpm\|${dbg_package_name}-[0-9].*.x86_64.rpm\)\"" {} \; | \
   cut -d'"' -f1
 }
 
@@ -65,7 +65,7 @@ fetch_packages() {
     get_package_urls ${line} >> packages.txt
   done
 
-  rm -f index.html*
+  find . -name "index.html*" -exec rm -f {} \;
 
   wget -o wget.log --progress=dot:mega -P downloads -c -i packages.txt
 

@@ -25,9 +25,9 @@ get_package_urls() {
 
   wget -o wget.log --progress=dot:mega -k ${urls}
   for i in ${urls}; do
-    grep -h -o "${i}\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" index.html* | cut -d'"' -f1
+    find . -name "index.html*" -exec grep -o "${i}\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
   done
-  rm -f index.html*
+  find . -name "index.html*" -exec rm -f {} \;
 }
 
 fetch_packages() {
