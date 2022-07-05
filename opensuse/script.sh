@@ -64,7 +64,7 @@ get_package_indexes() {
 fetch_packages() {
   get_package_indexes
 
-  wget -o wget.log --progress=dot:mega --compression=auto -k -i indexes.txt
+  wget -o wget_packages_urls.log --progress=dot:mega --compression=auto -k -i indexes.txt
 
   find . -name "index.html*" | while read path; do
     mv "${path}" "${path}.bak"
@@ -79,7 +79,7 @@ fetch_packages() {
 
   find . -name "index.html*" -exec rm -f {} \;
 
-  wget -o wget.log --progress=dot:mega -P downloads -c -i packages.txt
+  wget -o wget_packages.log --progress=dot:mega -P downloads -c -i packages.txt
 
   rev packages.txt | cut -d'/' -f1 | rev > package_names.txt
 }
@@ -97,12 +97,6 @@ function find_debuginfo_package() {
   package_name="${1}"
   version="${2}"
   find downloads -name "${package_name}-debuginfo-${version}.rpm" -type f
-}
-
-function unpack_package() {
-  mkdir packages
-  rpm2cpio "${1}" | cpio --quiet -i -d -D packages
-  rpm2cpio "${2}" | cpio --quiet -i -d -D packages
 }
 
 function get_build_id {
@@ -274,10 +268,10 @@ function process_packages() {
       truncate --size=0 error.log
 
       if [ -n "${debuginfo_package}" ]; then
-        unpack_package ${package} ${debuginfo_package}
+        unpack_rpm_package ${package} ${debuginfo_package}
       else
         printf "***** Could not find debuginfo for ${package_filename}\n"
-        unpack_package ${package}
+        unpack_rpm_package ${package}
       fi
 
       find packages -type f | grep -v debug | while read path; do

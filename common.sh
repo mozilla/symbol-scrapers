@@ -35,6 +35,17 @@ function zip_symbols() {
   cd ..
 }
 
+function unpack_rpm_package() {
+  mkdir packages
+  if [ -n "${1}" ]; then
+    rpm2cpio "${1}" | cpio --quiet -i -d -D packages
+  fi
+
+  if [ -n "${2}" ]; then
+    rpm2cpio "${2}" | cpio --quiet -i -d -D packages
+  fi
+}
+
 function upload_symbols()
 {
   if is_taskcluster; then
@@ -50,13 +61,15 @@ function upload_symbols()
 
 function reprocess_crashes()
 {
-  find symbols -mindepth 2 -maxdepth 2 -type d | while read module; do
-    module_name=${module##symbols/}
-    crashes=$(supersearch --num=all --modules_in_stack=${module_name})
-    if [ -n "${crashes}" ]; then
-     echo "${crashes}" | reprocess
-    fi
-  done
+  if ! is_taskcluster; then
+    find symbols -mindepth 2 -maxdepth 2 -type d | while read module; do
+      module_name=${module##symbols/}
+      crashes=$(supersearch --num=all --modules_in_stack=${module_name})
+      if [ -n "${crashes}" ]; then
+       echo "${crashes}" | reprocess
+      fi
+    done
+  fi
 }
 
 if [ -z "${DUMP_SYMS}" ]; then
