@@ -19,8 +19,8 @@ function generate_fake_packages() {
 }
 
 function add_package_to_list() {
-  local package_size=$(stat -c"%s" "${1}")
   local package_filename=$(basename "${1}")
+  local package_size=$(stat -c"%s" "${1}")
   printf "${package_filename},${package_size}\n" >> SHA256SUMS
   truncate --size 0 "${1}"
   truncate --size "${package_size}" "${1}"

@@ -212,8 +212,8 @@ xorg-x11-drv-nvidia-libs x https://mirror.nl.leaseweb.net/rpmfusion/nonfree/fedo
 fetch_packages "${packages}"
 
 function add_package_to_list() {
-  local package_size=$(stat -c"%s" "${1}")
   local package_filename=$(basename "${1}")
+  local package_size=$(stat -c"%s" "${1}")
   printf "${package_filename},${package_size}\n" >> SHA256SUMS
   truncate --size 0 "${1}"
   truncate --size "${package_size}" "${1}"

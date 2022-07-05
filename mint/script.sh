@@ -56,7 +56,7 @@ process_packages() {
       done
 
       rm -rf debug symbols
-      add_package_to_list "${filename}"
+      add_package_to_list "${path}"
     fi
   done
 }
