@@ -79,20 +79,8 @@ function unpack_package() {
   fi
 }
 
-function get_build_id {
-  eu-readelf -n "${1}" | grep "^    Build ID:" | cut -b15-
-}
-
 function find_debuginfo() {
   find debug-packages -path "*${1}.debug" -type f
-}
-
-function get_soname {
-  local path="${1}"
-  local soname=$(objdump -p "${path}" | grep "^  SONAME *" | cut -b24-)
-  if [ -n "${soname}" ]; then
-    printf "${soname}"
-  fi
 }
 
 function remove_temp_files() {
