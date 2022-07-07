@@ -99,30 +99,6 @@ function find_debuginfo_package() {
   find downloads -name "${package_name}-debuginfo-${version}.rpm" -type f
 }
 
-function get_build_id {
-  eu-readelf -n "${1}" | grep "^    Build ID:" | cut -b15-
-}
-
-function find_debuginfo() {
-  local buildid=$(get_build_id "${1}")
-  local prefix=$(echo "${buildid}" | cut -b1-2)
-  local suffix=$(echo "${buildid}" | cut -b3-)
-  local debuginfo=$(find packages -path "*/${prefix}/${suffix}*.debug" | head -n1)
-  if [ -e "${debuginfo}" ]; then
-    printf "${debuginfo}"
-  else
-    find packages/usr/lib/debug -name $(basename "${1}")-"${2}".debug -type f | head -n 1
-  fi
-}
-
-function get_soname {
-  local path="${1}"
-  local soname=$(objdump -p "${path}" | grep "^  SONAME *" | cut -b24-)
-  if [ -n "${soname}" ]; then
-    printf "${soname}"
-  fi
-}
-
 function remove_temp_files() {
   rm -rf symbols packages tmp symbols*.zip packages.txt package_names.txt
 }

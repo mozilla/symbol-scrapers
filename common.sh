@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export LC_ALL=C
+
 unalias -a
 
 cpu_count=$(grep -c ^processor /proc/cpuinfo)
@@ -39,6 +41,37 @@ function upload_symbols_directly()
       break
     fi
   done
+}
+
+function get_build_id {
+  eu-readelf -n "${1}" | grep "^    Build ID:" | cut -b15-
+}
+
+function find_debuginfo() {
+  local buildid=$(get_build_id "${1}")
+  local prefix=$(echo "${buildid}" | cut -b1-2)
+  local suffix=$(echo "${buildid}" | cut -b3-)
+  local debuginfo=$(find packages -path "*/${prefix}/${suffix}*.debug" | head -n1)
+
+  if [ -z "${debuginfo}" ]; then
+    local path="${1##packages/}"
+    debuginfo=$(find packages -path "*/debug/${path}" -type f)
+  fi
+
+  # this was from opensuse's find_debug_info
+  if [ ! -e "${debuginfo}" ]; then
+    find packages/usr/lib/debug -name $(basename "${1}")-"${2}".debug -type f | head -n 1
+  fi
+
+  printf "${debuginfo}"
+}
+
+function get_soname {
+  local path="${1}"
+  local soname=$(objdump -p "${path}" | grep "^  SONAME *" | cut -b24-)
+  if [ -n "${soname}" ]; then
+    printf "${soname}"
+  fi
 }
 
 function zip_symbols() {

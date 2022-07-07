@@ -83,32 +83,6 @@ function unpack_package() {
   fi
 }
 
-function get_build_id {
-  eu-readelf -n "${1}" | grep "^    Build ID:" | cut -b15-
-}
-
-function find_debuginfo() {
-  local buildid=$(get_build_id "${1}")
-  local prefix=$(echo "${buildid}" | cut -b1-2)
-  local suffix=$(echo "${buildid}" | cut -b3-)
-  local debuginfo=$(find packages -path "*/${prefix}/${suffix}*.debug" | head -n1)
-
-  if [ -z "${debuginfo}" ]; then
-    local path="${1##packages/}"
-    debuginfo=$(find packages -path "*/debug/${path}" -type f)
-  fi
-
-  printf "${debuginfo}"
-}
-
-function get_soname {
-  local path="${1}"
-  local soname=$(objdump -p "${path}" | grep "^  SONAME *" | cut -b24-)
-  if [ -n "${soname}" ]; then
-    printf "${soname}"
-  fi
-}
-
 function remove_temp_files() {
   rm -rf symbols packages tmp symbols*.zip packages.txt package_names.txt
 }
