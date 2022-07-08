@@ -185,6 +185,7 @@ libgtk-3-0
 libibus-1_0-5
 libICE6
 libicu[0-9][0-9]
+libigdgmm12
 libnuma1
 libopus0
 libpango-1_0-0
