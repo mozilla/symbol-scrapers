@@ -120,6 +120,7 @@ cairo
 dbus
 dbus-glib
 dconf
+egl-wayland
 ffmpeg
 gcc-libs
 gdk-pixbuf2
@@ -127,6 +128,7 @@ glib2
 glibc
 gtk3
 gvfs
+intel-gmmlib
 intel-media-driver
 libdrm
 libffi
@@ -153,6 +155,8 @@ pixman
 vulkan-intel
 vulkan-radeon
 wayland
+x264
+x265
 "
 
 fetch_packages "${packages}"

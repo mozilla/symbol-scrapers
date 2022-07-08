@@ -147,6 +147,7 @@ gnome-vfs2 g
 gtk2 g
 gtk3 g
 ibus-libs i
+intel-gmmlib i
 intel-media-driver i https://mirror.nl.leaseweb.net/rpmfusion/nonfree/fedora
 libdrm l
 libepoxy l
