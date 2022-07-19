@@ -16,6 +16,18 @@ function is_taskcluster()
   fi
 }
 
+function download_taskcluster_secret()
+{
+  local secret_name=$1
+  if [ -z "${secret_name}" ]; then
+    echo "No CRASHSTATS_SECRET, aborting"
+    exit 1
+  fi
+
+  local url="http://taskcluster/secrets/v1/secret/${secret_name}"
+  curl -sSL -H "Content-Type: application/json" "${url}" | jq -r '.secret.token'
+}
+
 function upload_symbols_directly()
 {
   local myfile="${artifact_filename}"
