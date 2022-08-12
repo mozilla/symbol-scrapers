@@ -145,18 +145,18 @@ libibus-1.0-5 i/ibus
 libice6 libi/libice
 libicu[0-9][0-9] i/icu
 libnspr4 n/nspr
+libnss3 n/nss
 libnss-ldap libn/libnss-ldap
 libnuma1 n/numactl
 libopus0 o/opus libopus
 libpango-1.0-0 p/pango1.0
-libpcre3 p/pcre3
 libpcre2-8-0 p/pcre2
+libpcre3 p/pcre3
 libpcsclite1 p/pcsc-lite
 libpixman-1-0 p/pixman
 libpng12-0 libp/libpng
 libpng16-16 libp/libpng1.6
 libproxy1-plugin-gsettings libp/libproxy
-libnss-ldap libn/libnss-ldap
 libproxy1v5 libp/libproxy
 libpulse0 p/pulseaudio
 libsm6 libs/libsm
@@ -184,6 +184,7 @@ libxvidcore4 x/xvidcore
 mesa-va-drivers m/mesa
 mesa-vulkan-drivers m/mesa
 opensc-pkcs11 o/opensc
+p11-kit-modules p/p11-kit
 thunderbird t/thunderbird
 vdpau-va-driver v/vdpau-video
 zlib1g z/zlib
