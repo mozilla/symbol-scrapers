@@ -123,6 +123,7 @@ libffi
 libglvnd
 libibus
 libice
+libp11-kit
 libpulse
 libsm
 libspeechd
@@ -136,6 +137,7 @@ libxext
 libxkbcommon
 mesa
 nspr
+nss
 numactl
 nvidia-utils
 pcre2

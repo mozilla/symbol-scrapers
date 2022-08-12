@@ -212,6 +212,7 @@ mozilla-nss
 openCryptoki-64bit
 opensc
 libp11-kit0
+p11-kit
 speech-dispatcher
 x11-video-nvidiaG[0-9][0-9]
 "
