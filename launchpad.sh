@@ -26,6 +26,12 @@ function get_all_files()
   curl -sSL ${getFileUrls} | jq -r '.[]'
 }
 
+function maybe_skip_if_sha256sums()
+{
+  local file=$(basename $1)
+  grep -q -G "${file},[0-9]" SHA256SUMS
+}
+
 function get_snap_and_debug_urls()
 {
   local store_name=$1
@@ -35,7 +41,7 @@ function get_snap_and_debug_urls()
   do
     for one_build in $(get_all_builds "${snap_link}");
     do
-      if grep -q -F "$(basename ${one_build})" SHA256SUMS; then
+      if maybe_skip_if_sha256sums ${one_build}; then
         echo "Skipping ${one_build}"
         continue
       fi
@@ -116,9 +122,10 @@ function process_snap_packages() {
   for arch in i386 amd64; do
     find downloads -name "${package_name}*_[0-9]*_${arch}.snap" -type f | while read package; do
       local package_filename="${package##downloads/}"
-      if ! grep -q -F "${package_filename}" SHA256SUMS; then
-        local version=$(get_version "${package_name}" "${package_filename}")
+      local debug_filename=$(get_debug_package "${package_filename}")
+      if ! maybe_skip_if_sha256sums "${package_filename}" || ! maybe_skip_if_sha256sums "${debug_filename}"; then
         local debuginfo_package=$(get_debug_package "${package}")
+        local version=$(get_version "${package_name}" "${package_filename}")
 
         truncate --size=0 error.log
 
