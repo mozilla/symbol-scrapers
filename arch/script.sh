@@ -127,7 +127,6 @@ libp11-kit
 libpulse
 libsm
 libspeechd
-libstdc++5
 libva
 libva-mesa-driver
 libva-vdpau-driver
