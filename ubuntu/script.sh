@@ -164,8 +164,7 @@ libspeechd2 s/speech-dispatcher
 libsqlite3-0 s/sqlite3
 libstdc++6 g/gcc-10 libstdc++6-10
 libstdc++6 g/gcc-11 libstdc++6-11
-libstdc++6 g/gcc-8 libstdc++6-8
-libstdc++6 g/gcc-9 libstdc++6-9
+libstdc++6 g/gcc-12 libstdc++6-12
 libsystemd0 s/systemd
 libtcmalloc-minimal4 g/google-perftools
 libthai0 libt/libthai
