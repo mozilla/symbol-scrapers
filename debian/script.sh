@@ -117,6 +117,7 @@ libavutil[0-9][0-9] f/ffmpeg
 libavutil[0-9][0-9] f/ffmpeg-dmo libavutil[0-9][0-9] libavutil[0-9][0-9] http://mirror.home-dn.net/debian-multimedia/pool
 libc6 g/glibc
 libcairo2 c/cairo
+libcups2 c/cups
 libdbus-1-3 d/dbus
 libdbus-glib-1-2 d/dbus-glib
 libdrm2 libd/libdrm

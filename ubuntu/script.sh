@@ -115,6 +115,7 @@ libavcodec[0-9][0-9] f/ffmpeg
 libavutil[0-9][0-9] f/ffmpeg
 libc6 g/glibc
 libcairo2 c/cairo
+libcups2 c/cups
 libdbus-1-3 d/dbus
 libdbus-glib-1-2 d/dbus-glib
 libdrm2 libd/libdrm
