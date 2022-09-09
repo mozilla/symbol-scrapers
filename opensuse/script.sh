@@ -136,6 +136,7 @@ libavformat[0-9][0-9]
 libavresample[0-9]
 libavutil[0-9][0-9]
 libcairo2
+libcups2
 libdbus-1-3
 libdconf1
 libdrm2

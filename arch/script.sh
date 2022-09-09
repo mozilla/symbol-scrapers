@@ -105,6 +105,7 @@ atk
 at-spi2-atk
 at-spi2-core
 cairo
+libcups
 dbus
 dbus-glib
 dconf
