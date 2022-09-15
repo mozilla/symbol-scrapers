@@ -191,9 +191,9 @@ function process_packages() {
           local tmpfile=$(mktemp --tmpdir=tmp)
           printf "Writing symbol file for ${path} ${debuginfo_path} ... "
           if [ -n "${debuginfo_path}" ]; then
-            ${DUMP_SYMS} --type elf "${path}" "${debuginfo_path}" 1> "${tmpfile}" 2> error.log
+            ${DUMP_SYMS} --inlines "${path}" "${debuginfo_path}" 1> "${tmpfile}" 2> error.log
           else
-            ${DUMP_SYMS} --type elf "${path}" 1> "${tmpfile}" 2> error.log
+            ${DUMP_SYMS} --inlines "${path}" 1> "${tmpfile}" 2> error.log
           fi
 
           if [ -s "${tmpfile}" -a -z "${debuginfo_path}" ]; then

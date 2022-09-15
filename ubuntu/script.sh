@@ -100,94 +100,7 @@ mkdir -p downloads symbols tmp
 generate_fake_packages
 
 packages="
-dconf-gsettings-backend d/dconf
-firefox f/firefox firefox firefox http://ppa.launchpad.net/mozillateam/firefox-next/ubuntu/pool
-firefox-trunk f/firefox-trunk firefox-trunk firefox-trunk http://ppa.launchpad.net/ubuntu-mozilla-daily/ppa/ubuntu/pool
-glib-networking g/glib-networking
-gvfs g/gvfs
-intel-media-va-driver i/intel-media-driver
-intel-media-va-driver-non-free i/intel-media-driver-non-free
-libasound2 a/alsa-lib
-libatk1.0-0 a/atk1.0
-libatk-bridge2.0-0 a/at-spi2-atk
-libatspi2.0-0 a/at-spi2-core
-libavcodec[0-9][0-9] f/ffmpeg
-libavutil[0-9][0-9] f/ffmpeg
-libc6 g/glibc
-libcairo2 c/cairo
-libcups2 c/cups
-libdbus-1-3 d/dbus
-libdbus-glib-1-2 d/dbus-glib
-libdrm2 libd/libdrm
-libdrm-amdgpu1 libd/libdrm
-libdrm-intel1 libd/libdrm
-libdrm-nouveau2 libd/libdrm
-libdrm-radeon1 libd/libdrm
-libegl1 libg/libglvnd
-libegl1-mesa-drivers m/mesa
-libegl-mesa0 m/mesa
-libepoxy0 libe/libepoxy
-libevent-2.[0-9]-[0-9] libe/libevent libevent libevent-2.[0-9]-[0-9]
-libfam0 f/fam
-libffi[0-9] libf/libffi
-libfontconfig1 f/fontconfig
-libfreetype6 f/freetype
-libfribidi0 f/fribidi
-libgamin0 g/gamin
-libgbm1 m/mesa
-libgdk-pixbuf-2.0-0 g/gdk-pixbuf
-libgdk-pixbuf2.0-0 g/gdk-pixbuf
-libgl1-mesa-dri m/mesa
-libglib2.0-0 g/glib2.0
-libglx0 libg/libglvnd
 libglx-mesa0 m/mesa
-libgtk-3-0 g/gtk+3.0
-libibus-1.0-5 i/ibus
-libice6 libi/libice
-libicu[0-9][0-9] i/icu
-libnspr4 n/nspr
-libnss3 n/nss
-libnss-ldap libn/libnss-ldap
-libnuma1 n/numactl
-libopus0 o/opus libopus
-libpango-1.0-0 p/pango1.0
-libpcre2-8-0 p/pcre2
-libpcre3 p/pcre3
-libpcsclite1 p/pcsc-lite
-libpixman-1-0 p/pixman
-libpng12-0 libp/libpng
-libpng16-16 libp/libpng1.6
-libproxy1-plugin-gsettings libp/libproxy
-libproxy1v5 libp/libproxy
-libpulse0 p/pulseaudio
-libsm6 libs/libsm
-libspeechd2 s/speech-dispatcher
-libsqlite3-0 s/sqlite3
-libstdc++6 g/gcc-10 libstdc++6-10
-libstdc++6 g/gcc-11 libstdc++6-11
-libstdc++6 g/gcc-12 libstdc++6-12
-libsystemd0 s/systemd
-libtcmalloc-minimal4 g/google-perftools
-libthai0 libt/libthai
-libva2 libv/libva
-libvpx[0-9] libv/libvpx
-libwayland-client0 w/wayland
-libx11-6 libx/libx11
-libx264-[0-9][0-9][0-9] x/x264
-libx265-[0-9][0-9][0-9] x/x265
-libxcb1 libx/libxcb
-libxext6 libx/libxext
-libxkbcommon0 libx/libxkbcommon
-libxml2 libx/libxml2
-libxss1 libx/libxss
-libxvidcore4 x/xvidcore
-mesa-va-drivers m/mesa
-mesa-vulkan-drivers m/mesa
-opensc-pkcs11 o/opensc
-p11-kit-modules p/p11-kit
-thunderbird t/thunderbird
-vdpau-va-driver v/vdpau-video
-zlib1g z/zlib
 "
 
 fetch_packages "${packages}"
@@ -236,11 +149,11 @@ function process_packages() {
 
             local tmpfile=$(mktemp --tmpdir=tmp)
             printf "Writing symbol file for ${path} ${debuginfo_path} ... "
-            ${DUMP_SYMS} --type elf "${path}" "${debuginfo_path}" 1> "${tmpfile}" 2>>error.log
+            ${DUMP_SYMS} --inlines "${path}" "${debuginfo_path}" 1> "${tmpfile}" 2>>error.log
             if [ -s "${tmpfile}" ]; then
               printf "done\n"
             else
-              ${DUMP_SYMS} --type elf "${path}" > "${tmpfile}"
+              ${DUMP_SYMS} --inlines "${path}" > "${tmpfile}"
               if [ -s "${tmpfile}" ]; then
                 printf "done w/o debuginfo\n"
               else
