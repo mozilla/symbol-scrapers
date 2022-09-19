@@ -117,6 +117,7 @@ generate_fake_packages
 
 packages="
 alsa
+apitrace-wrappers
 at-spi2-atk-gtk2
 at-spi2-core
 dbus-1-glib
@@ -151,6 +152,7 @@ libffi8
 libfreetype6
 libfribidi0
 libgbm1
+libgcc_s1
 libgdk_pixbuf-2_0-0
 libgio-2_0-0
 libgio-fam
