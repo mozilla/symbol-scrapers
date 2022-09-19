@@ -105,6 +105,7 @@ generate_fake_packages
 
 packages="
 alsa-lib a
+apitrace-libs a
 at-spi2-atk a
 at-spi2-core a
 atk a
@@ -134,6 +135,7 @@ libdrm l
 libepoxy l
 libevent l
 libffi l
+libgcc l
 libglvnd-devel l
 libglvnd-glx l
 libglvnd l

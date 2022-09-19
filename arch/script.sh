@@ -101,6 +101,7 @@ generate_fake_packages
 
 packages="
 amdvlk
+apitrace
 atk
 at-spi2-atk
 at-spi2-core

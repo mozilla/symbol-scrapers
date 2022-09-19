@@ -100,6 +100,7 @@ mkdir -p downloads symbols tmp
 generate_fake_packages
 
 packages="
+apitrace-tracers a/apitrace
 dconf-gsettings-backend d/dconf
 firefox-esr f/firefox-esr
 firefox f/firefox
@@ -137,6 +138,9 @@ libfreetype6 f/freetype
 libfribidi0 f/fribidi
 libgamin0 g/gamin
 libgbm1 m/mesa
+libgcc-s1 g/gcc-10
+libgcc-s1 g/gcc-11
+libgcc-s1 g/gcc-12
 libgdk-pixbuf-2.0-0 g/gdk-pixbuf
 libgdk-pixbuf2.0-0 g/gdk-pixbuf
 libgl1-mesa-dri m/mesa
