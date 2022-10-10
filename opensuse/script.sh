@@ -180,6 +180,7 @@ libpango-1_0-0
 libpcre1
 libpcre2-8-0
 libpcslite1
+libpipewire-0_3-0
 libpixman-1-0
 libpng12-0
 libpng16-16
@@ -225,6 +226,7 @@ openCryptoki-64bit
 opensc
 libp11-kit0
 p11-kit
+pipewire-spa-plugins-0_2
 speech-dispatcher
 x11-video-nvidiaG[0-9][0-9]
 "
