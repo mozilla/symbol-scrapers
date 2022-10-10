@@ -137,6 +137,7 @@ libevent l
 libffi l
 libgcc l
 libglvnd-devel l
+libglvnd-egl l
 libglvnd-glx l
 libglvnd l
 libICE l
@@ -174,6 +175,7 @@ pango p
 pcre p
 pcre2 p
 pcsc-lite-libs p
+pipewire-libs p
 pixman p
 pulseaudio-libs p
 speech-dispatcher s

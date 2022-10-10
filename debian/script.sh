@@ -160,6 +160,7 @@ libpango-1.0-0 p/pango1.0
 libpcre2-8-0 p/pcre2
 libpcre3 p/pcre3
 libpcsclite1 p/pcsc-lite
+libpipewire-0.3-0 p/pipewire
 libpixman-1-0 p/pixman
 libpng12-0 libp/libpng
 libpng16-16 libp/libpng1.6
@@ -167,6 +168,7 @@ libproxy1-plugin-gsettings libp/libproxy
 libproxy1v5 libp/libproxy
 libpulse0 p/pulseaudio
 libsm6 libs/libsm
+libspa-0.2-modules p/pipewire
 libspeechd2 s/speech-dispatcher
 libsqlite3-0 s/sqlite3
 libstdc++6 g/gcc-10 libstdc++6-10

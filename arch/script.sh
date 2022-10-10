@@ -142,6 +142,7 @@ nss
 numactl
 nvidia-utils
 pcre2
+pipewire
 pixman
 vulkan-intel
 vulkan-radeon
