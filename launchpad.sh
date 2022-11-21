@@ -62,6 +62,32 @@ function fetch_packages()
   rev packages.txt | cut -d'/' -f1 | rev > package_names.txt
 }
 
+function verify_processed()
+{
+  local failed=0
+  for f in $(grep "saved" wget_packages.log | awk '{ print $6 }' | sed -e "s/'downloads\///g" -e "s/'$//g" | grep -F ".debug");
+  do
+    # We dont want regex to interfere with dots
+    if grep -q -F "${f}," SHA256SUMS; then
+      echo "Downloaded ${f} was processed and added to SHA256SUMS"
+    else
+      echo "Downloaded ${f} was NOT PROCESSED and is MISSING FROM SHA256SUMS"
+      local snap_file="downloads/${f%%.debug}.snap"
+      if [ -f "${snap_file}" ]; then
+        echo "Snap package was downloaded:"
+        ls -hal "${snap_file}"
+      else
+        echo "Snap package ${f%%.debug}.snap was MISSING"
+      fi
+      failed=1
+    fi
+  done;
+
+  if [ ${failed} -eq 1 ]; then
+    exit 1
+  fi;
+}
+
 function get_version()
 {
   local package_name=$1
@@ -215,4 +241,6 @@ function process_snap()
   fetch_packages
 
   process_snap_packages "${store_name}"
+
+  verify_processed
 }
