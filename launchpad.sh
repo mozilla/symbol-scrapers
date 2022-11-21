@@ -179,7 +179,7 @@ function process_snap_packages() {
           # Firefox ready-to-use debug symbols
           if [ -f "${debuginfo_package}" ]; then
             echo "${debuginfo_package}"
-            unzip -d symbols "${debuginfo_package}"
+            unzip -o -d symbols "${debuginfo_package}"
           else
             echo "!! NO ${debuginfo_package}"
           fi
