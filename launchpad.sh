@@ -28,7 +28,7 @@ function get_all_files()
 
 function maybe_skip_if_sha256sums()
 {
-  local file=$(basename $1)
+  local file=$(basename $1 | sed -e "s/\./\\\./g")
   grep -q -G "${file},[0-9]" SHA256SUMS
 }
 
