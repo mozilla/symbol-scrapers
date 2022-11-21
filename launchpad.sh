@@ -219,6 +219,8 @@ function process_snap_packages() {
 
         rm -rf packages
         add_package_to_list "${package}" "${debuginfo_package}"
+      else
+        echo "maybe_skip_if_sha256sums ${package_filename} || maybe_skip_if_sha256sums ${debug_filename}"
       fi
     done
   done
