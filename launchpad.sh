@@ -28,7 +28,7 @@ function get_all_files()
 
 function maybe_skip_if_sha256sums()
 {
-  local file=$(basename $1)
+  local file=$(basename $1 | sed -e "s/\./\\\./g")
   grep -q -G "${file},[0-9]" SHA256SUMS
 }
 
@@ -60,6 +60,32 @@ function fetch_packages()
 {
   sort packages.txt | wget -o wget_packages.log --progress=dot:mega -P downloads -c -i -
   rev packages.txt | cut -d'/' -f1 | rev > package_names.txt
+}
+
+function verify_processed()
+{
+  local failed=0
+  for f in $(grep "saved" wget_packages.log | awk '{ print $6 }' | sed -e "s/'downloads\///g" -e "s/'$//g" | grep -F ".debug");
+  do
+    # We dont want regex to interfere with dots
+    if grep -q -F "${f}," SHA256SUMS; then
+      echo "Downloaded ${f} was processed and added to SHA256SUMS"
+    else
+      echo "Downloaded ${f} was NOT PROCESSED and is MISSING FROM SHA256SUMS"
+      local snap_file="downloads/${f%%.debug}.snap"
+      if [ -f "${snap_file}" ]; then
+        echo "Snap package was downloaded:"
+        ls -hal "${snap_file}"
+      else
+        echo "Snap package ${f%%.debug}.snap was MISSING"
+      fi
+      failed=1
+    fi
+  done;
+
+  if [ ${failed} -eq 1 ]; then
+    exit 1
+  fi;
 }
 
 function get_version()
@@ -179,7 +205,7 @@ function process_snap_packages() {
           # Firefox ready-to-use debug symbols
           if [ -f "${debuginfo_package}" ]; then
             echo "${debuginfo_package}"
-            unzip -d symbols "${debuginfo_package}"
+            unzip -o -d symbols "${debuginfo_package}"
           else
             echo "!! NO ${debuginfo_package}"
           fi
@@ -193,6 +219,8 @@ function process_snap_packages() {
 
         rm -rf packages
         add_package_to_list "${package}" "${debuginfo_package}"
+      else
+        echo "maybe_skip_if_sha256sums ${package_filename} || maybe_skip_if_sha256sums ${debug_filename}"
       fi
     done
   done
@@ -215,4 +243,6 @@ function process_snap()
   fetch_packages
 
   process_snap_packages "${store_name}"
+
+  verify_processed
 }
