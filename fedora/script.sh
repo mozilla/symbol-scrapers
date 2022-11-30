@@ -114,6 +114,7 @@ cups-libs c
 dbus-glib d
 dbus-libs d
 dconf d
+expat e
 ffmpeg-libs f https://mirror.nl.leaseweb.net/rpmfusion/free/fedora
 firefox f
 fontconfig f

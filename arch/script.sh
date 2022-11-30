@@ -111,6 +111,7 @@ dbus
 dbus-glib
 dconf
 egl-wayland
+expat
 ffmpeg
 gcc-libs
 gdk-pixbuf2

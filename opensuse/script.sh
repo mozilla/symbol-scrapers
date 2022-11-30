@@ -156,6 +156,7 @@ libdrm_nouveau2
 libdrm_radeon1
 libepoxy0
 libevent-2_1-7
+libexpat1
 libfam0-gamin
 libffi8
 libfreetype6
