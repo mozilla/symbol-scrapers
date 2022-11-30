@@ -131,6 +131,7 @@ libegl1-mesa-drivers m/mesa
 libegl-mesa0 m/mesa
 libepoxy0 libe/libepoxy
 libevent-2.[0-9]-[0-9] libe/libevent libevent libevent-2.[0-9]-[0-9]
+libexpat1 e/expat
 libfam0 f/fam
 libffi[0-9] libf/libffi
 libfontconfig1 f/fontconfig
