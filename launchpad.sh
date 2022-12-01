@@ -32,6 +32,31 @@ function maybe_skip_if_sha256sums()
   grep -q -G "${file},[0-9]" SHA256SUMS
 }
 
+function get_valid_arches()
+{
+  echo i386 amd64
+}
+
+function is_diff_arch()
+{
+  local arch=$1
+  local file=$2
+  local this_arch=$(echo "$file" | rev | cut -d'_' -f1| rev | cut -d'.' -f1)
+  test "${arch}" != "${this_arch}"
+}
+
+function maybe_skip_if_invalid_arch()
+{
+  local file=$(basename "$1")
+  for arch in $(get_valid_arches);
+  do
+    if ! is_diff_arch ${arch} ${file}; then
+      return 1
+    fi
+  done;
+  return 0
+}
+
 function get_snap_and_debug_urls()
 {
   local store_name=$1
@@ -42,12 +67,17 @@ function get_snap_and_debug_urls()
     for one_build in $(get_all_builds "${snap_link}");
     do
       if maybe_skip_if_sha256sums ${one_build}; then
-        echo "Skipping ${one_build}"
+        >&2 echo "Skipping ${one_build} (SHA256SUMS)"
         continue
       fi
 
       for one_file in $(get_all_files "${one_build}");
       do
+        if maybe_skip_if_invalid_arch ${one_file}; then
+          >&2 echo "Skipping ${one_file} (unsupported arch)"
+          continue
+        fi
+
         if [ -n "${one_file}" ]; then
           echo "${one_file}"
         fi
@@ -145,7 +175,7 @@ function remove_temp_files() {
 function process_snap_packages() {
   local package_name="${1}"
 
-  for arch in i386 amd64; do
+  for arch in $(get_valid_arches); do
     find downloads -name "${package_name}*_[0-9]*_${arch}.snap" -type f | while read package; do
       local package_filename="${package##downloads/}"
       local debug_filename=$(get_debug_package "${package_filename}")
