@@ -110,8 +110,16 @@ function reprocess_crashes()
     find symbols -mindepth 2 -maxdepth 2 -type d | while read module; do
       module_name=${module##symbols/}
       crashes=$(supersearch --num=all --modules_in_stack=${module_name})
+      if [ $? -ne 0 ]; then
+        echo "Error doing supersearch: aborting"
+        exit 1
+      fi
       if [ -n "${crashes}" ]; then
-       echo "${crashes}" | reprocess
+        echo "${crashes}" | reprocess
+        if [ $? -ne 0 ]; then
+          echo "Error doing reprocesss: aborting"
+          exit 1
+        fi
       fi
     done
   fi
