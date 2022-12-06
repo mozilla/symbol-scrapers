@@ -107,21 +107,32 @@ function upload_symbols()
 function reprocess_crashes()
 {
   if ! is_taskcluster; then
-    find symbols -mindepth 2 -maxdepth 2 -type d | while read module; do
-      module_name=${module##symbols/}
-      crashes=$(supersearch --num=all --modules_in_stack=${module_name})
+    fd ".*.sym$" symbols > symbols.list
+
+    cat symbols.list | while read symfile; do
+      debug_id=$(head -n1 "${symfile}" | cut -d' ' -f4)
+      module_name=$(head -n2 "${symfile}" | tail -n1 | cut -d' ' -f4)
+      if [ -z "${module_name}" ]; then
+        module_name=$(head -n1 "${symfile}" | cut -d' ' -f5-)
+      fi
+      crashes=$(supersearch --num=all --modules_in_stack="${module_name}/${debug_id}")
       if [ $? -ne 0 ]; then
         echo "Error doing supersearch: aborting"
         exit 1
       fi
-      if [ -n "${crashes}" ]; then
-        echo "${crashes}" | reprocess
-        if [ $? -ne 0 ]; then
-          echo "Error doing reprocesss: aborting"
-          exit 1
-        fi
-      fi
+      echo "${crashes}" >> crashes.list
     done
+
+    sort -u crashes.list > crashes.list.sorted
+    mv -f crashes.list.sorted crashes.list
+
+    if [ -n "$(cat crashes.list)" ]; then
+      cat crashes.list | reprocess --allow-many --sleep 5
+      if [ $? -ne 0 ]; then
+        echo "Error doing reprocesss: aborting"
+        exit 1
+      fi
+    fi
   fi
 }
 
