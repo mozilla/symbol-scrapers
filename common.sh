@@ -109,7 +109,7 @@ function upload_symbols()
 function reprocess_crashes()
 {
   if ! is_taskcluster; then
-    fd ".*.sym$" symbols > symbols.list
+    find symbols -name "*.sym" -type f > symbols.list
 
     cat symbols.list | while read symfile; do
       debug_id=$(head -n1 "${symfile}" | cut -d' ' -f4)
