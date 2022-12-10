@@ -2,8 +2,6 @@
 
 export LC_ALL=C
 
-set -euo pipefail
-
 unalias -a
 
 cpu_count=$(grep -c ^processor /proc/cpuinfo)
