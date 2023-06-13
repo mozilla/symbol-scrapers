@@ -3,7 +3,7 @@
 . $(dirname $0)/../common.sh
 
 URL="https://fedora.mirror.wearetriple.com/linux"
-RELEASES="35 36 37 test/37_Beta"
+RELEASES="37 38 test/38_Beta"
 
 get_package_urls() {
   local package_name=${1}
@@ -36,10 +36,6 @@ get_package_indexes() {
     printf "${url}/updates/testing/${release}/${everything_dir}/x86_64/${packages_dir}/${pkg_path}/\n"
     printf "${url}/updates/testing/${release}/${everything_dir}/x86_64/debug/${packages_dir}/${pkg_path}/\n"
   done
-
-  # 35 beta
-  printf "${url}/development/35/${everything_dir}/x86_64/os/Packages/${pkg_path}/\n"
-  printf "${url}/development/35/${everything_dir}/x86_64/debug/${tree_dir}/${packages_dir}/${pkg_path}/\n"
 
   # Rawhide
   printf "${url}/development/rawhide/${everything_dir}/x86_64/os/Packages/${pkg_path}/\n"
