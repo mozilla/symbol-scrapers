@@ -2,7 +2,7 @@
 
 . $(dirname $0)/../common.sh
 
-URL="https://ftp.lysator.liu.se/pub/opensuse"
+URL="https://download.opensuse.org"
 
 REPOS="
 debug/distribution/leap/15.4/repo/oss/x86_64
@@ -62,12 +62,12 @@ get_package_urls() {
 get_package_indexes() {
   echo "${REPOS}" | while read line; do
     [ -z "${line}" ] && continue
-    printf "${URL}/${line}/\n"
+    echo "${URL}/${line}/"
   done | sort -u > indexes.txt
 
   echo "${REPOS2}" | while read line; do
     [ -z "${line}" ] && continue
-    printf "${URL2}/${line}/\n"
+    echo "${URL2}/${line}/"
   done | sort -u >> indexes.txt
 }
 
