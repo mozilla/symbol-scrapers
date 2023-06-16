@@ -47,6 +47,15 @@ function add_package_to_list()
   printf "${package_name},${package_hash}\n" >> SHA256SUMS
 }
 
+function find_debug() {
+  local path=$1
+
+  local fname=$(basename "${path}")
+  local debugpkg=$(find packages -name "${fname}.debug" | head -n1)
+
+  printf "${debugpkg}"
+}
+
 function process_flatpak_package() {
   find ${pkgs_dir}/flatpak/runtime/ -mindepth 3 -maxdepth 3 -type d | while read package_full; do
     pkg_ver=$(echo "${package_full}" | rev | cut -d '/' -f 1 | rev)
@@ -59,17 +68,17 @@ function process_flatpak_package() {
       continue
     fi
 
-    find ${pkgs_dir}/flatpak/runtime/${package} -name "*.debug" -type f | while read path; do
+    find ${pkgs_dir}/flatpak/runtime/${package} -type f | grep -v '\.debug$' |grep -v '\.Debug\.' | while read path; do
       truncate --size=0 error.log
-          filename=$(basename "${path}")
-	  if [ "${filename}" = "[.debug" ]; then
-            echo "Skipping [.debug since it will make socorro choke"
-	    continue
-	  fi
           if file "${path}" | grep -q ": *ELF" ; then
+            local debug_path="$(find_debug "${path}")"
+            [ -z "${debug_path}" ] && printf "Could not find debuginfo for ${path}\n" && continue
+            [ "$(basename ${debug_path})" = "[.debug" ] && echo "Skipping [.debug since it will make socorro choke" && continue
+
             local tmpfile=$(mktemp --tmpdir=tmp)
-            printf "Writing symbol file for ${path} ... "
-            ${DUMP_SYMS} --inlines "${path}" 1> "${tmpfile}" 2>>error.log
+            printf "Writing symbol file for ${path} ${debug_path} ... "
+
+            ${DUMP_SYMS} --inlines "${path}" "${debug_path}" 1> "${tmpfile}" 2>>error.log
             if [ -s "${tmpfile}" ]; then
               printf "done\n"
             else
