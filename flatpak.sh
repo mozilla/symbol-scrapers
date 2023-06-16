@@ -49,11 +49,26 @@ function add_package_to_list()
 
 function find_debug() {
   local path=$1
+  local buildid=$(get_build_id "${path}")
 
   local fname=$(basename "${path}")
-  local debugpkg=$(find packages -name "${fname}.debug" | head -n1)
+  local debugpkg="./packages/usr/lib/debug/${buildid}/${fname}.debug"
 
-  printf "${debugpkg}"
+  if [ -f "${debugpkg}" ]; then
+    printf "${debugpkg}"
+  else
+    >&2 echo "No debug symbol seems to exists for ${path}"
+  fi
+}
+
+function generate_debuginfo_tree() {
+  mkdir -p packages/usr/lib/debug/ || true
+  find ${pkgs_dir}/flatpak/runtime/${package} -type f -name "*.debug" | while read path; do
+    local buildid=$(get_build_id "${path}")
+    local debugdir="packages/usr/lib/debug/${buildid}"
+    [ ! -d "${debugdir}" ] && mkdir "${debugdir}"
+    mv "${path}" "${debugdir}"
+  done;
 }
 
 function process_flatpak_package() {
@@ -147,6 +162,8 @@ function process_flatpak()
   do
     install_flatpak_and_deps "${dep}"
   done;
+
+  generate_debuginfo_tree
 
   process_flatpak_package
 
