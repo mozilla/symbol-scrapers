@@ -7,13 +7,9 @@ function get_snaps()
   local search_term=$1
   local team=$2
 
-  # "${API_ROOT}/+snaps?ws.op=findByOwner&owner=https://api.launchpad.net/devel/~${TEAM}"
-  # API_COMMAND="findByStoreName"
-  # API_PARAM="store_name"
   API_COMMAND="getByName"
   API_PARAM="name"
   find_url="${API_ROOT}/+snaps?ws.op=${API_COMMAND}&${API_PARAM}=${search_term}&owner=https://api.launchpad.net/devel/~${team}"
-  # curl -sSL "${find_url}" | jq -r '.entries[] | .self_link'
   curl -sSL "${find_url}" | jq -r '.self_link'
 }
 
