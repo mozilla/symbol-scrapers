@@ -8,10 +8,10 @@ process_flatpak \
 	"org.freedesktop.Platform.GL.Debug.default/x86_64/22.08" \
 	"org.freedesktop.Platform.GL.Debug.default/x86_64/22.08-extra"
 
-zip_symbols
+#zip_symbols
 
-upload_symbols
+#upload_symbols
 
-reprocess_crashes
+#reprocess_crashes
 
-remove_temp_files
+#remove_temp_files
