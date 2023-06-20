@@ -4,12 +4,13 @@ API_ROOT="https://api.launchpad.net/devel"
 
 function get_snaps()
 {
-  local store_name=$1
+  local search_term=$1
   local team=$2
 
-  # "${API_ROOT}/+snaps?ws.op=findByOwner&owner=https://api.launchpad.net/devel/~${TEAM}"
-  find_url="${API_ROOT}/+snaps?ws.op=findByStoreName&store_name=${store_name}&owner=https://api.launchpad.net/devel/~${team}"
-  curl -sSL "${find_url}" | jq -r '.entries[] | .self_link'
+  API_COMMAND="getByName"
+  API_PARAM="name"
+  find_url="${API_ROOT}/+snaps?ws.op=${API_COMMAND}&${API_PARAM}=${search_term}&owner=https://api.launchpad.net/devel/~${team}"
+  curl -sSL "${find_url}" | jq -r '.self_link'
 }
 
 function get_all_builds()
@@ -28,8 +29,11 @@ function get_all_files()
 
 function maybe_skip_if_sha256sums()
 {
-  local file=$(basename $1 | sed -e "s/\./\\\./g")
-  grep -q -G "${file},[0-9]" SHA256SUMS
+  local fname=$1
+  local pkg_name=$2
+
+  local file=$(basename $fname | sed -e "s/\./\\\./g")
+  grep -q -G "${pkg_name},${file},[0-9]" SHA256SUMS
 }
 
 function get_valid_arches()
@@ -59,14 +63,14 @@ function maybe_skip_if_invalid_arch()
 
 function get_snap_and_debug_urls()
 {
-  local store_name=$1
+  local pkg_name=$1
   local team_name=$2
 
-  for snap_link in $(get_snaps "${store_name}" "${team_name}");
+  for snap_link in $(get_snaps "${pkg_name}" "${team_name}");
   do
     for one_build in $(get_all_builds "${snap_link}");
     do
-      if maybe_skip_if_sha256sums ${one_build}; then
+      if maybe_skip_if_sha256sums "${one_build}" "${pkg_name}"; then
         >&2 echo "Skipping ${one_build} (SHA256SUMS)"
         continue
       fi
@@ -88,21 +92,23 @@ function get_snap_and_debug_urls()
 
 function fetch_packages()
 {
-  sort packages.txt | wget -o wget_packages.log --progress=dot:mega -P downloads -c -i -
-  rev packages.txt | cut -d'/' -f1 | rev > package_names.txt
+  local pkg_name="${1}"
+  sort packages_${pkg_name}.txt | wget -o wget_packages_${pkg_name}.log --progress=dot:mega -P downloads/${pkg_name}/ -c -i -
+  rev packages_${pkg_name}.txt | cut -d'/' -f1 | rev > package_names_${pkg_name}.txt
 }
 
 function verify_processed()
 {
+  local pkg_name="${1}"
   local failed=0
-  for f in $(grep "saved" wget_packages.log | awk '{ print $6 }' | sed -e "s/'downloads\///g" -e "s/'$//g" | grep -F ".debug");
+  for f in $(grep "saved" wget_packages_${pkg_name}.log | awk '{ print $6 }' | sed -e "s/'downloads\/${pkg_name}\///g" -e "s/'$//g" | grep -F ".debug");
   do
     # We dont want regex to interfere with dots
-    if grep -q -F "${f}," SHA256SUMS; then
+    if grep -q -F "${pkg_name},${f}," SHA256SUMS; then
       echo "Downloaded ${f} was processed and added to SHA256SUMS"
     else
       echo "Downloaded ${f} was NOT PROCESSED and is MISSING FROM SHA256SUMS"
-      local snap_file="downloads/${f%%.debug}.snap"
+      local snap_file="downloads/${pkg_name}/${f%%.debug}.snap"
       if [ -f "${snap_file}" ]; then
         echo "Snap package was downloaded:"
         ls -hal "${snap_file}"
@@ -153,35 +159,37 @@ function unpack_package() {
 
 function add_package_to_list()
 {
-  local package_filename=$(basename "${1}")
-  local package_size=$(stat -c"%s" "${1}")
-  printf "${package_filename},${package_size}\n" >> SHA256SUMS
-  truncate --size 0 "${1}"
-  truncate --size "${package_size}" "${1}"
+  local pkg_name=${1}
+  local package_filename=$(basename "${2}")
+  local package_size=$(stat -c"%s" "${2}")
+  printf "${pkg_name},${package_filename},${package_size}\n" >> SHA256SUMS
+  truncate --size 0 "${2}"
+  truncate --size "${package_size}" "${2}"
 
-  if [ -n "${2}" ]; then
-    local debuginfo_package_filename=$(basename "${2}")
-    local debuginfo_package_size=$(stat -c"%s" "${2}")
-    printf "${debuginfo_package_filename},${debuginfo_package_size}\n" >> SHA256SUMS
-    truncate --size 0 "${2}"
-    truncate --size "${debuginfo_package_size}" "${2}"
+  if [ -n "${3}" ]; then
+    local debuginfo_package_filename=$(basename "${3}")
+    local debuginfo_package_size=$(stat -c"%s" "${3}")
+    printf "${pkg_name},${debuginfo_package_filename},${debuginfo_package_size}\n" >> SHA256SUMS
+    truncate --size 0 "${3}"
+    truncate --size "${debuginfo_package_size}" "${3}"
   fi
 }
 
 function remove_temp_files() {
-  rm -rf symbols packages tmp symbols*.zip packages.txt package_names.txt
+  rm -rf symbols packages tmp symbols*.zip packages*.txt package_names*.txt
 }
 
 function process_snap_packages() {
   local package_name="${1}"
+  local store_name="${2}"
 
   for arch in $(get_valid_arches); do
-    find downloads -name "${package_name}*_[0-9]*_${arch}.snap" -type f | while read package; do
-      local package_filename="${package##downloads/}"
+    find downloads/${package_name} -name "${store_name}*_[0-9]*_${arch}.snap" -type f | while read package; do
+      local package_filename="${package##downloads/${package_name}/}"
       local debug_filename=$(get_debug_package "${package_filename}")
-      if ! maybe_skip_if_sha256sums "${package_filename}" || ! maybe_skip_if_sha256sums "${debug_filename}"; then
+      if ! maybe_skip_if_sha256sums "${package_filename}" "${pkg_name}" || ! maybe_skip_if_sha256sums "${debug_filename}" "${pkg_name}"; then
         local debuginfo_package=$(get_debug_package "${package}")
-        local version=$(get_version "${package_name}" "${package_filename}")
+        local version=$(get_version "${store_name}" "${package_filename}")
 
         truncate --size=0 error.log
 
@@ -234,7 +242,7 @@ function process_snap_packages() {
           echo -n "Processing ${package} ..."
           # Firefox ready-to-use debug symbols
           if [ -f "${debuginfo_package}" ]; then
-            echo "${debuginfo_package}"
+            echo " ${debuginfo_package}"
             unzip -o -d symbols "${debuginfo_package}"
           else
             echo "!! NO ${debuginfo_package}"
@@ -248,7 +256,7 @@ function process_snap_packages() {
         fi
 
         rm -rf packages
-        add_package_to_list "${package}" "${debuginfo_package}"
+        add_package_to_list "${package_name}" "${package}" "${debuginfo_package}"
       else
         echo "maybe_skip_if_sha256sums ${package_filename} || maybe_skip_if_sha256sums ${debug_filename}"
       fi
@@ -258,8 +266,9 @@ function process_snap_packages() {
 
 function process_snap()
 {
-  local store_name=$1
-  local team_name=$2
+  local pkg_name=$1
+  local store_name=$2
+  local team_name=$3
 
   if [ ! -f SHA256SUMS ]; then
     echo "Please provide SHA256SUMS"
@@ -268,11 +277,13 @@ function process_snap()
 
   mkdir -p tmp symbols
 
-  get_snap_and_debug_urls "${store_name}" "${team_name}" >> packages.txt
+  echo "Processing ${pkg_name} published by ${team_name}"
 
-  fetch_packages
+  get_snap_and_debug_urls "${pkg_name}" "${team_name}" >> packages_${pkg_name}.txt
 
-  process_snap_packages "${store_name}"
+  fetch_packages "${pkg_name}"
 
-  verify_processed
+  process_snap_packages "${pkg_name}" "${store_name}"
+
+  verify_processed "${pkg_name}"
 }
