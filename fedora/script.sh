@@ -160,6 +160,7 @@ mesa-dri-drivers m
 mesa-libEGL m
 mesa-libgbm m
 mesa-libGL m
+mesa-va-drivers m
 mesa-vulkan-drivers m
 nspr n
 nss n
