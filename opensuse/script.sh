@@ -139,6 +139,7 @@ gnome-vfs2
 gsettings-backend-dconf
 intel-media-driver
 intel-vaapi-driver
+libasound2
 libatk-1_0-0
 libatk-bridge-2_0-0
 libavcodec[0-9][0-9]
