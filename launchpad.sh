@@ -38,7 +38,7 @@ function maybe_skip_if_sha256sums()
 
 function get_valid_arches()
 {
-  echo i386 amd64
+  echo i386 amd64 arm64
 }
 
 function is_diff_arch()
