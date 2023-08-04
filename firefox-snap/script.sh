@@ -9,6 +9,7 @@ process_snap "firefox-snap-esr" "firefox" "mozilla-snaps"
 process_snap "firefox-snap-esr-chemspill" "firefox" "mozilla-snaps"
 process_snap "firefox-snap-beta" "firefox" "mozilla-snaps"
 process_snap "firefox-snap-core22" "firefox" "mozilla-snaps"
+process_snap "firefox-snap-nightly" "firefox" "mozilla-snaps"
 
 zip_symbols
 
