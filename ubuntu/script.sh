@@ -102,8 +102,10 @@ generate_fake_packages
 packages="
 apitrace-tracers a/apitrace
 dconf-gsettings-backend d/dconf
-firefox f/firefox firefox firefox http://ppa.launchpad.net/mozillateam/firefox-next/ubuntu/pool
-firefox-trunk f/firefox-trunk firefox-trunk firefox-trunk http://ppa.launchpad.net/ubuntu-mozilla-daily/ppa/ubuntu/pool
+firefox-esr f/firefox-esr firefox-esr firefox-esr https://ppa.launchpadcontent.net/mozillateam/ppa/ubuntu/pool
+firefox f/firefox firefox firefox https://ppa.launchpadcontent.net/mozillateam/firefox-next/ubuntu/pool
+firefox f/firefox firefox firefox https://ppa.launchpadcontent.net/mozillateam/ppa/ubuntu/pool
+firefox-trunk f/firefox-trunk firefox-trunk firefox-trunk https://ppa.launchpadcontent.net/ubuntu-mozilla-daily/ppa/ubuntu/pool
 glib-networking g/glib-networking
 gvfs g/gvfs
 intel-media-va-driver i/intel-media-driver
