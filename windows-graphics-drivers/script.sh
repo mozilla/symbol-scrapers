@@ -21,6 +21,8 @@ function fetch_and_process_drivers() {
   local symbol_server="${2}"
   touch index.html
 
+  count=$(wc -l < SHA256SUMS)
+
   # Sometimes we get an empty response so try multiple times
   while [ $(stat -c%s index.html) -eq 0 ]; do
     curl -s --output index.html "${url}"
@@ -36,6 +38,10 @@ function fetch_and_process_drivers() {
       driver_id=$(echo "${line}" | cut -d'"' -f4)
 
       if ! grep -q "${driver_name}" SHA256SUMS; then
+        if [ "${max_left_to_process}" -le 0 ]; then
+          break
+        fi
+
         # We haven't seen this driver yet, process it
         server_id=$(curl -s "${url}" -d "id=${driver_id}" | grep -m 1 -o "name=\"server_id\" value=\"[0-9]\+\"" | cut -d'"' -f4)
         location=$(curl -s -i "${url}" -d "id=${driver_id}&server_id=${server_id}" | grep "^location:" | tr -d "\r" | cut -d' ' -f2)
@@ -50,9 +56,6 @@ function fetch_and_process_drivers() {
         add_driver_to_list "${driver_name}"
 
         max_left_to_process=$((max_left_to_process - 1))
-        if [ "${max_left_to_process}" -eq 0 ]; then
-          break
-        fi
       fi
 
       # Move on to the next driver
@@ -60,6 +63,12 @@ function fetch_and_process_drivers() {
       driver_id=""
     fi
   done
+
+  # We're done
+  rm -f index.html
+
+  count=$(($(wc -l < SHA256SUMS) - count))
+  max_left_to_process=$((max_left_to_process - count))
 }
 
 function remove_temp_files() {
