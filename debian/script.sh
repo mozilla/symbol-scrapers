@@ -2,9 +2,9 @@
 
 . $(dirname $0)/../common.sh
 
-URL="http://ftp.nl.debian.org/debian/pool"
-UPDATES_URL="http://security-cdn.debian.org/debian-security/pool/updates"
-DDEB_URL="http://debug.mirrors.debian.org/debian-debug/pool"
+URL="http://deb.debian.org/debian/pool"
+UPDATES_URL="http://deb.debian.org/debian-security/pool/updates"
+DDEB_URL="http://deb.debian.org/debian-debug/pool"
 
 get_package_urls() {
   local package_name="${1}"
