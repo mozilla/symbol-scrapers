@@ -5,6 +5,7 @@
 URL="http://deb.debian.org/debian/pool"
 UPDATES_URL="http://deb.debian.org/debian-security/pool/updates"
 DDEB_URL="http://deb.debian.org/debian-debug/pool"
+DDEB_UPDATES_URL="http://deb.debian.org/debian-security-debug/pool/updates"
 
 get_package_urls() {
   local package_name="${1}"
@@ -16,11 +17,12 @@ get_package_urls() {
   local alt_url="${5:-$UPDATES_URL}"
   local url="${URL}"
   local ddeb_url="${DDEB_URL}"
+  local ddeb_alt_url="${DDEB_UPDATES_URL}"
 
   local urls="${url}/${main_path}/ ${url}/${non_free_path}/ ${ddeb_url}/${main_path}/ ${ddeb_url}/${non_free_path}/"
 
   if [ -n "${alt_url}" ]; then
-    urls="${urls} ${alt_url}/${main_path}/"
+    urls="${urls} ${alt_url}/${main_path}/ ${ddeb_alt_url}/${main_path}/"
   fi
 
   wget -o wget_packages_urls.log --progress=dot:mega -k ${urls}
