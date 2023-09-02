@@ -2,9 +2,10 @@
 
 . $(dirname $0)/../common.sh
 
-URL="http://ftp.nl.debian.org/debian/pool"
-UPDATES_URL="http://security-cdn.debian.org/debian-security/pool/updates"
-DDEB_URL="http://debug.mirrors.debian.org/debian-debug/pool"
+URL="http://deb.debian.org/debian/pool"
+UPDATES_URL="http://deb.debian.org/debian-security/pool/updates"
+DDEB_URL="http://deb.debian.org/debian-debug/pool"
+DDEB_UPDATES_URL="http://deb.debian.org/debian-security-debug/pool/updates"
 
 get_package_urls() {
   local package_name="${1}"
@@ -16,11 +17,12 @@ get_package_urls() {
   local alt_url="${5:-$UPDATES_URL}"
   local url="${URL}"
   local ddeb_url="${DDEB_URL}"
+  local ddeb_alt_url="${DDEB_UPDATES_URL}"
 
   local urls="${url}/${main_path}/ ${url}/${non_free_path}/ ${ddeb_url}/${main_path}/ ${ddeb_url}/${non_free_path}/"
 
   if [ -n "${alt_url}" ]; then
-    urls="${urls} ${alt_url}/${main_path}/"
+    urls="${urls} ${alt_url}/${main_path}/ ${ddeb_alt_url}/${main_path}/"
   fi
 
   wget -o wget_packages_urls.log --progress=dot:mega -k ${urls}
@@ -113,9 +115,9 @@ libatk1.0-0 a/atk1.0
 libatk-bridge2.0-0 a/at-spi2-atk
 libatspi2.0-0 a/at-spi2-core
 libavcodec[0-9][0-9] f/ffmpeg
-libavcodec[0-9][0-9] f/ffmpeg-dmo libavcodec[0-9][0-9] libavcodec[0-9][0-9] http://mirror.home-dn.net/debian-multimedia/pool
+libavcodec[0-9][0-9] f/ffmpeg-dmo libavcodec[0-9][0-9] libavcodec[0-9][0-9] http://deb-multimedia.org/debian-multimedia/pool
 libavutil[0-9][0-9] f/ffmpeg
-libavutil[0-9][0-9] f/ffmpeg-dmo libavutil[0-9][0-9] libavutil[0-9][0-9] http://mirror.home-dn.net/debian-multimedia/pool
+libavutil[0-9][0-9] f/ffmpeg-dmo libavutil[0-9][0-9] libavutil[0-9][0-9] http://deb-multimedia.org/debian-multimedia/pool
 libc6 g/glibc
 libcairo2 c/cairo
 libcups2 c/cups
