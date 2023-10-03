@@ -160,6 +160,7 @@ libXext l
 libxkbcommon l
 libxml2 l
 llvm-libs l
+llvm[0-9][0-9]-libs l
 mesa-dri-drivers m
 mesa-libEGL m
 mesa-libgbm m
