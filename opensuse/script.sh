@@ -1,5 +1,7 @@
 #!/bin/sh
 
+export DEBUGINFOD_URLS="https://debuginfod.opensuse.org/"
+
 . $(dirname $0)/../common.sh
 
 URL="https://download.opensuse.org"

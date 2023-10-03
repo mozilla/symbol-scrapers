@@ -1,5 +1,7 @@
 #!/bin/sh
 
+export DEBUGINFOD_URLS="https://debuginfod.debian.net/"
+
 . $(dirname $0)/../common.sh
 
 URL="http://deb.debian.org/debian/pool"

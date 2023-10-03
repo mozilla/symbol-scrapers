@@ -59,8 +59,16 @@ function find_debuginfo() {
   fi
 
   # this was from opensuse's find_debug_info
-  if [ ! -e "${debuginfo}" ]; then
-    find packages/usr/lib/debug -name $(basename "${1}")-"${2}".debug -type f | head -n 1
+  if [ \( -z "${debuginfo}" \) -a \( -d "packages/usr/lib/debug" \) ]; then
+    debuginfo=$(find "packages/usr/lib/debug" -name $(basename "${1}")-"${2}".debug -type f | head -n 1)
+  fi
+
+  if [ -z "${debuginfo}" ]; then
+    debuginfo=$(debuginfod-find debuginfo "${buildid}" 2>/dev/null)
+
+    if [ $? -ne 0 ]; then
+      debuginfo="" # Discard debuginfod-find output on failure
+    fi
   fi
 
   printf "${debuginfo}"

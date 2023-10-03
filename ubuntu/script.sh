@@ -1,5 +1,7 @@
 #!/bin/sh
 
+export DEBUGINFOD_URLS="https://debuginfod.ubuntu.com/"
+
 . $(dirname $0)/../common.sh
 
 URL="http://nl.archive.ubuntu.com/ubuntu/pool"

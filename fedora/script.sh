@@ -1,5 +1,7 @@
 #!/bin/sh
 
+export DEBUGINFOD_URLS="https://debuginfod.fedoraproject.org/"
+
 . $(dirname $0)/../common.sh
 
 URL="https://fedora.mirror.wearetriple.com/linux"
