@@ -148,6 +148,7 @@ libx11
 libxcb
 libxext
 libxkbcommon
+llvm-libs
 mesa
 nspr
 nss
