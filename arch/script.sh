@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export DEBUGINFOD_URLS="https://debuginfod.archlinux.org/"
+
 . $(dirname $0)/../common.sh
 
 URL="https://geo.mirror.pkgbuild.com"
@@ -80,7 +82,16 @@ function unpack_package() {
 }
 
 function find_debuginfo() {
-  find debug-packages -path "*${1}.debug" -type f
+  local buildid=$(get_build_id "${1}")
+  local debuginfo=$(debuginfod-find debuginfo "${buildid}" 2>/dev/null)
+
+  if [ \( $? -eq 0 \) -a \( -n "${debuginfo}" \) ]; then
+    printf "${debuginfo}"
+    return
+  fi
+
+  local filename="${1##packages}"
+  find debug-packages -path "*${filename}.debug" -type f
 }
 
 function remove_temp_files() {
@@ -189,7 +200,7 @@ function process_packages() {
 
       find packages -type f | while read path; do
         if file "${path}" | grep -q ": *ELF" ; then
-          local debuginfo_path="$(find_debuginfo "${path##packages}")"
+          local debuginfo_path="$(find_debuginfo "${path}")"
 
           local tmpfile=$(mktemp --tmpdir=tmp)
           printf "Writing symbol file for ${path} ${debuginfo_path} ... "
