@@ -82,9 +82,9 @@ function get_soname {
   fi
 }
 
-function zip_symbols() {
+function create_symbols_archive() {
   cd symbols
-  zip -r -9 "../${artifact_filename}" .
+  7zz a "../${artifact_filename}" $(ls -A)
   cd ..
 }
 

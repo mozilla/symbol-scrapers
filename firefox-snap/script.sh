@@ -13,7 +13,7 @@ process_snap "firefox-snap-beta" "firefox" "mozilla-snaps"
 process_snap "firefox-snap-core22" "firefox" "mozilla-snaps"
 process_snap "firefox-snap-nightly" "firefox" "mozilla-snaps"
 
-zip_symbols
+create_symbols_archive
 
 upload_symbols
 

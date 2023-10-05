@@ -287,7 +287,7 @@ echo "${packages}" | while read line; do
   process_packages ${line}
 done
 
-zip_symbols
+create_symbols_archive
 
 upload_symbols
 

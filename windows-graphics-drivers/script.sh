@@ -87,7 +87,7 @@ fetch_and_process_drivers "${AMD_PATH}" "${AMD_SYMBOL_SERVER}"
 fetch_and_process_drivers "${INTEL_PATH}" "${INTEL_SYMBOL_SERVER}"
 fetch_and_process_drivers "${NVIDIA_PATH}" "${NVIDIA_SYMBOL_SERVER}"
 
-zip_symbols
+create_symbols_archive
 
 upload_symbols
 
