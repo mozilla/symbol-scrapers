@@ -22,13 +22,23 @@ get_package_urls() {
   local urls="${url}/${main_path}/ ${url}/${universe_path}/ ${url}/${multiverse_path} ${ddeb_url}/${main_path}/ ${ddeb_url}/${universe_path}/ ${ddeb_url}/${multiverse_path}/"
 
   if [ -n "${alt_url}" ]; then
-    urls="${urls} ${alt_url}/${main_path}/ ${alt_url}/${universe_path}/"
+    urls="${urls} ${alt_url}/${main_path}/ ${alt_url}/${universe_path}/ ${alt_url}/${multiverse_path}/"
   fi
 
   wget -o wget_packages_urls.log --progress=dot:mega -k ${urls}
-  for i in ${urls}; do
-    find . -name "index.html*" -exec grep -o "${i}\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
-  done
+  find . -name "index.html*" -exec grep -o "${url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
+  find . -name "index.html*" -exec grep -o "${url}/${universe_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
+  find . -name "index.html*" -exec grep -o "${url}/${multiverse_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
+  find . -name "index.html*" -exec grep -o "${ddeb_url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
+  find . -name "index.html*" -exec grep -o "${ddeb_url}/${universe_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
+  find . -name "index.html*" -exec grep -o "${ddeb_url}/${multiverse_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
+
+  if [ -n "${alt_url}" ]; then
+    find . -name "index.html*" -exec grep -o "${alt_url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
+    find . -name "index.html*" -exec grep -o "${alt_url}/${universe_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
+    find . -name "index.html*" -exec grep -o "${alt_url}/${multiverse_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
+  fi
+
   find . -name "index.html*" -exec rm -f {} \;
 }
 
