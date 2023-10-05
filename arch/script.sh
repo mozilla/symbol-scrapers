@@ -102,7 +102,7 @@ function generate_fake_packages() {
   cat SHA256SUMS | while read line; do
     local package_name=$(echo ${line} | cut -d',' -f1)
     local package_size=$(echo ${line} | cut -d',' -f2)
-    truncate --size "${package_size}" "downloads/${package_name}"
+    truncate -s "${package_size}" "downloads/${package_name}"
   done
 }
 
@@ -170,15 +170,15 @@ function add_package_to_list() {
   local package_filename=$(basename "${1}")
   local package_size=$(stat -c"%s" "${1}")
   printf "${package_filename},${package_size}\n" >> SHA256SUMS
-  truncate --size 0 "${1}"
-  truncate --size "${package_size}" "${1}"
+  truncate -s 0 "${1}"
+  truncate -s "${package_size}" "${1}"
 
   if [ -n "${2}" ]; then
     local debuginfo_package_filename=$(basename "${2}")
     local debuginfo_package_size=$(stat -c"%s" "${2}")
     printf "${debuginfo_package_filename},${debuginfo_package_size}\n" >> SHA256SUMS
-    truncate --size 0 "${2}"
-    truncate --size "${debuginfo_package_size}" "${2}"
+    truncate -s 0 "${2}"
+    truncate -s "${debuginfo_package_size}" "${2}"
   fi
 }
 
@@ -190,7 +190,7 @@ function process_packages() {
       local version=$(get_version "${package_name}" "${package_filename}")
       local debuginfo_package=$(find_debuginfo_package "${package_name}" "${version}")
 
-      truncate --size=0 error.log
+      truncate -s 0 error.log
 
       if [ -n "${debuginfo_package}" ]; then
         unpack_package "${package}" "${debuginfo_package}"
