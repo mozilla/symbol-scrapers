@@ -154,6 +154,7 @@ libgbm1 m/mesa
 libgcc-s1 g/gcc-10
 libgcc-s1 g/gcc-11
 libgcc-s1 g/gcc-12
+libgcc-s1 g/gcc-13
 libgdk-pixbuf-2.0-0 g/gdk-pixbuf
 libgdk-pixbuf2.0-0 g/gdk-pixbuf
 libgl1-mesa-dri m/mesa
@@ -184,9 +185,10 @@ libsm6 libs/libsm
 libspa-0.2-modules p/pipewire
 libspeechd2 s/speech-dispatcher
 libsqlite3-0 s/sqlite3
-libstdc++6 g/gcc-10 libstdc++6-10
-libstdc++6 g/gcc-11 libstdc++6-11
-libstdc++6 g/gcc-12 libstdc++6-12
+libstdc++6 g/gcc-10
+libstdc++6 g/gcc-11
+libstdc++6 g/gcc-12
+libstdc++6 g/gcc-13
 libsystemd0 s/systemd
 libtcmalloc-minimal4 g/google-perftools
 libthai0 libt/libthai
