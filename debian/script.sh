@@ -28,9 +28,16 @@ get_package_urls() {
   fi
 
   wget -o wget_packages_urls.log --progress=dot:mega -k ${urls}
-  for i in ${urls}; do
-    find . -name "index.html*" -exec grep -o "${i}\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).deb\"" {} \; | cut -d'"' -f1
-  done
+  find . -name "index.html*" -exec grep -o "${url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).deb\"" {} \; | cut -d'"' -f1
+  find . -name "index.html*" -exec grep -o "${url}/${non_free_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).deb\"" {} \; | cut -d'"' -f1
+  find . -name "index.html*" -exec grep -o "${ddeb_url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).deb\"" {} \; | cut -d'"' -f1
+  find . -name "index.html*" -exec grep -o "${ddeb_url}/${non_free_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).deb\"" {} \; | cut -d'"' -f1
+
+  if [ -n "${alt_url}" ]; then
+    find . -name "index.html*" -exec grep -o "${alt_url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).deb\"" {} \; | cut -d'"' -f1
+    find . -name "index.html*" -exec grep -o "${ddeb_alt_url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).deb\"" {} \; | cut -d'"' -f1
+  fi
+
   find . -name "index.html*" -exec rm -f {} \;
 }
 
