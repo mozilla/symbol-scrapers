@@ -117,6 +117,7 @@ function reprocess_crashes()
   if ! is_taskcluster; then
     find symbols -name "*.sym" -type f > symbols.list
 
+    touch crashes.list
     cat symbols.list | while read symfile; do
       debug_id=$(head -n1 "${symfile}" | cut -d' ' -f4)
       module_name=$(head -n2 "${symfile}" | tail -n1 | cut -d' ' -f4)
@@ -142,6 +143,12 @@ function reprocess_crashes()
       fi
     fi
   fi
+}
+
+function update_sha256sums() {
+  # We store the package names along with the current date, we will use these dates
+  # in the future but for the time being we just need a package-name,number format.
+  cat unfiltered-packages.txt | rev | cut -d'/' -f1 | rev | sed -e "s/$/,$(date "+%s")/" > SHA256SUMS
 }
 
 if [ -z "${DUMP_SYMS}" ]; then
