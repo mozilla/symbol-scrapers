@@ -34,7 +34,7 @@ function get_package_indexes() {
 function fetch_packages() {
   get_package_indexes
 
-  wget -o wget_packages_urls.log --progress=dot:mega --compression=auto -k -i indexes.txt
+  wget --waitretry=100 --retry-on-http-error=429 -o wget_packages_urls.log --progress=dot:mega --compression=auto -k -i indexes.txt
 
   find . -name "index.html*" | while read path; do
     mv "${path}" "${path}.bak"
@@ -57,7 +57,7 @@ function fetch_packages() {
     fi
   done
 
-  sort packages.txt | wget -o wget_packages.log --progress=dot:mega -P downloads -c -i -
+  sort packages.txt | wget --waitretry=100 --retry-on-http-error=429 -o wget_packages.log --progress=dot:mega -P downloads -c -i -
 }
 
 function get_version() {

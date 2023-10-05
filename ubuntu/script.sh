@@ -25,7 +25,7 @@ get_package_urls() {
     urls="${urls} ${alt_url}/${main_path}/ ${alt_url}/${universe_path}/ ${alt_url}/${multiverse_path}/"
   fi
 
-  wget -o wget_packages_urls.log --progress=dot:mega -k ${urls}
+  wget --waitretry=100 --retry-on-http-error=429 -o wget_packages_urls.log --progress=dot:mega -k ${urls}
   find . -name "index.html*" -exec grep -o "${url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
   find . -name "index.html*" -exec grep -o "${url}/${universe_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
   find . -name "index.html*" -exec grep -o "${url}/${multiverse_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
@@ -57,7 +57,7 @@ fetch_packages() {
   done
 
   sed -i -e 's/%2b/+/g' packages.txt
-  sort packages.txt | wget -o wget_packages.log --progress=dot:mega -P downloads -c -i -
+  sort packages.txt | wget --waitretry=100 --retry-on-http-error=429 -o wget_packages.log --progress=dot:mega -P downloads -c -i -
 }
 
 function get_version() {
