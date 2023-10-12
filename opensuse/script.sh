@@ -174,10 +174,12 @@ libglvnd
 libgobject-2_0-0
 libgtk-2_0-0
 libgtk-3-0
+libhwy1
 libibus-1_0-5
 libICE6
 libicu[0-9][0-9]
 libigdgmm12
+libjemalloc2
 libnuma1
 libopus0
 libpango-1_0-0
