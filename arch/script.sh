@@ -116,6 +116,7 @@ atk
 at-spi2-atk
 at-spi2-core
 cairo
+jemalloc
 libcups
 dbus
 dbus-glib
@@ -127,8 +128,10 @@ gcc-libs
 gdk-pixbuf2
 glib2
 glibc
+gperftools
 gtk3
 gvfs
+highway
 intel-gmmlib
 intel-media-driver
 libdrm

@@ -162,9 +162,11 @@ libglib2.0-0 g/glib2.0
 libglx0 libg/libglvnd
 libglx-mesa0 m/mesa
 libgtk-3-0 g/gtk+3.0
+libhwy1 h/highway
 libibus-1.0-5 i/ibus
 libice6 libi/libice
 libicu[0-9][0-9] i/icu
+libjemalloc2 j/jemalloc
 libnspr4 n/nspr
 libnss3 n/nss
 libnss-ldap libn/libnss-ldap
