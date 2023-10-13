@@ -169,3 +169,6 @@ if ! is_taskcluster; then
     exit 1
   fi
 fi
+
+# wget with common options to retry, compress the requests, etc...
+WGET="wget --waitretry=100 --retry-on-http-error=429 --progress=dot:mega --compression=auto"
