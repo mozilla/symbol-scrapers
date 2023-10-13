@@ -246,8 +246,6 @@ function process_packages() {
     local version=$(get_version "${package_name}" "${package_filename}")
     local debuginfo_package=$(find_debuginfo_package "${package_name}" "${version}")
 
-    truncate -s 0 error.log
-
     if [ -n "${debuginfo_package}" ]; then
       unpack_rpm_package ${package} ${debuginfo_package}
     else
@@ -259,20 +257,21 @@ function process_packages() {
       if file "${path}" | grep -q ": *ELF" ; then
         local debuginfo_path="$(find_debuginfo "${path}" "${version}")"
 
-        [ -z "${debuginfo_path}" ] && printf "Could not find debuginfo for ${path}\n" && continue
-
+        truncate -s 0 error.log
         local tmpfile=$(mktemp --tmpdir=tmp)
         printf "Writing symbol file for ${path} ${debuginfo_path} ... "
-        ${DUMP_SYMS} --inlines "${path}" "${debuginfo_path}" 1> "${tmpfile}" 2> error.log
-        if [ -s "${tmpfile}" ]; then
+        if [ -n "${debuginfo_path}" ]; then
+          ${DUMP_SYMS} --inlines "${path}" "${debuginfo_path}" 1> "${tmpfile}" 2> error.log
+        else
+          ${DUMP_SYMS} --inlines "${path}" 1> "${tmpfile}" 2> error.log
+        fi
+
+        if [ -s "${tmpfile}" -a -z "${debuginfo_path}" ]; then
+          printf "done w/o debuginfo\n"
+        elif [ -s "${tmpfile}" ]; then
           printf "done\n"
         else
-          ${DUMP_SYMS} --inlines "${path}" > "${tmpfile}"
-          if [ -s "${tmpfile}" ]; then
-            printf "done w/o debuginfo\n"
-          else
-            printf "something went terribly wrong!\n"
-          fi
+          printf "something went terribly wrong!\n"
         fi
 
         if [ -s error.log ]; then
