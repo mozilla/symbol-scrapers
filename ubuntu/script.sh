@@ -227,8 +227,6 @@ function process_packages() {
       printf "package_name = ${package_name} version = ${version} dbg_package_name = ${debug_package_name}\n"
       local debuginfo_package=$(find_debuginfo_package "${package_name}" "${version}" "${debug_package_name}")
 
-      truncate -s 0 error.log
-
       if [ -n "${debuginfo_package}" ]; then
         unpack_package ${package} ${debuginfo_package}
       else
@@ -240,20 +238,27 @@ function process_packages() {
         if file "${path}" | grep -q ": *ELF" ; then
           local debuginfo_path="$(find_debuginfo "${path}")"
 
-          [ -z "${debuginfo_path}" ] && printf "Could not find debuginfo for ${path}\n" && continue
-
+          truncate -s 0 error.log
           local tmpfile=$(mktemp --tmpdir=tmp)
           printf "Writing symbol file for ${path} ${debuginfo_path} ... "
-          ${DUMP_SYMS} --inlines "${path}" "${debuginfo_path}" 1> "${tmpfile}" 2>>error.log
-          if [ -s "${tmpfile}" ]; then
+          if [ -n "${debuginfo_path}" ]; then
+            ${DUMP_SYMS} --inlines "${path}" "${debuginfo_path}" 1> "${tmpfile}" 2> error.log
+          else
+            ${DUMP_SYMS} --inlines "${path}" 1> "${tmpfile}" 2> error.log
+          fi
+
+          if [ -s "${tmpfile}" -a -z "${debuginfo_path}" ]; then
+            printf "done w/o debuginfo\n"
+          elif [ -s "${tmpfile}" ]; then
             printf "done\n"
           else
-            ${DUMP_SYMS} --inlines "${path}" > "${tmpfile}"
-            if [ -s "${tmpfile}" ]; then
-              printf "done w/o debuginfo\n"
-            else
-              printf "something went terribly wrong!\n"
-            fi
+            printf "something went terribly wrong!\n"
+          fi
+
+          if [ -s error.log ]; then
+            printf "***** error log for package ${package} ${path} ${debuginfo_path}\n"
+            cat error.log
+            printf "***** error log for package ${package} ${path} ${debuginfo_path} ends here\n"
           fi
 
           # Copy the symbol file and debug information
@@ -272,12 +277,6 @@ function process_packages() {
           rm -f "${tmpfile}"
         fi
       done
-
-      if [ -s error.log ]; then
-        printf "***** error log for package ${package}\n"
-        cat error.log
-        printf "***** error log for package ${package} ends here\n"
-      fi
 
       rm -rf packages
     done
