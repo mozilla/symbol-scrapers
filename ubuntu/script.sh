@@ -1,5 +1,7 @@
 #!/bin/sh
 
+export DEBUGINFOD_URLS="https://debuginfod.ubuntu.com/"
+
 . $(dirname $0)/../common.sh
 
 URL="http://nl.archive.ubuntu.com/ubuntu/pool"
@@ -20,25 +22,42 @@ get_package_urls() {
   local urls="${url}/${main_path}/ ${url}/${universe_path}/ ${url}/${multiverse_path} ${ddeb_url}/${main_path}/ ${ddeb_url}/${universe_path}/ ${ddeb_url}/${multiverse_path}/"
 
   if [ -n "${alt_url}" ]; then
-    urls="${urls} ${alt_url}/${main_path}/ ${alt_url}/${universe_path}/"
+    urls="${urls} ${alt_url}/${main_path}/ ${alt_url}/${universe_path}/ ${alt_url}/${multiverse_path}/"
   fi
 
-  wget -o wget_packages_urls.log --progress=dot:mega -k ${urls}
-  for i in ${urls}; do
-    find . -name "index.html*" -exec grep -o "${i}\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
-  done
+  ${WGET} -o wget_packages_urls.log -k ${urls}
+  find . -name "index.html*" -exec grep -o "${url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
+  find . -name "index.html*" -exec grep -o "${url}/${universe_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
+  find . -name "index.html*" -exec grep -o "${url}/${multiverse_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
+  find . -name "index.html*" -exec grep -o "${ddeb_url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
+  find . -name "index.html*" -exec grep -o "${ddeb_url}/${universe_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
+  find . -name "index.html*" -exec grep -o "${ddeb_url}/${multiverse_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
+
+  if [ -n "${alt_url}" ]; then
+    find . -name "index.html*" -exec grep -o "${alt_url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
+    find . -name "index.html*" -exec grep -o "${alt_url}/${universe_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
+    find . -name "index.html*" -exec grep -o "${alt_url}/${multiverse_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
+  fi
+
   find . -name "index.html*" -exec rm -f {} \;
 }
 
 fetch_packages() {
   echo "${1}" | while read line; do
     [ -z "${line}" ] && continue
-    get_package_urls ${line} >> packages.txt
+    get_package_urls ${line} >> unfiltered-packages.txt
+  done
+
+  touch packages.txt
+  cat unfiltered-packages.txt | while read line; do
+    package_name=$(echo "${line}" | rev | cut -d'/' -f1 | rev)
+    if ! grep -q -F "${package_name}" SHA256SUMS; then
+      echo "${line}" >> packages.txt
+    fi
   done
 
   sed -i -e 's/%2b/+/g' packages.txt
-  sort packages.txt | wget -o wget_packages.log --progress=dot:mega -P downloads -c -i -
-  rev packages.txt | cut -d'/' -f1 | rev > package_names.txt
+  sort packages.txt | ${WGET} -o wget_packages.log -P downloads -c -i -
 }
 
 function get_version() {
@@ -66,38 +85,31 @@ function unpack_package() {
   local debug_package_name="${2}"
   mkdir packages
   data_file=$(ar t "${package_name}" | grep ^data)
-  ar x "${package_name}" && \
+  ar x "${package_name}" "${data_file}" && \
   tar -C packages -x -a -f "${data_file}"
   if [ $? -ne 0 ]; then
     printf "Failed to extract ${package_name}\n" 2>>error.log
   fi
-  rm -f data.tar* control.tar* debian-binary
+  rm -f "${data_file}"
   if [ -n "${debug_package_name}" ]; then
     data_file=$(ar t "${package_name}" | grep ^data)
-    ar x "${debug_package_name}" && \
+    ar x "${debug_package_name}" "${data_file}" && \
     tar -C packages -x -a -f "${data_file}"
     if [ $? -ne 0 ]; then
       printf "Failed to extract ${debug_package_name}\n" 2>>error.log
     fi
-    rm -f data.tar* control.tar* debian-binary
+    rm -f "${data_file}"
   fi
 }
 
 function remove_temp_files() {
-  rm -rf symbols packages tmp symbols*.zip packages.txt package_names.txt
-}
-
-function generate_fake_packages() {
-  cat SHA256SUMS | while read line; do
-    local package_name=$(echo ${line} | cut -d',' -f1)
-    local package_size=$(echo ${line} | cut -d',' -f2)
-    truncate --size "${package_size}" "downloads/${package_name}"
-  done
+  rm -rf downloads symbols packages debug-packages tmp \
+         symbols*.zip indexes.txt packages.txt unfiltered-packages.txt \
+         crashes.list symbols.list
 }
 
 remove_temp_files
 mkdir -p downloads symbols tmp
-generate_fake_packages
 
 packages="
 apitrace-tracers a/apitrace
@@ -142,6 +154,7 @@ libgbm1 m/mesa
 libgcc-s1 g/gcc-10
 libgcc-s1 g/gcc-11
 libgcc-s1 g/gcc-12
+libgcc-s1 g/gcc-13
 libgdk-pixbuf-2.0-0 g/gdk-pixbuf
 libgdk-pixbuf2.0-0 g/gdk-pixbuf
 libgl1-mesa-dri m/mesa
@@ -149,9 +162,11 @@ libglib2.0-0 g/glib2.0
 libglx0 libg/libglvnd
 libglx-mesa0 m/mesa
 libgtk-3-0 g/gtk+3.0
+libhwy1 h/highway
 libibus-1.0-5 i/ibus
 libice6 libi/libice
 libicu[0-9][0-9] i/icu
+libjemalloc2 j/jemalloc
 libnspr4 n/nspr
 libnss3 n/nss
 libnss-ldap libn/libnss-ldap
@@ -172,9 +187,10 @@ libsm6 libs/libsm
 libspa-0.2-modules p/pipewire
 libspeechd2 s/speech-dispatcher
 libsqlite3-0 s/sqlite3
-libstdc++6 g/gcc-10 libstdc++6-10
-libstdc++6 g/gcc-11 libstdc++6-11
-libstdc++6 g/gcc-12 libstdc++6-12
+libstdc++6 g/gcc-10
+libstdc++6 g/gcc-11
+libstdc++6 g/gcc-12
+libstdc++6 g/gcc-13
 libsystemd0 s/systemd
 libtcmalloc-minimal4 g/google-perftools
 libthai0 libt/libthai
@@ -201,88 +217,68 @@ zlib1g z/zlib
 
 fetch_packages "${packages}"
 
-function add_package_to_list() {
-  local package_filename=$(basename "${1}")
-  local package_size=$(stat -c"%s" "${1}")
-  printf "${package_filename},${package_size}\n" >> SHA256SUMS
-  truncate --size 0 "${1}"
-  truncate --size "${package_size}" "${1}"
-
-  if [ -n "${2}" ]; then
-    local debuginfo_package_filename=$(basename "${2}")
-    local debuginfo_package_size=$(stat -c"%s" "${2}")
-    printf "${debuginfo_package_filename},${debuginfo_package_size}\n" >> SHA256SUMS
-    truncate --size 0 "${2}"
-    truncate --size "${debuginfo_package_size}" "${2}"
-  fi
-}
-
 function process_packages() {
   local package_name="${1}"
   for arch in i386 amd64; do
     find downloads -name "${package_name}_[0-9]*_${arch}.deb" -type f | grep -v dbg | while read package; do
       local package_filename="${package##downloads/}"
-      if ! grep -q -F "${package_filename}" SHA256SUMS; then
-        local version=$(get_version "${package_name}" "${package_filename}")
-        local debug_package_name="${3:-$package_name}"
-        printf "package_name = ${package_name} version = ${version} dbg_package_name = ${debug_package_name}\n"
-        local debuginfo_package=$(find_debuginfo_package "${package_name}" "${version}" "${debug_package_name}")
+      local version=$(get_version "${package_name}" "${package_filename}")
+      local debug_package_name="${3:-$package_name}"
+      printf "package_name = ${package_name} version = ${version} dbg_package_name = ${debug_package_name}\n"
+      local debuginfo_package=$(find_debuginfo_package "${package_name}" "${version}" "${debug_package_name}")
 
-        truncate --size=0 error.log
-
-        if [ -n "${debuginfo_package}" ]; then
-          unpack_package ${package} ${debuginfo_package}
-        else
-          printf "***** Could not find debuginfo for ${package_filename}\n"
-          unpack_package ${package}
-        fi
-
-        find packages -type f | grep -v debug | while read path; do
-          if file "${path}" | grep -q ": *ELF" ; then
-            local debuginfo_path="$(find_debuginfo "${path}")"
-
-            [ -z "${debuginfo_path}" ] && printf "Could not find debuginfo for ${path}\n" && continue
-
-            local tmpfile=$(mktemp --tmpdir=tmp)
-            printf "Writing symbol file for ${path} ${debuginfo_path} ... "
-            ${DUMP_SYMS} --inlines "${path}" "${debuginfo_path}" 1> "${tmpfile}" 2>>error.log
-            if [ -s "${tmpfile}" ]; then
-              printf "done\n"
-            else
-              ${DUMP_SYMS} --inlines "${path}" > "${tmpfile}"
-              if [ -s "${tmpfile}" ]; then
-                printf "done w/o debuginfo\n"
-              else
-                printf "something went terribly wrong!\n"
-              fi
-            fi
-
-            # Copy the symbol file and debug information
-            debugid=$(head -n 1 "${tmpfile}" | cut -d' ' -f4)
-            filename="$(basename "${path}")"
-            mkdir -p "symbols/${filename}/${debugid}"
-            cp "${tmpfile}" "symbols/${filename}/${debugid}/${filename}.sym"
-            local soname=$(get_soname "${path}")
-            if [ -n "${soname}" ]; then
-              if [ "${soname}" != "${filename}" ]; then
-                mkdir -p "symbols/${soname}/${debugid}"
-                cp "${tmpfile}" "symbols/${soname}/${debugid}/${soname}.sym"
-              fi
-            fi
-
-            rm -f "${tmpfile}"
-          fi
-        done
-
-        if [ -s error.log ]; then
-          printf "***** error log for package ${package}\n"
-          cat error.log
-          printf "***** error log for package ${package} ends here\n"
-        fi
-
-        rm -rf packages
-        add_package_to_list "${package}" "${debuginfo_package}"
+      if [ -n "${debuginfo_package}" ]; then
+        unpack_package ${package} ${debuginfo_package}
+      else
+        printf "***** Could not find debuginfo for ${package_filename}\n"
+        unpack_package ${package}
       fi
+
+      find packages -type f | grep -v debug | while read path; do
+        if file "${path}" | grep -q ": *ELF" ; then
+          local debuginfo_path="$(find_debuginfo "${path}")"
+
+          truncate -s 0 error.log
+          local tmpfile=$(mktemp --tmpdir=tmp)
+          printf "Writing symbol file for ${path} ${debuginfo_path} ... "
+          if [ -n "${debuginfo_path}" ]; then
+            ${DUMP_SYMS} --inlines "${path}" "${debuginfo_path}" 1> "${tmpfile}" 2> error.log
+          else
+            ${DUMP_SYMS} --inlines "${path}" 1> "${tmpfile}" 2> error.log
+          fi
+
+          if [ -s "${tmpfile}" -a -z "${debuginfo_path}" ]; then
+            printf "done w/o debuginfo\n"
+          elif [ -s "${tmpfile}" ]; then
+            printf "done\n"
+          else
+            printf "something went terribly wrong!\n"
+          fi
+
+          if [ -s error.log ]; then
+            printf "***** error log for package ${package} ${path} ${debuginfo_path}\n"
+            cat error.log
+            printf "***** error log for package ${package} ${path} ${debuginfo_path} ends here\n"
+          fi
+
+          # Copy the symbol file and debug information
+          debugid=$(head -n 1 "${tmpfile}" | cut -d' ' -f4)
+          filename="$(basename "${path}")"
+          mkdir -p "symbols/${filename}/${debugid}"
+          cp "${tmpfile}" "symbols/${filename}/${debugid}/${filename}.sym"
+          local soname=$(get_soname "${path}")
+          if [ -n "${soname}" ]; then
+            if [ "${soname}" != "${filename}" ]; then
+              mkdir -p "symbols/${soname}/${debugid}"
+              cp "${tmpfile}" "symbols/${soname}/${debugid}/${soname}.sym"
+            fi
+          fi
+
+          rm -f "${tmpfile}"
+        fi
+      done
+
+      rm -rf packages
     done
   done
 }
@@ -292,10 +288,12 @@ echo "${packages}" | while read line; do
   process_packages ${line}
 done
 
-zip_symbols
+create_symbols_archive
 
 upload_symbols
 
 reprocess_crashes
+
+update_sha256sums
 
 remove_temp_files

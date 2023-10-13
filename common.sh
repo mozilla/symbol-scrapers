@@ -59,8 +59,16 @@ function find_debuginfo() {
   fi
 
   # this was from opensuse's find_debug_info
-  if [ ! -e "${debuginfo}" ]; then
-    find packages/usr/lib/debug -name $(basename "${1}")-"${2}".debug -type f | head -n 1
+  if [ \( -z "${debuginfo}" \) -a \( -d "packages/usr/lib/debug" \) ]; then
+    debuginfo=$(find "packages/usr/lib/debug" -name $(basename "${1}")-"${2}".debug -type f | head -n 1)
+  fi
+
+  if [ -z "${debuginfo}" ]; then
+    debuginfo=$(debuginfod-find debuginfo "${buildid}" 2>/dev/null)
+
+    if [ $? -ne 0 ]; then
+      debuginfo="" # Discard debuginfod-find output on failure
+    fi
   fi
 
   printf "${debuginfo}"
@@ -74,9 +82,9 @@ function get_soname {
   fi
 }
 
-function zip_symbols() {
+function create_symbols_archive() {
   cd symbols
-  zip -r -9 "../${artifact_filename}" .
+  7zz a "../${artifact_filename}" $(ls -A)
   cd ..
 }
 
@@ -109,6 +117,7 @@ function reprocess_crashes()
   if ! is_taskcluster; then
     find symbols -name "*.sym" -type f > symbols.list
 
+    touch crashes.list
     cat symbols.list | while read symfile; do
       debug_id=$(head -n1 "${symfile}" | cut -d' ' -f4)
       module_name=$(head -n2 "${symfile}" | tail -n1 | cut -d' ' -f4)
@@ -136,6 +145,12 @@ function reprocess_crashes()
   fi
 }
 
+function update_sha256sums() {
+  # We store the package names along with the current date, we will use these dates
+  # in the future but for the time being we just need a package-name,number format.
+  cat unfiltered-packages.txt | rev | cut -d'/' -f1 | rev | sed -e "s/$/,$(date "+%s")/" > SHA256SUMS
+}
+
 if [ -z "${DUMP_SYMS}" ]; then
   printf "You must set the \`DUMP_SYMS\` enviornment variable before running the script\n"
   exit 1
@@ -154,3 +169,6 @@ if ! is_taskcluster; then
     exit 1
   fi
 fi
+
+# wget with common options to retry, compress the requests, etc...
+WGET="wget --waitretry=100 --retry-on-http-error=429 --progress=dot:mega --compression=auto"
