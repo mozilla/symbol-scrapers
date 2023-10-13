@@ -76,7 +76,7 @@ get_package_indexes() {
 fetch_packages() {
   get_package_indexes
 
-  sort indexes.txt | wget --waitretry=100 --retry-on-http-error=429 -o wget_packages_urls.log --progress=dot:mega --compression=auto -k -i -
+  sort indexes.txt | ${WGET} -o wget_packages_urls.log -k -i -
 
   find . -name "index.html*" | while read path; do
     mv "${path}" "${path}.bak"
@@ -99,7 +99,7 @@ fetch_packages() {
 
   find . -name "index.html*" -exec rm -f {} \;
 
-  sort packages.txt | wget --waitretry=100 --retry-on-http-error=429 -o wget_packages.log --progress=dot:mega -P downloads -c -i -
+  sort packages.txt | ${WGET} -o wget_packages.log -P downloads -c -i -
 }
 
 function get_version() {
