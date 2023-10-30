@@ -63,7 +63,11 @@ function find_debuginfo() {
     debuginfo=$(find "packages/usr/lib/debug" -name $(basename "${1}")-"${2}".debug -type f | head -n 1)
   fi
 
-  if [ -z "${debuginfo}" ]; then
+  # Validate the debug information file
+  [ -n "${debuginfo}" ] && objdump -h "${debuginfo}" | grep -q "\.debug_info"
+  debuginfo_present="$?"
+
+  if [ "${debuginfo_present}" -ne 0 ]; then
     debuginfo=$(debuginfod-find debuginfo "${buildid}" 2>/dev/null)
 
     if [ $? -ne 0 ]; then
