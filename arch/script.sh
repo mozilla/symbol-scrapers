@@ -134,6 +134,7 @@ gvfs
 highway
 intel-gmmlib
 intel-media-driver
+libcloudproviders
 libdrm
 libffi
 libglvnd

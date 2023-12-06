@@ -129,6 +129,7 @@ libavutil[0-9][0-9] f/ffmpeg
 libavutil[0-9][0-9] f/ffmpeg-dmo libavutil[0-9][0-9] libavutil[0-9][0-9] http://deb-multimedia.org/pool
 libc6 g/glibc
 libcairo2 c/cairo
+libcloudproviders0 libc/libcloudproviders
 libcups2 c/cups
 libdbus-1-3 d/dbus
 libdbus-glib-1-2 d/dbus-glib

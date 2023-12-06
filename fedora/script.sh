@@ -133,6 +133,7 @@ ibus-libs i
 intel-gmmlib i
 intel-media-driver i https://mirror.nl.leaseweb.net/rpmfusion/nonfree/fedora
 jemalloc j
+libcloudproviders l
 libdrm l
 libepoxy l
 libevent l
