@@ -47,6 +47,16 @@ function get_build_id {
   eu-readelf -n "${1}" | grep "^    Build ID:" | cut -b15-
 }
 
+function find_debuginfo_by_build_id() {
+  find . -type f -perm '/a+x' -name "*.debug" | while read path; do
+    local debug_build_id=$(get_build_id "${path}")
+    if [ "${1}" = "${debug_build_id}" ]; then
+      printf "${path}"
+      break
+    fi
+  done
+}
+
 function find_debuginfo() {
   local buildid=$(get_build_id "${1}")
   local prefix=$(echo "${buildid}" | cut -b1-2)
@@ -58,9 +68,18 @@ function find_debuginfo() {
     debuginfo=$(find packages -path "*/debug/${path}" -type f)
   fi
 
-  # this was from opensuse's find_debug_info
+  if [ -z "${debuginfo}" ]; then
+    debuginfo=$(find packages -path "*/debug/${path}.debug" -type f)
+  fi
+
+  # This was from opensuse's find_debug_info
   if [ \( -z "${debuginfo}" \) -a \( -d "packages/usr/lib/debug" \) ]; then
     debuginfo=$(find "packages/usr/lib/debug" -name $(basename "${1}")-"${2}".debug -type f | head -n 1)
+  fi
+
+  # Let's do one final brute-force pass
+  if [ -z "${debuginfo}" ]; then
+    debuginfo=$(find_debuginfo_by_build_id "${buildid}")
   fi
 
   # Validate the debug information file
