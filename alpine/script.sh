@@ -115,6 +115,8 @@ dbus-libs
 ffmpeg-libavcodec
 ffmpeg-libavutil
 ffmpeg-libswresample
+firefox
+firefox-esr
 fontconfig
 freetype
 fribidi
