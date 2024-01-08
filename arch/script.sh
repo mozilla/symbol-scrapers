@@ -141,6 +141,7 @@ libglvnd
 libibus
 libice
 libp11-kit
+libpipewire
 libpulse
 libsm
 libspeechd
