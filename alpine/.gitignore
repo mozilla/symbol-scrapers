@@ -1,0 +1,14 @@
+data.tar
+debug
+downloads
+error.log
+indexes.txt
+package_names.txt
+packages
+packages.txt
+SHA256SUMS
+symbols*
+tmp
+unfiltered-packages.txt
+wget_packages.log
+wget_packages_urls.log
