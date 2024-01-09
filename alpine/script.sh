@@ -193,6 +193,8 @@ opus
 pango
 pciutils-libs
 pcre2
+pipewire
+pipewire-libs
 pixman
 rav1e-libs
 scudo-malloc
