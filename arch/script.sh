@@ -7,8 +7,10 @@ export DEBUGINFOD_URLS="https://debuginfod.archlinux.org/"
 URL="https://geo.mirror.pkgbuild.com"
 
 REPOS="
-community/os/x86_64
-community-debug/os/x86_64
+core-testing/os/x86_64
+core-testing-debug/os/x86_64
+extra-testing/os/x86_64
+extra-testing-debug/os/x86_64
 core/os/x86_64
 core-debug/os/x86_64
 extra/os/x86_64
@@ -112,18 +114,18 @@ mkdir -p downloads symbols tmp
 packages="
 amdvlk
 apitrace
-atk
 at-spi2-atk
 at-spi2-core
+atk
 cairo
-jemalloc
-libcups
 dbus
 dbus-glib
 dconf
 egl-wayland
 expat
 ffmpeg
+firefox
+firefox-developer-edition
 gcc-libs
 gdk-pixbuf2
 glib2
@@ -134,7 +136,9 @@ gvfs
 highway
 intel-gmmlib
 intel-media-driver
+jemalloc
 libcloudproviders
+libcups
 libdrm
 libffi
 libglvnd
