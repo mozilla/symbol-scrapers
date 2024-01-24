@@ -7,8 +7,10 @@ export DEBUGINFOD_URLS="https://debuginfod.archlinux.org/"
 URL="https://geo.mirror.pkgbuild.com"
 
 REPOS="
-community/os/x86_64
-community-debug/os/x86_64
+core-testing/os/x86_64
+core-testing-debug/os/x86_64
+extra-testing/os/x86_64
+extra-testing-debug/os/x86_64
 core/os/x86_64
 core-debug/os/x86_64
 extra/os/x86_64
