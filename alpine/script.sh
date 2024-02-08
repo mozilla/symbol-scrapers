@@ -5,21 +5,23 @@
 
 . $(dirname $0)/../common.sh
 
-URL="http://dl-cdn.alpinelinux.org/alpine/"
+URL="http://dl-cdn.alpinelinux.org/alpine"
+
+VERSIONS="
+edge
+v3.17
+v3.18
+v3.19
+"
 
 REPOS="
-edge/main/x86_64
-edge/community/x86_64
-v3.17/main/x86_64
-v3.17/community/x86_64
-v3.18/main/x86_64
-v3.18/community/x86_64
-v3.19/main/x86_64
-v3.19/community/x86_64
+main/x86_64
+community/x86_64
 "
 
 get_package_urls() {
-  local package_name="${1}"
+  # Alpine servers have the '+' character encoded in the URLs
+  local package_name=$(echo "${1}" | sed -e 's/+/\%2B/g')
   local dbg_package_name="${package_name}-dbg"
   local url="${URL}"
 
@@ -28,14 +30,17 @@ get_package_urls() {
 }
 
 get_package_indexes() {
+  local version="${1}"
   echo "${REPOS}" | while read line; do
     [ -z "${line}" ] && continue
-    echo "${URL}/${line}/"
+    echo "${URL}/${version}/${line}/"
   done | sort -u > indexes.txt
 }
 
 fetch_packages() {
-  get_package_indexes
+  local packages="${1}"
+  local version="${2}"
+  get_package_indexes "${version}"
 
   sort indexes.txt | ${WGET} -o wget_packages_urls.log -k -i -
 
@@ -93,122 +98,6 @@ function unpack_package() {
     fi
   fi
 }
-
-function remove_temp_files() {
-  rm -rf downloads symbols packages debug-packages tmp \
-         symbols*.zip indexes.txt packages.txt unfiltered-packages.txt \
-         crashes.list symbols.list
-}
-
-remove_temp_files
-mkdir -p downloads symbols tmp
-
-packages="
-alsa-lib
-aom-libs
-brotli-libs
-busybox-binsh
-cairo
-cairo-gobject cairo
-cups-libs
-dbus-libs
-ffmpeg-libavcodec
-ffmpeg-libavutil
-ffmpeg-libswresample
-firefox
-firefox-esr
-fontconfig
-freetype
-fribidi
-gdk-pixbuf
-glib
-graphite2
-gtk+3.0
-harfbuzz
-icu-libs
-lame-libs
-libatk-1.0
-libatk-bridge-2.0
-libbsd
-libbz2
-libcrypto3
-libdav1d
-libdrm
-libepoxy
-libevent
-libexpat
-libffi
-libgcc
-libintl
-libjpeg-turbo
-libjxl
-libmount
-libpciaccess
-libpng
-libssl3
-libstdc++
-libtheora
-libva
-libvorbis
-libvpx
-libwebp
-libwebpdemux
-libwebpmux
-libx11
-libxau
-libxbcommon
-libxcb
-libxcomposite
-libxcursor
-libxdamage
-libxdmcp
-libxext
-libxfixes
-libxft
-libxi
-libxinerama
-libxrandr
-libxrender
-libxshmfence
-libxxf86vm
-mesa
-mesa-dri-gallium mesa
-mesa-egl mesa
-mesa-gbm mesa
-mesa-gl mesa
-mesa-glapi mesa
-mesa-gles mesa
-mesa-osmesa mesa
-mesa-va-gallium mesa
-mesa-vdpau-gallium mesa
-mesa-vulkan-ati mesa
-mesa-vulkan-intel mesa
-mesa-vulkan-layers mesa
-mesa-vulkan-swrast mesa
-mesa-xatracker mesa
-musl
-nspr
-nss
-opus
-pango
-pciutils-libs
-pcre2
-pipewire
-pipewire-libs
-pixman
-rav1e-libs
-scudo-malloc
-sqlite-libs
-wayland
-wayland-libs-client wayland
-wayland-libs-cursor wayland
-wayland-libs-egl wayland
-x264-libs
-x265-libs
-zlib
-"
-
-fetch_packages "${packages}"
 
 function process_packages() {
   local package_name="${1}"
@@ -280,17 +169,142 @@ function process_packages() {
   done
 }
 
-echo "${packages}" | while read line; do
-  [ -z "${line}" ] && continue
-  process_packages ${line}
+function remove_temp_files() {
+  rm -rf downloads symbols packages tmp symbols*.zip indexes.txt packages.txt \
+         unfiltered-packages.txt crashes.list symbols.list
+}
+
+remove_temp_files
+mkdir -p symbols
+
+packages="
+alsa-lib
+aom-libs
+brotli-libs
+busybox-binsh
+cairo
+cairo-gobject cairo
+cups-libs
+dconf
+dbus-libs
+ffmpeg-libavcodec
+ffmpeg-libavutil
+ffmpeg-libswresample
+firefox
+firefox-esr
+fontconfig
+freetype
+fribidi
+gdk-pixbuf
+glib
+graphite2
+gtk+3.0
+harfbuzz
+icu-libs
+lame-libs
+libatk-1.0
+libatk-bridge-2.0
+libbsd
+libbz2
+libcrypto3
+libdav1d
+libdrm
+libepoxy
+libevent
+libexpat
+libffi
+libgcc
+libintl
+libjpeg-turbo
+libjxl
+libmount
+libpciaccess
+libpng
+libpulse
+libssl3
+libstdc++
+libtheora
+libva
+libvorbis
+libvpx
+libwebp
+libwebpdemux
+libwebpmux
+libx11
+libxau
+libxbcommon
+libxcb
+libxcomposite
+libxcursor
+libxdamage
+libxdmcp
+libxext
+libxfixes
+libxft
+libxi
+libxinerama
+libxrandr
+libxrender
+libxshmfence
+libxxf86vm
+llvm17-libs
+mesa
+mesa-dri-gallium mesa
+mesa-egl mesa
+mesa-gbm mesa
+mesa-gl mesa
+mesa-glapi mesa
+mesa-gles mesa
+mesa-osmesa mesa
+mesa-va-gallium mesa
+mesa-vdpau-gallium mesa
+mesa-vulkan-ati mesa
+mesa-vulkan-intel mesa
+mesa-vulkan-layers mesa
+mesa-vulkan-swrast mesa
+mesa-xatracker mesa
+musl
+nspr
+nss
+opus
+pango
+pciutils-libs
+pcre2
+pipewire
+pipewire-libs
+pixman
+rav1e-libs
+scudo-malloc
+sqlite-libs
+wayland
+wayland-libs-client wayland
+wayland-libs-cursor wayland
+wayland-libs-egl wayland
+x264-libs
+x265-libs
+zlib
+"
+
+echo "${VERSIONS}" | while read version; do
+  [ -z "${version}" ] && continue
+  mkdir -p downloads tmp
+  fetch_packages "${packages}" "${version}"
+
+  echo "${packages}" | while read line; do
+    [ -z "${line}" ] && continue
+    process_packages ${line}
+  done
+
+  cat unfiltered-packages.txt | rev | cut -d'/' -f1 | rev | sed -e "s/$/,$(date "+%s")/" >> SHA256SUMS.new
+  rm -rf downloads tmp indexes.txt packages.txt unfiltered-packages.txt
 done
+
+mv -f SHA256SUMS.new SHA256SUMS
 
 create_symbols_archive
 
 upload_symbols
 
 reprocess_crashes
-
-update_sha256sums
 
 remove_temp_files
