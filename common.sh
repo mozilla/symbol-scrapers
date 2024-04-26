@@ -5,7 +5,10 @@ export LC_ALL=C
 unalias -a
 
 cpu_count=$(grep -c ^processor /proc/cpuinfo)
-declare -r artifact_filename="target.crashreporter-symbols.zip"
+artifact_index=0
+artifact_filenames=("target.crashreporter-symbols.${artifact_index}.zip")
+# split the zip file if it gets bigger than 1GB
+artifact_max_size=$((1<<30))
 
 function is_taskcluster()
 {
@@ -32,14 +35,15 @@ function download_taskcluster_secret()
 
 function upload_symbols_directly()
 {
-  local myfile="${artifact_filename}"
-  printf "Uploading ${myfile}\n"
-  while : ; do
-    res=$(curl -H "auth-token: ${SYMBOLS_API_TOKEN}" --form ${myfile}=@${myfile} https://symbols.mozilla.org/upload/)
-    if [ -n "${res}" ]; then
-      echo "${res}"
-      break
-    fi
+  for myfile in "${artifact_filenames[@]}"; do
+    printf "Uploading ${myfile}\n"
+    while : ; do
+      res=$(curl -H "auth-token: ${SYMBOLS_API_TOKEN}" --form ${myfile}=@${myfile} https://symbols.mozilla.org/upload/)
+      if [ -n "${res}" ]; then
+        echo "${res}"
+        break
+      fi
+    done
   done
 }
 
@@ -107,7 +111,15 @@ function get_soname {
 
 function create_symbols_archive() {
   cd symbols
-  7zz a "../${artifact_filename}" $(ls -A)
+  archive="${artifact_filenames[-1]}"
+  for path in $(ls -A); do
+    7zz a "../${archive}" "${path}"
+    if [ $(stat -c "%s" "../${archive}") -gt $artifact_max_size ]; then
+      artifact_index=$((artifact_index + 1))
+      archive="target.crashreporter-symbols.${artifact_index}.zip"
+      artifact_filenames+=("${archive}")
+    fi
+  done
   cd ..
 }
 
@@ -127,8 +139,8 @@ function upload_symbols()
   if is_taskcluster; then
     # When we are running on taskcluster, repackage everything to
     # /builds/worker/artifacts/target.crashreporter-symbols.zip
-    mv "${artifact_filename}" "/builds/worker/artifacts/${artifact_filename}"
-    ls -hal "/builds/worker/artifacts/${artifact_filename}"
+    mv "${artifact_filenames[@]}" "/builds/worker/artifacts/"
+    ls -hal "/builds/worker/artifacts/"
   else
     # Otherwise perform the upload ourselves
     upload_symbols_directly
@@ -175,7 +187,7 @@ function update_sha256sums() {
 }
 
 if [ -z "${DUMP_SYMS}" ]; then
-  printf "You must set the \`DUMP_SYMS\` enviornment variable before running the script\n"
+  printf "You must set the \`DUMP_SYMS\` environment variable before running the script\n"
   exit 1
 fi
 
@@ -184,11 +196,11 @@ fi
 
 if ! is_taskcluster; then
   if [ -z "${SYMBOLS_API_TOKEN}" ]; then
-    printf "You must set the \`SYMBOLS_API_TOKEN\` enviornment variable before running the script\n"
+    printf "You must set the \`SYMBOLS_API_TOKEN\` environment variable before running the script\n"
     exit 1
   fi
   if [ -z "${CRASHSTATS_API_TOKEN}" ]; then
-    printf "You must set the \`CRASHSTATS_API_TOKEN\` enviornment variable before running the script\n"
+    printf "You must set the \`CRASHSTATS_API_TOKEN\` environment variable before running the script\n"
     exit 1
   fi
 fi
