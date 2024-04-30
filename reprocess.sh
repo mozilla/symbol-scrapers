@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 . $(dirname $0)/common.sh
 
 if [ -z "${TASK_ID}" ]; then
@@ -17,12 +19,16 @@ if [ -z "${CRASHSTATS_API_TOKEN}" ]; then
   exit 1
 fi
 
-SYMBOLS_ARCHIVE_URL="$1"
-SYMBOLS_ARCHIVE=$(basename "${SYMBOLS_ARCHIVE_URL}")
-
-wget "${SYMBOLS_ARCHIVE_URL}"
-
 mkdir -p symbols/
-unzip -d symbols/ "${SYMBOLS_ARCHIVE}"
+
+SYMBOLS_TASK_ID="$1"
+curl -f -o artifacts.json "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/${SYMBOLS_TASK_ID}/artifacts"
+for file in $(jq -r '.artifacts[].name' < artifacts.json); do
+    if [[ "${file}" =~ ^public/build/target.crashreporter-symbols.* ]]; then
+        base=$(basename "$file")
+        curl -L -f -o "$base" "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/${SYMBOLS_TASK_ID}/artifacts/${file}"
+        unzip -d symbols/ "$base"
+    fi
+done
 
 reprocess_crashes
