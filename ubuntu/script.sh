@@ -123,15 +123,20 @@ gvfs g/gvfs
 intel-media-va-driver i/intel-media-driver
 intel-media-va-driver-non-free i/intel-media-driver-non-free
 libasound2 a/alsa-lib
+libasound2t64 a/alsa-lib
 libatk1.0-0 a/atk1.0
+libatk1.0-0t64 a/atk1.0
 libatk-bridge2.0-0 a/at-spi2-atk
+libatk-bridge2.0-0t64 a/at-spi2-atk
 libatspi2.0-0 a/at-spi2-core
+libatspi2.0-0t64 a/at-spi2-core
 libavcodec[0-9][0-9] f/ffmpeg
 libavutil[0-9][0-9] f/ffmpeg
 libc6 g/glibc
 libcairo2 c/cairo
 libcloudproviders0 libc/libcloudproviders
 libcups2 c/cups
+libcups2t64 c/cups
 libdbus-1-3 d/dbus
 libdbus-glib-1-2 d/dbus-glib
 libdrm2 libd/libdrm
@@ -144,6 +149,7 @@ libegl1-mesa-drivers m/mesa
 libegl-mesa0 m/mesa
 libepoxy0 libe/libepoxy
 libevent-2.[0-9]-[0-9] libe/libevent libevent libevent-2.[0-9]-[0-9]
+libevent-2.[0-9]-[0-9]t64 libe/libevent libevent libevent-2.[0-9]-[0-9]t64
 libexpat1 e/expat
 libfam0 f/fam
 libffi[0-9] libf/libffi
@@ -160,10 +166,13 @@ libgdk-pixbuf-2.0-0 g/gdk-pixbuf
 libgdk-pixbuf2.0-0 g/gdk-pixbuf
 libgl1-mesa-dri m/mesa
 libglib2.0-0 g/glib2.0
+libglib2.0-0t64 g/glib2.0
 libglx0 libg/libglvnd
 libglx-mesa0 m/mesa
 libgtk-3-0 g/gtk+3.0
+libgtk-3-0t64 g/gtk+3.0
 libhwy1 h/highway
+libhwy1t64 h/highway
 libibus-1.0-5 i/ibus
 libice6 libi/libice
 libicu[0-9][0-9] i/icu
@@ -178,9 +187,11 @@ libpcre2-8-0 p/pcre2
 libpcre3 p/pcre3
 libpcsclite1 p/pcsc-lite
 libpipewire-0.3-0 p/pipewire
+libpipewire-0.3-0t64 p/pipewire
 libpixman-1-0 p/pixman
 libpng12-0 libp/libpng
 libpng16-16 libp/libpng1.6
+libpng16-16t64 libp/libpng1.6
 libproxy1-plugin-gsettings libp/libproxy
 libproxy1v5 libp/libproxy
 libpulse0 p/pulseaudio
@@ -194,6 +205,7 @@ libstdc++6 g/gcc-12
 libstdc++6 g/gcc-13
 libsystemd0 s/systemd
 libtcmalloc-minimal4 g/google-perftools
+libtcmalloc-minimal4t64 g/google-perftools
 libthai0 libt/libthai
 libva2 libv/libva
 libvpx[0-9] libv/libvpx
