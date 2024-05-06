@@ -170,6 +170,7 @@ vulkan-radeon
 wayland
 x264
 x265
+zvbi
 "
 
 fetch_packages "${packages}"

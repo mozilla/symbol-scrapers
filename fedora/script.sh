@@ -188,10 +188,11 @@ systemd-libs s
 thunderbird t
 x264-libs x https://mirror.nl.leaseweb.net/rpmfusion/free/fedora
 x265-libs x https://mirror.nl.leaseweb.net/rpmfusion/free/fedora
-xvidcore x https://mirror.nl.leaseweb.net/rpmfusion/free/fedora
-zlib z
 xorg-x11-drv-nvidia-[0-9][0-9][0-9]xx-libs x https://mirror.nl.leaseweb.net/rpmfusion/nonfree/fedora
 xorg-x11-drv-nvidia-libs x https://mirror.nl.leaseweb.net/rpmfusion/nonfree/fedora
+xvidcore x https://mirror.nl.leaseweb.net/rpmfusion/free/fedora
+zlib z
+zvbi z
 "
 
 fetch_packages "${packages}"

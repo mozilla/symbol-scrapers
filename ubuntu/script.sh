@@ -219,6 +219,7 @@ libxkbcommon0 libx/libxkbcommon
 libxml2 libx/libxml2
 libxss1 libx/libxss
 libxvidcore4 x/xvidcore
+libzvbi0 z/zvbi
 mesa-va-drivers m/mesa
 mesa-vulkan-drivers m/mesa
 opensc-pkcs11 o/opensc

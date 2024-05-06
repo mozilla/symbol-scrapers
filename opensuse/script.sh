@@ -220,6 +220,7 @@ libxkbcommon0
 libxml2-2
 libxvidcore4
 libz1
+libzvbi0
 Mesa-dri
 Mesa-dri-nouveau
 Mesa-gallium
