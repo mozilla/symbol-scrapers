@@ -112,7 +112,7 @@ function get_soname {
 function create_symbols_archive() {
   cd symbols
   archive="${artifact_filenames[-1]}"
-  for path in $(ls -A); do
+  for path in $(find -type f -name '*.sym'); do
     7zz a "../${archive}" "${path}"
     if [ $(stat -c "%s" "../${archive}") -gt $artifact_max_size ]; then
       artifact_index=$((artifact_index + 1))
