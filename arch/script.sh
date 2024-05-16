@@ -89,19 +89,6 @@ function unpack_package() {
   fi
 }
 
-function find_debuginfo() {
-  local buildid=$(get_build_id "${1}")
-  local debuginfo=$(debuginfod-find debuginfo "${buildid}" 2>/dev/null)
-
-  if [ \( $? -eq 0 \) -a \( -n "${debuginfo}" \) ]; then
-    printf "${debuginfo}"
-    return
-  fi
-
-  local filename="${1##packages}"
-  find debug-packages -path "*${filename}.debug" -type f
-}
-
 function remove_temp_files() {
   rm -rf downloads symbols packages debug-packages tmp \
          symbols*.zip indexes.txt packages.txt unfiltered-packages.txt \
