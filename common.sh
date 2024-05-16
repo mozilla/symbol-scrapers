@@ -113,7 +113,7 @@ function create_symbols_archive() {
   cd symbols
   archive="${artifact_filenames[-1]}"
   for path in $(find -type f -name '*.sym'); do
-    7zz -spf a "../${archive}" "${path##./}"
+    7zz -bd -bso0 -spf a "../${archive}" "${path##./}"
     if [ $(stat -c "%s" "../${archive}") -gt $artifact_max_size ]; then
       artifact_index=$((artifact_index + 1))
       archive="target.crashreporter-symbols.${artifact_index}.zip"
