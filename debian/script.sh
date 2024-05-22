@@ -177,6 +177,9 @@ libibus-1.0-5 i/ibus
 libice6 libi/libice
 libicu[0-9][0-9] i/icu
 libjemalloc2 j/jemalloc
+libllvm16 l/llvm-toolchain-16
+libllvm17 l/llvm-toolchain-17
+libllvm18 l/llvm-toolchain-18
 libnspr4 n/nspr
 libnss3 n/nss
 libnss-ldap libn/libnss-ldap
