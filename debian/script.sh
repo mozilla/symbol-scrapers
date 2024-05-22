@@ -161,6 +161,7 @@ libgcc-s1 g/gcc-10
 libgcc-s1 g/gcc-11
 libgcc-s1 g/gcc-12
 libgcc-s1 g/gcc-13
+libgcc-s1 g/gcc-14
 libgdk-pixbuf-2.0-0 g/gdk-pixbuf
 libgdk-pixbuf2.0-0 g/gdk-pixbuf
 libgl1-mesa-dri m/mesa
@@ -202,6 +203,7 @@ libstdc++6 g/gcc-10
 libstdc++6 g/gcc-11
 libstdc++6 g/gcc-12
 libstdc++6 g/gcc-13
+libstdc++6 g/gcc-14
 libsystemd0 s/systemd
 libtcmalloc-minimal4 g/google-perftools
 libtcmalloc-minimal4t64 g/google-perftools
