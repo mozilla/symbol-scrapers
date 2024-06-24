@@ -127,6 +127,7 @@ jemalloc
 libcloudproviders
 libcups
 libdrm
+libevent
 libffi
 libglvnd
 libibus
