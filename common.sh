@@ -171,7 +171,7 @@ function reprocess_crashes()
     mv -f crashes.list.sorted crashes.list
 
     if [ -n "$(cat crashes.list)" ]; then
-      cat crashes.list | reprocess --sleep 5
+      cat crashes.list | reprocess --sleep 5 --allow-many
       if [ $? -ne 0 ]; then
         echo "Error doing reprocesss: aborting"
         exit 1
