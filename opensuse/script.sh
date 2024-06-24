@@ -7,37 +7,37 @@ export DEBUGINFOD_URLS="https://debuginfod.opensuse.org/"
 URL="https://download.opensuse.org"
 
 REPOS="
-debug/distribution/leap/15.4/repo/oss/x86_64
 debug/distribution/leap/15.5/repo/oss/x86_64
 debug/distribution/leap/15.6/repo/oss/x86_64
+debug/distribution/leap/15.7/repo/oss/x86_64
 
-debug/update/leap/15.4/oss/x86_64
-debug/update/leap/15.4-test/oss/x86_64
 debug/update/leap/15.5/oss/x86_64
 debug/update/leap/15.5-test/oss/x86_64
 debug/update/leap/15.6/oss/x86_64
 debug/update/leap/15.6-test/oss/x86_64
+debug/update/leap/15.7/oss/x86_64
+debug/update/leap/15.7-test/oss/x86_64
 
-distribution/leap/15.4/repo/oss/x86_64
 distribution/leap/15.5/repo/oss/x86_64
 distribution/leap/15.6/repo/oss/x86_64
+distribution/leap/15.7/repo/oss/x86_64
 
 tumbleweed/repo/oss/x86_64
 tumbleweed/repo/debug/x86_64
 
-update/leap/15.4/oss/x86_64/
-update/leap/15.4-test/oss/x86_64
 update/leap/15.5/oss/x86_64/
 update/leap/15.5-test/oss/x86_64
 update/leap/15.6/oss/x86_64/
 update/leap/15.6-test/oss/x86_64
+update/leap/15.7/oss/x86_64/
+update/leap/15.7-test/oss/x86_64
 
-repositories/mozilla/openSUSE_Leap_15.4/x86_64
-repositories/mozilla/openSUSE_Leap_15.4_debug/x86_64
 repositories/mozilla/openSUSE_Leap_15.5/x86_64
 repositories/mozilla/openSUSE_Leap_15.5_debug/x86_64
 repositories/mozilla/openSUSE_Leap_15.6/x86_64
 repositories/mozilla/openSUSE_Leap_15.6_debug/x86_64
+repositories/mozilla/openSUSE_Leap_15.7/x86_64
+repositories/mozilla/openSUSE_Leap_15.7_debug/x86_64
 repositories/mozilla/openSUSE_Tumbleweed/x86_64
 repositories/mozilla%3A/Factory/openSUSE_Factory/x86_64
 "
@@ -45,9 +45,9 @@ repositories/mozilla%3A/Factory/openSUSE_Factory/x86_64
 URL2="https://ftp.gwdg.de/pub/linux/misc/packman/suse"
 
 REPOS2="
-openSUSE_Leap_15.4/Essentials/x86_64
 openSUSE_Leap_15.5/Essentials/x86_64
 openSUSE_Leap_15.6/Essentials/x86_64
+openSUSE_Leap_15.7/Essentials/x86_64
 openSUSE_Tumbleweed/Essentials/x86_64
 "
 
