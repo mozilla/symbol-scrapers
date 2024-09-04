@@ -150,9 +150,11 @@ nspr
 nss
 numactl
 nvidia-utils
+pango
 pcre2
 pipewire
 pixman
+systemd-libs
 vulkan-intel
 vulkan-radeon
 wayland
