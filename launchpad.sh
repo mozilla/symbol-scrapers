@@ -93,7 +93,13 @@ function get_snap_and_debug_urls()
 function fetch_packages()
 {
   local pkg_name="${1}"
-  sort packages_${pkg_name}.txt | wget -o wget_packages_${pkg_name}.log --progress=dot:mega -P downloads/${pkg_name}/ -c -i -
+  sort packages_${pkg_name}.txt | while read -r line; do
+     BUILDID=$(echo "$line" | sed -e 's/.*+build\///g' -e 's/\/+files.*//g');
+     BNAME=$(basename "$line" | cut -d'.' -f1,2);
+     EXT=$(basename "$line" | cut -d'.' -f3);
+     TARGET_FNAME="${BNAME}_${BUILDID}.${EXT}";
+     echo -e "$line\n out=$TARGET_FNAME";
+  done | aria2c --show-console-readout=false --summary-interval=0 --console-log-level=error --log-level=notice --log wget_packages_${pkg_name}.log -d downloads/${pkg_name} --auto-file-renaming=false -c -i -
   rev packages_${pkg_name}.txt | cut -d'/' -f1 | rev > package_names_${pkg_name}.txt
 }
 
@@ -101,7 +107,7 @@ function verify_processed()
 {
   local pkg_name="${1}"
   local failed=0
-  for f in $(grep "saved" wget_packages_${pkg_name}.log | awk '{ print $6 }' | sed -e "s/'downloads\/${pkg_name}\///g" -e "s/'$//g" | grep -F ".debug");
+  for f in $(grep "complete" wget_packages_${pkg_name}.log | sed -e "s/.*downloads\/${pkg_name}\///g" | grep -F ".debug");
   do
     # We dont want regex to interfere with dots
     if grep -q -F "${pkg_name},${f}," SHA256SUMS; then
@@ -184,7 +190,7 @@ function process_snap_packages() {
   local store_name="${2}"
 
   for arch in $(get_valid_arches); do
-    find downloads/${package_name} -name "${store_name}*_[0-9]*_${arch}.snap" -type f | while read package; do
+    find downloads/${package_name} -name "${store_name}*_[0-9]*_${arch}*.snap" -type f | while read package; do
       local package_filename="${package##downloads/${package_name}/}"
       local debug_filename=$(get_debug_package "${package_filename}")
       if ! maybe_skip_if_sha256sums "${package_filename}" "${pkg_name}" || ! maybe_skip_if_sha256sums "${debug_filename}" "${pkg_name}"; then
