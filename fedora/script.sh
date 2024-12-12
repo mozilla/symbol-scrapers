@@ -6,13 +6,14 @@ export DEBUGINFOD_URLS="https://debuginfod.fedoraproject.org/"
 
 URL="https://fedora.mirror.wearetriple.com/linux"
 RELEASES="40 41 42 test/42_Beta"
+ARCHITECTURES="aarch64 x86_64"
 
 get_package_urls() {
   local package_name=${1}
   local dbg_package_name="${package_name}-debuginfo"
   local url=${3:-$URL}
 
-  find . -name "index.html*" -exec grep -h -o "${url}.*/\(${package_name}-[0-9].*.x86_64.rpm\|${dbg_package_name}-[0-9].*.x86_64.rpm\)\"" {} \; | \
+  find . -name "index.html*" -exec grep -h -o "${url}.*/\(${package_name}-[0-9].*.\(x86_64\|aarch64\).rpm\|${dbg_package_name}-[0-9].*.\(x86_64\|aarch64\).rpm\)\"" {} \; | \
   cut -d'"' -f1
 }
 
@@ -30,20 +31,22 @@ get_package_indexes() {
     tree_dir="tree"
   fi
 
-  for release in ${RELEASES}; do
-    printf "${url}/releases/${release}/Everything/x86_64/os/Packages/${pkg_path}/\n"
-    printf "${url}/releases/${release}/Everything/x86_64/debug/${tree_dir}/${packages_dir}/${pkg_path}/\n"
-    printf "${url}/updates/${release}/${everything_dir}/x86_64/${packages_dir}/${pkg_path}/\n"
-    printf "${url}/updates/${release}/${everything_dir}/x86_64/debug/${packages_dir}/${pkg_path}/\n"
-    printf "${url}/updates/testing/${release}/${everything_dir}/x86_64/${packages_dir}/${pkg_path}/\n"
-    printf "${url}/updates/testing/${release}/${everything_dir}/x86_64/debug/${packages_dir}/${pkg_path}/\n"
-    printf "${url}/development/${release}/Everything/x86_64/os/Packages/${pkg_path}/\n"
-    printf "${url}/development/${release}/Everything/x86_64/debug/${tree_dir}/${packages_dir}/${pkg_path}/\n"
-  done
+  for arch in ${ARCHITECTURES}; do
+    for release in ${RELEASES}; do
+      printf "${url}/releases/${release}/Everything/${arch}/os/Packages/${pkg_path}/\n"
+      printf "${url}/releases/${release}/Everything/${arch}/debug/${tree_dir}/${packages_dir}/${pkg_path}/\n"
+      printf "${url}/updates/${release}/${everything_dir}/${arch}/${packages_dir}/${pkg_path}/\n"
+      printf "${url}/updates/${release}/${everything_dir}/${arch}/debug/${packages_dir}/${pkg_path}/\n"
+      printf "${url}/updates/testing/${release}/${everything_dir}/${arch}/${packages_dir}/${pkg_path}/\n"
+      printf "${url}/updates/testing/${release}/${everything_dir}/${arch}/debug/${packages_dir}/${pkg_path}/\n"
+      printf "${url}/development/${release}/Everything/${arch}/os/Packages/${pkg_path}/\n"
+      printf "${url}/development/${release}/Everything/${arch}/debug/${tree_dir}/${packages_dir}/${pkg_path}/\n"
+    done
 
-  # Rawhide
-  printf "${url}/development/rawhide/Everything/x86_64/os/Packages/${pkg_path}/\n"
-  printf "${url}/development/rawhide/Everything/x86_64/debug/${tree_dir}/${packages_dir}/${pkg_path}/\n"
+    # Rawhide
+    printf "${url}/development/rawhide/Everything/${arch}/os/Packages/${pkg_path}/\n"
+    printf "${url}/development/rawhide/Everything/${arch}/debug/${tree_dir}/${packages_dir}/${pkg_path}/\n"
+  done
 }
 
 fetch_packages() {
