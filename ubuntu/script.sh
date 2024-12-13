@@ -26,17 +26,17 @@ get_package_urls() {
   fi
 
   ${WGET} -o wget_packages_urls.log -k ${urls}
-  find . -name "index.html*" -exec grep -o "${url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
-  find . -name "index.html*" -exec grep -o "${url}/${universe_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
-  find . -name "index.html*" -exec grep -o "${url}/${multiverse_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
-  find . -name "index.html*" -exec grep -o "${ddeb_url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
-  find . -name "index.html*" -exec grep -o "${ddeb_url}/${universe_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
-  find . -name "index.html*" -exec grep -o "${ddeb_url}/${multiverse_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
+  find . -name "index.html*" -exec grep -o "${url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\|arm64\).d.*eb\"" {} \; | cut -d'"' -f1
+  find . -name "index.html*" -exec grep -o "${url}/${universe_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\|arm64\).d.*eb\"" {} \; | cut -d'"' -f1
+  find . -name "index.html*" -exec grep -o "${url}/${multiverse_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\|arm64\).d.*eb\"" {} \; | cut -d'"' -f1
+  find . -name "index.html*" -exec grep -o "${ddeb_url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\|arm64\).d.*eb\"" {} \; | cut -d'"' -f1
+  find . -name "index.html*" -exec grep -o "${ddeb_url}/${universe_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\|arm64\).d.*eb\"" {} \; | cut -d'"' -f1
+  find . -name "index.html*" -exec grep -o "${ddeb_url}/${multiverse_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\|arm64\).d.*eb\"" {} \; | cut -d'"' -f1
 
   if [ -n "${alt_url}" ]; then
-    find . -name "index.html*" -exec grep -o "${alt_url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
-    find . -name "index.html*" -exec grep -o "${alt_url}/${universe_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
-    find . -name "index.html*" -exec grep -o "${alt_url}/${multiverse_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
+    find . -name "index.html*" -exec grep -o "${alt_url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\|arm64\).d.*eb\"" {} \; | cut -d'"' -f1
+    find . -name "index.html*" -exec grep -o "${alt_url}/${universe_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\|arm64\).d.*eb\"" {} \; | cut -d'"' -f1
+    find . -name "index.html*" -exec grep -o "${alt_url}/${multiverse_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\|arm64\).d.*eb\"" {} \; | cut -d'"' -f1
   fi
 
   find . -name "index.html*" -exec rm -f {} \;
@@ -238,7 +238,7 @@ fetch_packages "${packages}"
 
 function process_packages() {
   local package_name="${1}"
-  for arch in i386 amd64; do
+  for arch in i386 amd64 arm64; do
     find downloads -name "${package_name}_[0-9]*_${arch}.deb" -type f | grep -v dbg | while read package; do
       local package_filename="${package##downloads/}"
       local version=$(get_version "${package_name}" "${package_filename}")
