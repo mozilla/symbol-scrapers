@@ -95,11 +95,9 @@ function fetch_packages()
   local pkg_name="${1}"
   sort packages_${pkg_name}.txt | while read -r line; do
      BUILDID=$(echo "$line" | sed -e 's/.*+build\///g' -e 's/\/+files.*//g');
-     BNAME=$(basename "$line" | cut -d'.' -f1,2);
-     EXT=$(basename "$line" | cut -d'.' -f3);
-     TARGET_FNAME="${BNAME}_${BUILDID}.${EXT}";
+     TARGET_FNAME=$(basename "$line" | sed -e "s/\.debug$/_${BUILDID}.debug/" | sed -e "s/\.snap$/_${BUILDID}.snap/")
      echo -e "$line\n out=$TARGET_FNAME";
-  done | aria2c --show-console-readout=false --summary-interval=0 --console-log-level=error --log-level=notice --log wget_packages_${pkg_name}.log -d downloads/${pkg_name} --auto-file-renaming=false -c -i -
+  done | tee package_buildid_${pkg_name}.txt | aria2c --show-console-readout=false --summary-interval=0 --console-log-level=error --log-level=notice --log wget_packages_${pkg_name}.log -d downloads/${pkg_name} --auto-file-renaming=false -c -i -
   rev packages_${pkg_name}.txt | cut -d'/' -f1 | rev > package_names_${pkg_name}.txt
 }
 
