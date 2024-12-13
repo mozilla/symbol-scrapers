@@ -7,8 +7,8 @@ unalias -a
 cpu_count=$(grep -c ^processor /proc/cpuinfo)
 artifact_index=0
 artifact_filenames=("target.crashreporter-symbols.${artifact_index}.zip")
-# split the zip file if it gets bigger than 1GB
-artifact_max_size=$((1<<30))
+# don't try to put more than 3 GiB of symbols into a single archive
+symbols_max_size=$(((1<<30) * 3))
 
 function is_taskcluster()
 {
@@ -112,14 +112,26 @@ function get_soname {
 function create_symbols_archive() {
   cd symbols
   archive="${artifact_filenames[-1]}"
+  symbols_size=0
+  paths=""
   for path in $(find -type f -name '*.sym'); do
-    7zz -bd -bso0 -spf a "../${archive}" "${path##./}"
-    if [ $(stat -c "%s" "../${archive}") -gt $artifact_max_size ]; then
+    symbols_size=$((symbols_size + $(stat -c "%s" "${path}")))
+    paths="${paths} ${path##./}"
+
+    if [ ${symbols_size} -gt ${symbols_max_size} ]; then
+      # Create an archive whenever we got over the maximum size
+      7zz -bd -bso0 -spf a "../${archive}" ${paths}
       artifact_index=$((artifact_index + 1))
       archive="target.crashreporter-symbols.${artifact_index}.zip"
       artifact_filenames+=("${archive}")
+      symbols_size=0
+      paths=""
     fi
   done
+
+  # Create the last archive
+  7zz -bd -bso0 -spf a "../${archive}" ${paths}
+
   cd ..
 }
 
