@@ -2,6 +2,13 @@
 
 API_ROOT="https://api.launchpad.net/devel"
 
+function get_branches()
+{
+  local team_name=$1
+  find_branches="${API_ROOT}/+snaps?ws.op=findByOwner&owner=https://api.launchpad.net/devel/~${team_name}"
+  curl -sSL "${find_branches}" | jq -r '.entries | .[] | .name'
+}
+
 function get_snaps()
 {
   local search_term=$1
