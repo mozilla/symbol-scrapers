@@ -10,8 +10,9 @@ INTEL_SYMBOL_SERVER="SRV*store*https://msdl.microsoft.com/download/symbols;SRV*s
 NVIDIA_PATH="download/nvidia-geforce-graphics-drivers/"
 NVIDIA_SYMBOL_SERVER="SRV*store*https://msdl.microsoft.com/download/symbols;SRV*store*https://driver-symbols.nvidia.com"
 
-# Maximum number of drivers we'll process in one go, we don't want to put too
-# much load on TechPowerUp's resources.
+# Maximum number of drivers we'll process in one go. Set this before calling
+# fetch_and_process_drivers(). We don't want to put too much load on
+# TechPowerUp's resources.
 max_left_to_process=10
 
 # The first arguent is the path used to fetch the drivers, the second is the
@@ -81,7 +82,23 @@ function add_driver_to_list() {
   printf "${driver_name},${driver_date}\n" >> SHA256SUMS
 }
 
+# Filter out all drivers fetched before the cutoff date, this can be used to
+# force the script to re-scrape older drivers.
+function filter_sha256sum() {
+  local cutoff_date="1733958000"
+  cat SHA256SUMS | while read line; do
+      local driver_date=$(echo "${line}" | cut -d',' -f2)
+      if [ ${driver_date} -gt ${cutoff_date} ]; then
+          printf "${line}\n" > SHA256SUMS.filtered
+      fi
+  done
+
+  mv SHA256SUMS.filtered SHA256SUMS
+}
+
 mkdir -p downloads symbols
+
+filter_sha256sum
 
 fetch_and_process_drivers "${AMD_PATH}" "${AMD_SYMBOL_SERVER}"
 fetch_and_process_drivers "${INTEL_PATH}" "${INTEL_SYMBOL_SERVER}"
