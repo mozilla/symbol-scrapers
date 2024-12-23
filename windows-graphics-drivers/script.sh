@@ -82,23 +82,7 @@ function add_driver_to_list() {
   printf "${driver_name},${driver_date}\n" >> SHA256SUMS
 }
 
-# Filter out all drivers fetched before the cutoff date, this can be used to
-# force the script to re-scrape older drivers.
-function filter_sha256sum() {
-  local cutoff_date="1733958000"
-  cat SHA256SUMS | while read line; do
-      local driver_date=$(echo "${line}" | cut -d',' -f2)
-      if [ ${driver_date} -gt ${cutoff_date} ]; then
-          printf "${line}\n" > SHA256SUMS.filtered
-      fi
-  done
-
-  mv SHA256SUMS.filtered SHA256SUMS
-}
-
 mkdir -p downloads symbols
-
-filter_sha256sum
 
 fetch_and_process_drivers "${AMD_PATH}" "${AMD_SYMBOL_SERVER}"
 fetch_and_process_drivers "${INTEL_PATH}" "${INTEL_SYMBOL_SERVER}"
