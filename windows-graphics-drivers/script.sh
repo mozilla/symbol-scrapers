@@ -45,7 +45,8 @@ function fetch_and_process_drivers() {
 
         # We haven't seen this driver yet, process it
         download_driver "${url}" "${driver_id}"
-        7zz -otmp x "downloads/${driver_name}"
+        mkdir tmp
+        expand_archives "downloads/${driver_name}"
         dump_dlls tmp "${symbol_server}"
         rm -rf tmp "downloads/${driver_name}"
         add_driver_to_list "${driver_name}"
@@ -74,6 +75,23 @@ function download_driver() {
   local location=$(curl -s -i "${url}" -d "id=${driver_id}&server_id=${server_id}" | grep "^location:" | tr -d "\r" | cut -d' ' -f2)
   printf "Downloading ${driver_name} from ${location}\n"
   curl -s --output-dir downloads --remote-name "${location}"
+}
+
+function expand_archives() {
+  local path="${1}"
+  local output_dir="$(mktemp --tmpdir=tmp -d)"
+
+  7zz -bso0 -bd -o"${output_dir}" x "${path}"
+
+  # Unpack all packed DLLs
+  find "${output_dir}" -iname "*.dl_" -type f | while read dll; do
+    7zz -bso0 -bd -o"$(dirname ${dll})" x "${dll}"
+  done
+
+  # Recursively unpack other archives
+  find "${output_dir}" -iname "*.exe" -o -iname "*.cab" -o -iname "*.zip" -type f | while read archive; do
+    expand_archives "${archive}"
+  done
 }
 
 function dump_dlls() {
