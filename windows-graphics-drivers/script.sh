@@ -44,9 +44,7 @@ function fetch_and_process_drivers() {
         fi
 
         # We haven't seen this driver yet, process it
-        server_id=$(curl -s "${url}" -d "id=${driver_id}" | grep -m 1 -o "name=\"server_id\" value=\"[0-9]\+\"" | cut -d'"' -f4)
-        location=$(curl -s -i "${url}" -d "id=${driver_id}&server_id=${server_id}" | grep "^location:" | tr -d "\r" | cut -d' ' -f2)
-        curl -s --output-dir downloads --remote-name "${location}"
+        download_driver "${url}" "${driver_id}"
         7zz -otmp x "downloads/${driver_name}"
         dump_dlls tmp "${symbol_server}"
         rm -rf tmp "downloads/${driver_name}"
@@ -66,6 +64,16 @@ function fetch_and_process_drivers() {
 
   count=$(($(wc -l < SHA256SUMS) - count))
   max_left_to_process=$((max_left_to_process - count))
+}
+
+function download_driver() {
+  local url="${1}"
+  local driver_id="${2}"
+
+  local server_id=$(curl -s "${url}" -d "id=${driver_id}" | grep -m 1 -o "name=\"server_id\" value=\"[0-9]\+\"" | cut -d'"' -f4)
+  local location=$(curl -s -i "${url}" -d "id=${driver_id}&server_id=${server_id}" | grep "^location:" | tr -d "\r" | cut -d' ' -f2)
+  printf "Downloading ${driver_name} from ${location}\n"
+  curl -s --output-dir downloads --remote-name "${location}"
 }
 
 function dump_dlls() {
