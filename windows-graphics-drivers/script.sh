@@ -48,11 +48,7 @@ function fetch_and_process_drivers() {
         location=$(curl -s -i "${url}" -d "id=${driver_id}&server_id=${server_id}" | grep "^location:" | tr -d "\r" | cut -d' ' -f2)
         curl -s --output-dir downloads --remote-name "${location}"
         7zz -otmp x "downloads/${driver_name}"
-        find tmp -iname "*.dll" | while read file; do
-          if file "${file}" | grep -q -v "Mono/.Net"; then
-            "${DUMP_SYMS}" --check-cfi --inlines --store symbols --symbol-server "${symbol_server}" --verbose error "${file}"
-          fi
-        done
+        dump_dlls tmp "${symbol_server}"
         rm -rf tmp "downloads/${driver_name}"
         add_driver_to_list "${driver_name}"
 
@@ -70,6 +66,18 @@ function fetch_and_process_drivers() {
 
   count=$(($(wc -l < SHA256SUMS) - count))
   max_left_to_process=$((max_left_to_process - count))
+}
+
+function dump_dlls() {
+  local path="${1}"
+  local symbol_server="${2}"
+
+  find tmp -iname "*.dll" | while read file; do
+    if file "${file}" | grep -q -v "Mono/.Net"; then
+      printf "Dumping ${file}\n"
+      "${DUMP_SYMS}" --inlines --store symbols --symbol-server "${symbol_server}" --verbose error "${file}"
+    fi
+  done
 }
 
 function remove_temp_files() {
