@@ -185,7 +185,8 @@ function reprocess_crashes()
     done
 
     sort -u crashes.list > crashes.list.sorted
-    mv -f crashes.list.sorted crashes.list
+    # We cap the number of crashes we reprocess at 50k
+    head -n 50000 crashes.list.sorted > crashes.list
 
     if [ -n "$(cat crashes.list)" ]; then
       cat crashes.list | reprocess --sleep 5 --allow-many
