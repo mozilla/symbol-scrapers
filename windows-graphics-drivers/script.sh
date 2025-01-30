@@ -80,17 +80,42 @@ function download_driver() {
 function expand_archives() {
   local path="${1}"
   local output_dir="$(mktemp --tmpdir=tmp -d)"
+  local archive_size=$(du -b -s "${path}" | cut -f1)
 
-  7zz -bso0 -bd -o"${output_dir}" x "${path}"
+  # Try unpacking the driver as a cabinet file. Note that we don't check the
+  # extension because they sometimes come as .exe, and it's not possible to
+  # tell them apart from regular executables when they do.
+  if ! cabextract -q -d "${output_dir}" "${path}"; then
+    # Not a cabinet file, try again with 7-zip
+    7zz -y -bso0 -bd -o"${output_dir}" x "${path}"
+  else
+    # Check that the unpacked size is larger than the archive. If it isn't then
+    # cabextract partially failed to unpack the archive but returned a success.
+    local unpacked_size=$(du -b -s "${output_dir}" | cut -f1)
 
-  # Unpack all packed DLLs
-  find "${output_dir}" -iname "*.dl_" -type f | while read dll; do
-    7zz -bso0 -bd -o"$(dirname ${dll})" x "${dll}"
+    if [ ${archive_size} -gt ${unpacked_size} ]; then
+        # Partial failure, better try again with 7-zip
+        rm -rf "${output_dir}"
+        7zz -y -bso0 -bd -o"${output_dir}" x "${path}"
+    fi
+  fi
+
+  # If we just expanded a cabinet archive, it might contain more archives, try
+  # expanding them too.
+  find "${output_dir}" -regex "${output_dir}/a[0-9]+" | while read archive; do
+    expand_archives "${archive}"
   done
 
-  # Recursively unpack other archives
-  find "${output_dir}" -iname "*.exe" -o -iname "*.cab" -o -iname "*.zip" -type f | while read archive; do
+  # Recursively unpack other archives. We look for four different types of
+  # archives at the moment: executables (which are often cabinet files),
+  # cabinet files, ZIP archives and MSI files.
+  find "${output_dir}" -iname "*.exe" -o -iname "*.cab" -o -iname "*.zip" -o -iname "*.msi" | while read archive; do
     expand_archives "${archive}"
+  done
+
+  # Finally unpack all packed DLLs.
+  find "${output_dir}" -iname "*.dl_" -type f | while read dll; do
+    7zz -y -bso0 -bd -o"$(dirname ${dll})" x "${dll}"
   done
 }
 
@@ -98,7 +123,10 @@ function dump_dlls() {
   local path="${1}"
   local symbol_server="${2}"
 
-  find tmp -iname "*.dll" | while read file; do
+  local count=$(find tmp -iname "*.dll" -type f | wc -l)
+  printf "Found ${count} DLLs\n"
+
+  find tmp -iname "*.dll" -type f | while read file; do
     if file "${file}" | grep -q -v "Mono/.Net"; then
       printf "Dumping ${file}\n"
       "${DUMP_SYMS}" --inlines --store symbols --symbol-server "${symbol_server}" --verbose error "${file}"
