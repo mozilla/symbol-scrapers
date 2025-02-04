@@ -185,11 +185,9 @@ function reprocess_crashes()
     done
 
     sort -u crashes.list > crashes.list.sorted
-    # We cap the number of crashes we reprocess at 50k
-    head -n 50000 crashes.list.sorted > crashes.list
 
     if [ -n "$(cat crashes.list)" ]; then
-      cat crashes.list | reprocess --sleep 5 --allow-many
+      cat crashes.list | reprocess --sleep 3 --allow-many
       if [ $? -ne 0 ]; then
         echo "Error doing reprocesss: aborting"
         exit 1
