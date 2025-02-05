@@ -229,7 +229,7 @@ mesa-va-drivers m/mesa
 mesa-vulkan-drivers m/mesa
 opensc-pkcs11 o/opensc
 p11-kit-modules p/p11-kit
-thunderbird t/thunderbird
+thunderbird t/thunderbird thunderbird thunderbird https://ppa.launchpadcontent.net/mozillateam/ppa/ubuntu/pool
 vdpau-va-driver v/vdpau-video
 zlib1g z/zlib
 "
