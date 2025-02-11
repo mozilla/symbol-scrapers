@@ -184,7 +184,9 @@ function reprocess_crashes()
       echo "${crashes}" >> crashes.list
     done
 
-    sort -u crashes.list > crashes.list.sorted
+    # Remove empty lines and deduplicate crashes
+    grep -v '^$' crashes.list | sort -u > crashes.list.dedup
+    mv -f crashes.list.dedup crashes.list
 
     if [ -n "$(cat crashes.list)" ]; then
       cat crashes.list | reprocess --sleep 3 --allow-many
