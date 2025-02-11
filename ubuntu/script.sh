@@ -19,7 +19,7 @@ get_package_urls() {
   local url="${URL}"
   local ddeb_url="${DDEB_URL}"
 
-  local urls="${url}/${main_path}/ ${url}/${universe_path}/ ${url}/${multiverse_path} ${ddeb_url}/${main_path}/ ${ddeb_url}/${universe_path}/ ${ddeb_url}/${multiverse_path}/"
+  local urls="${url}/${main_path}/ ${url}/${universe_path}/ ${url}/${multiverse_path}/ ${ddeb_url}/${main_path}/ ${ddeb_url}/${universe_path}/ ${ddeb_url}/${multiverse_path}/"
 
   if [ -n "${alt_url}" ]; then
     urls="${urls} ${alt_url}/${main_path}/ ${alt_url}/${universe_path}/ ${alt_url}/${multiverse_path}/"
@@ -185,6 +185,7 @@ libnspr4 n/nspr
 libnss3 n/nss
 libnss-ldap libn/libnss-ldap
 libnuma1 n/numactl
+libnvidia-decode-[0-9][0-9][0-9] n/nvidia-graphics-drivers-[0-9][0-9][0-9]
 libopus0 o/opus libopus
 libpango-1.0-0 p/pango1.0
 libpcre2-8-0 p/pcre2
@@ -227,6 +228,7 @@ libxvidcore4 x/xvidcore
 libzvbi0 z/zvbi
 mesa-va-drivers m/mesa
 mesa-vulkan-drivers m/mesa
+nvidia-vaapi-driver n/nvidia-vaapi-driver
 opensc-pkcs11 o/opensc
 p11-kit-modules p/p11-kit
 thunderbird t/thunderbird thunderbird thunderbird https://ppa.launchpadcontent.net/mozillateam/ppa/ubuntu/pool
