@@ -101,9 +101,9 @@ mkdir -p downloads symbols tmp
 packages="
 amdvlk
 apitrace
+atk
 at-spi2-atk
 at-spi2-core
-atk
 cairo
 dbus
 dbus-glib
@@ -139,6 +139,7 @@ libsm
 libspeechd
 libva
 libva-mesa-driver
+libva-nvidia-driver
 libva-vdpau-driver
 libx11
 libxcb
@@ -150,13 +151,17 @@ nspr
 nss
 numactl
 nvidia-utils
+opencl-nvidia
 pango
 pcre2
 pipewire
 pixman
 systemd-libs
+vulkan-icd-loader
 vulkan-intel
+vulkan-nouveau
 vulkan-radeon
+vulkan-swrast
 wayland
 x264
 x265

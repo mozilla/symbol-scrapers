@@ -134,6 +134,7 @@ libavutil[0-9][0-9] f/ffmpeg-dmo libavutil[0-9][0-9] libavutil[0-9][0-9] http://
 libc6 g/glibc
 libcairo2 c/cairo
 libcloudproviders0 libc/libcloudproviders
+libcuda1 n/nvidia-graphics-drivers
 libcups2 c/cups
 libcups2t64 c/cups
 libdbus-1-3 d/dbus
@@ -146,6 +147,7 @@ libdrm-radeon1 libd/libdrm
 libegl1 libg/libglvnd
 libegl1-mesa-drivers m/mesa
 libegl-mesa0 m/mesa
+libegl-nvidia0 n/nvidia-graphics-drivers
 libepoxy0 libe/libepoxy
 libevent-2.[0-9]-[0-9] libe/libevent libevent libevent-2.[0-9]-[0-9]
 libevent-2.[0-9]-[0-9]t64 libe/libevent libevent libevent-2.[0-9]-[0-9]t64
@@ -162,13 +164,18 @@ libgcc-s1 g/gcc-11
 libgcc-s1 g/gcc-12
 libgcc-s1 g/gcc-13
 libgcc-s1 g/gcc-14
+libgcc-s1 g/gcc-15
 libgdk-pixbuf-2.0-0 g/gdk-pixbuf
 libgdk-pixbuf2.0-0 g/gdk-pixbuf
 libgl1-mesa-dri m/mesa
+libgl1-nvidia-glvnd-glx n/nvidia-graphics-drivers
+libgles-nvidia1 n/nvidia-graphics-drivers
+libgles-nvidia2 n/nvidia-graphics-drivers
 libglib2.0-0 g/glib2.0
 libglib2.0-0t64 g/glib2.0
 libglx0 libg/libglvnd
 libglx-mesa0 m/mesa
+libglx-nvidia0 n/nvidia-graphics-drivers
 libgtk-3-0 g/gtk+3.0
 libgtk-3-0t64 g/gtk+3.0
 libhwy1 h/highway
@@ -180,10 +187,17 @@ libjemalloc2 j/jemalloc
 libllvm16 l/llvm-toolchain-16
 libllvm17 l/llvm-toolchain-17
 libllvm18 l/llvm-toolchain-18
+libllvm19 l/llvm-toolchain-19
+libllvm20 l/llvm-toolchain-20
 libnspr4 n/nspr
 libnss3 n/nss
 libnss-ldap libn/libnss-ldap
 libnuma1 n/numactl
+libnvcuvid1 n/nvidia-graphics-drivers
+libnvidia-allocator1 n/nvidia-graphics-drivers
+libnvidia-eglcore n/nvidia-graphics-drivers
+libnvidia-glcore n/nvidia-graphics-drivers
+libnvidia-glvkspirv n/nvidia-graphics-drivers
 libopus0 o/opus libopus
 libpango-1.0-0 p/pango1.0
 libpcre2-8-0 p/pcre2
@@ -207,6 +221,7 @@ libstdc++6 g/gcc-11
 libstdc++6 g/gcc-12
 libstdc++6 g/gcc-13
 libstdc++6 g/gcc-14
+libstdc++6 g/gcc-15
 libsystemd0 s/systemd
 libtcmalloc-minimal4 g/google-perftools
 libtcmalloc-minimal4t64 g/google-perftools
@@ -226,6 +241,7 @@ libxvidcore4 x/xvidcore
 libzvbi0 z/zvbi
 mesa-va-drivers m/mesa
 mesa-vulkan-drivers m/mesa
+nvidia-vaapi-driver n/nvidia-vaapi-driver
 opensc-pkcs11 o/opensc
 p11-kit-modules p/p11-kit
 thunderbird t/thunderbird

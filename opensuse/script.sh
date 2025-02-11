@@ -51,6 +51,14 @@ openSUSE_Leap_16.0/Essentials/x86_64
 openSUSE_Tumbleweed/Essentials/x86_64
 "
 
+URL3="https://download.nvidia.com"
+
+REPOS3="
+opensuse/leap/15.6/x86_64
+opensuse/leap/16.0/x86_64
+opensuse/tumbleweed/x86_64
+"
+
 get_package_urls() {
   local package_name="${1}"
   local dbg_package_name="${package_name}-debuginfo"
@@ -70,6 +78,11 @@ get_package_indexes() {
   echo "${REPOS2}" | while read line; do
     [ -z "${line}" ] && continue
     echo "${URL2}/${line}/"
+  done | sort -u >> indexes.txt
+
+  echo "${REPOS3}" | while read line; do
+    [ -z "${line}" ] && continue
+    echo "${URL3}/${line}/"
   done | sort -u >> indexes.txt
 }
 
@@ -182,7 +195,10 @@ libicu[0-9][0-9]
 libigdgmm12
 libjemalloc2
 libnuma1
+libnvidia-egl-wayland1
+libnvidia-egl-x111
 libopus0
+libp11-kit0
 libpango-1_0-0
 libpcre1
 libpcre2-8-0
@@ -230,9 +246,13 @@ Mesa-libva
 MozillaFirefox
 mozilla-nspr
 mozilla-nss
+nvidia-compute-G[0-9][0-9]
+nvidia-gl-G[0-9][0-9]
+nvidia-glG[0-9][0-9]
+nvidia-utils-G[0-9][0-9]
+nvidia-video-G[0-9][0-9]
 openCryptoki-64bit
 opensc
-libp11-kit0
 p11-kit
 pipewire-spa-plugins-0_2
 speech-dispatcher

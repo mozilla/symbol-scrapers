@@ -108,14 +108,15 @@ mkdir -p downloads symbols tmp
 packages="
 alsa-lib a
 apitrace-libs a
+atk a
 at-spi2-atk a
 at-spi2-core a
-atk a
 cairo c
 cups-libs c
 dbus-glib d
 dbus-libs d
 dconf d
+egl-wayland e
 expat e
 ffmpeg-libs f https://mirror.nl.leaseweb.net/rpmfusion/free/fedora
 firefox f
@@ -156,6 +157,7 @@ libSM l
 libstdc++ l
 libthai l
 libva l
+libva-nvidia-driver l
 libva-vdpau-driver l
 libvpx l
 libwayland-client l
@@ -166,7 +168,6 @@ libXext l
 libxkbcommon l
 libxml2 l
 llvm-libs l
-llvm[0-9][0-9]-libs l
 mesa-dri-drivers m
 mesa-libEGL m
 mesa-libgbm m
@@ -181,8 +182,8 @@ opencryptoki-libs o
 opus o
 p11-kit p
 pango p
-pcre p
 pcre2 p
+pcre p
 pcsc-lite-libs p
 pipewire-libs p
 pixman p
@@ -192,8 +193,14 @@ systemd-libs s
 thunderbird t
 x264-libs x https://mirror.nl.leaseweb.net/rpmfusion/free/fedora
 x265-libs x https://mirror.nl.leaseweb.net/rpmfusion/free/fedora
+xorg-x11-drv-nvidia-[0-9][0-9][0-9]xx-cuda-libs x https://mirror.nl.leaseweb.net/rpmfusion/nonfree/fedora
 xorg-x11-drv-nvidia-[0-9][0-9][0-9]xx-libs x https://mirror.nl.leaseweb.net/rpmfusion/nonfree/fedora
+xorg-x11-drv-nvidia-[0-9][0-9][0-9]xx x https://mirror.nl.leaseweb.net/rpmfusion/nonfree/fedora
+xorg-x11-drv-nvidia-[0-9][0-9][0-9]xx-xorg-libs x https://mirror.nl.leaseweb.net/rpmfusion/nonfree/fedora
+xorg-x11-drv-nvidia-cuda-libs x https://mirror.nl.leaseweb.net/rpmfusion/nonfree/fedora
 xorg-x11-drv-nvidia-libs x https://mirror.nl.leaseweb.net/rpmfusion/nonfree/fedora
+xorg-x11-drv-nvidia x https://mirror.nl.leaseweb.net/rpmfusion/nonfree/fedora
+xorg-x11-drv-nvidia-xorg-libs x https://mirror.nl.leaseweb.net/rpmfusion/nonfree/fedora
 xvidcore x https://mirror.nl.leaseweb.net/rpmfusion/free/fedora
 zlib z
 zvbi z

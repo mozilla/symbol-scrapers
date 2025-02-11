@@ -187,8 +187,8 @@ busybox-binsh
 cairo
 cairo-gobject cairo
 cups-libs
-dconf
 dbus-libs
+dconf
 ffmpeg-libavcodec
 ffmpeg-libavutil
 ffmpeg-libswresample
@@ -227,6 +227,7 @@ libssl3
 libstdc++
 libtheora
 libva
+libva-vdpau-driver
 libvorbis
 libvpx
 libwebp
@@ -254,9 +255,9 @@ mesa
 mesa-dri-gallium mesa
 mesa-egl mesa
 mesa-gbm mesa
-mesa-gl mesa
 mesa-glapi mesa
 mesa-gles mesa
+mesa-gl mesa
 mesa-osmesa mesa
 mesa-va-gallium mesa
 mesa-vdpau-gallium mesa
