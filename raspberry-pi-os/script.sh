@@ -143,6 +143,7 @@ libpulse0 p/pulseaudio
 libspa-0.2-modules p/pipewire
 libspeechd2 s/speech-dispatcher
 libwayland-client0 w/wayland
+mesa-libgallium m/mesa
 mesa-va-drivers m/mesa
 mesa-vulkan-drivers m/mesa
 zlib1g z/zlib
