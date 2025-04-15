@@ -14,6 +14,7 @@ get_package_urls() {
   local pkg_path="${2}"
   local main_path="main/${pkg_path}"
   local non_free_path="non-free/${pkg_path}"
+  local contrib_path="contrib/${pkg_path}"
   local dbg_package_name="${3:-$package_name}"
   local dbgsym_package_name="${4:-$package_name}"
   local alt_url="${5:-$UPDATES_URL}"
@@ -21,7 +22,7 @@ get_package_urls() {
   local ddeb_url="${DDEB_URL}"
   local ddeb_alt_url="${DDEB_UPDATES_URL}"
 
-  local urls="${url}/${main_path}/ ${url}/${non_free_path}/ ${ddeb_url}/${main_path}/ ${ddeb_url}/${non_free_path}/"
+  local urls="${url}/${main_path}/ ${url}/${non_free_path}/ ${url}/${contrib_path}/ ${ddeb_url}/${main_path}/ ${ddeb_url}/${non_free_path}/ ${ddeb_url}/${contrib_path}/"
 
   if [ -n "${alt_url}" ]; then
     urls="${urls} ${alt_url}/${main_path}/ ${ddeb_alt_url}/${main_path}/"
@@ -30,8 +31,10 @@ get_package_urls() {
   ${WGET} -o wget_packages_urls.log -k ${urls}
   find . -name "index.html*" -exec grep -o "${url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).deb\"" {} \; | cut -d'"' -f1
   find . -name "index.html*" -exec grep -o "${url}/${non_free_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).deb\"" {} \; | cut -d'"' -f1
+  find . -name "index.html*" -exec grep -o "${url}/${contrib_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).deb\"" {} \; | cut -d'"' -f1
   find . -name "index.html*" -exec grep -o "${ddeb_url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).deb\"" {} \; | cut -d'"' -f1
   find . -name "index.html*" -exec grep -o "${ddeb_url}/${non_free_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).deb\"" {} \; | cut -d'"' -f1
+  find . -name "index.html*" -exec grep -o "${ddeb_url}/${contrib_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).deb\"" {} \; | cut -d'"' -f1
 
   if [ -n "${alt_url}" ]; then
     find . -name "index.html*" -exec grep -o "${alt_url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).deb\"" {} \; | cut -d'"' -f1
@@ -196,6 +199,7 @@ libnuma1 n/numactl
 libnvcuvid1 n/nvidia-graphics-drivers
 libnvidia-allocator1 n/nvidia-graphics-drivers
 libnvidia-eglcore n/nvidia-graphics-drivers
+libnvidia-egl-gbm1 n/nvidia-egl-gbm
 libnvidia-glcore n/nvidia-graphics-drivers
 libnvidia-glvkspirv n/nvidia-graphics-drivers
 libopus0 o/opus libopus
@@ -229,6 +233,7 @@ libthai0 libt/libthai
 libva2 libv/libva
 libvpx[0-9] libv/libvpx
 libwayland-client0 w/wayland
+libwayland-egl1 w/wayland
 libx11-6 libx/libx11
 libx264-[0-9][0-9][0-9] x/x264
 libx265-[0-9][0-9][0-9] x/x265
