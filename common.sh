@@ -189,7 +189,7 @@ function reprocess_crashes()
     mv -f crashes.list.dedup crashes.list
 
     if [ -n "$(cat crashes.list)" ]; then
-      cat crashes.list | reprocess --sleep 3 --allow-many
+      split -l 10000 crashes.list --filter="cat $FILE | reprocess --sleep 3 --allow-many"
       if [ $? -ne 0 ]; then
         echo "Error doing reprocesss: aborting"
         exit 1
