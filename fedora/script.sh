@@ -5,7 +5,7 @@ export DEBUGINFOD_URLS="https://debuginfod.fedoraproject.org/"
 . $(dirname $0)/../common.sh
 
 URL="https://fedora.mirror.wearetriple.com/linux"
-RELEASES="40 41 42 test/42_Beta"
+RELEASES="41 42 43 test/43_Beta"
 ARCHITECTURES="aarch64 x86_64"
 
 get_package_urls() {
