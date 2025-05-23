@@ -143,11 +143,11 @@ function create_symbols_archive() {
 function unpack_rpm_package() {
   mkdir packages
   if [ -n "${1}" ]; then
-    rpm2cpio "${1}" | cpio --quiet -i -d -D packages
+    7zz -so x "${1}" | cpio --quiet -i -d -D packages
   fi
 
   if [ -n "${2}" ]; then
-    rpm2cpio "${2}" | cpio --quiet -i -d -D packages
+    7zz -so x "${2}" | cpio --quiet -i -d -D packages
   fi
 }
 
