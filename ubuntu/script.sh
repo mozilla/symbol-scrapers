@@ -13,30 +13,34 @@ get_package_urls() {
   local main_path="main/${pkg_path}"
   local universe_path="universe/${pkg_path}"
   local multiverse_path="multiverse/${pkg_path}"
+  local restricted_path="restricted/${pkg_path}"
   local dbg_package_name="${3:-$package_name}"
   local dbgsym_package_name="${4:-$package_name}"
   local alt_url="${5}"
   local url="${URL}"
   local ddeb_url="${DDEB_URL}"
 
-  local urls="${url}/${main_path}/ ${url}/${universe_path}/ ${url}/${multiverse_path}/ ${ddeb_url}/${main_path}/ ${ddeb_url}/${universe_path}/ ${ddeb_url}/${multiverse_path}/"
+  local urls="${url}/${main_path}/ ${url}/${universe_path}/ ${url}/${multiverse_path}/ ${url}/${restricted_path}/ ${ddeb_url}/${main_path}/ ${ddeb_url}/${universe_path}/ ${ddeb_url}/${multiverse_path}/ ${ddeb_url}/${restricted_path}/"
 
   if [ -n "${alt_url}" ]; then
-    urls="${urls} ${alt_url}/${main_path}/ ${alt_url}/${universe_path}/ ${alt_url}/${multiverse_path}/"
+    urls="${urls} ${alt_url}/${main_path}/ ${alt_url}/${universe_path}/ ${alt_url}/${multiverse_path}/ ${alt_url}/${restricted_path}/"
   fi
 
   ${WGET} -o wget_packages_urls.log -k ${urls}
   find . -name "index.html*" -exec grep -o "${url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
   find . -name "index.html*" -exec grep -o "${url}/${universe_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
   find . -name "index.html*" -exec grep -o "${url}/${multiverse_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
+  find . -name "index.html*" -exec grep -o "${url}/${restricted_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
   find . -name "index.html*" -exec grep -o "${ddeb_url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
   find . -name "index.html*" -exec grep -o "${ddeb_url}/${universe_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
   find . -name "index.html*" -exec grep -o "${ddeb_url}/${multiverse_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
+  find . -name "index.html*" -exec grep -o "${ddeb_url}/${restricted_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
 
   if [ -n "${alt_url}" ]; then
     find . -name "index.html*" -exec grep -o "${alt_url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
     find . -name "index.html*" -exec grep -o "${alt_url}/${universe_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
     find . -name "index.html*" -exec grep -o "${alt_url}/${multiverse_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
+    find . -name "index.html*" -exec grep -o "${alt_url}/${restricted_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).d.*eb\"" {} \; | cut -d'"' -f1
   fi
 
   find . -name "index.html*" -exec rm -f {} \;
@@ -186,6 +190,9 @@ libnss3 n/nss
 libnss-ldap libn/libnss-ldap
 libnuma1 n/numactl
 libnvidia-decode-[0-9][0-9][0-9] n/nvidia-graphics-drivers-[0-9][0-9][0-9]
+libnvidia-egl-gbm1 n/nvidia-egl-gbm
+libnvidia-gl-[0-9][0-9][0-9] n/nvidia-graphics-drivers-[0-9][0-9][0-9]
+libnvidia-gl-[0-9][0-9][0-9]-server n/nvidia-graphics-drivers-[0-9][0-9][0-9]-server
 libopus0 o/opus libopus
 libpango-1.0-0 p/pango1.0
 libpcre2-8-0 p/pcre2
@@ -216,6 +223,7 @@ libthai0 libt/libthai
 libva2 libv/libva
 libvpx[0-9] libv/libvpx
 libwayland-client0 w/wayland
+libwayland-egl1 w/wayland
 libx11-6 libx/libx11
 libx264-[0-9][0-9][0-9] x/x264
 libx265-[0-9][0-9][0-9] x/x265
