@@ -166,6 +166,11 @@ function upload_symbols()
 
 function reprocess_crashes()
 {
+  # Socorro currently has a limit of 10k crashes it will accept in searches and
+  # reprocessing requests. When bug 1942885 gets fixed we'll be able to remove
+  # this limitation, but for now we enforce it to avoid errors at runtime.
+  declare -r SOCORRO_LIMIT=10000
+
   if ! is_taskcluster; then
     find symbols -name "*.sym" -type f > symbols.list
 
@@ -176,7 +181,7 @@ function reprocess_crashes()
       if [ -z "${module_name}" ]; then
         module_name=$(head -n1 "${symfile}" | cut -d' ' -f5-)
       fi
-      crashes=$(supersearch --num=all --modules_in_stack="${module_name}/${debug_id}")
+      crashes=$(supersearch --num="${SOCORRO_LIMIT}" --modules_in_stack="${module_name}/${debug_id}")
       if [ $? -ne 0 ]; then
         echo "Error doing supersearch: aborting"
         exit 1
@@ -189,7 +194,7 @@ function reprocess_crashes()
     mv -f crashes.list.dedup crashes.list
 
     if [ -n "$(cat crashes.list)" ]; then
-      split -l 10000 crashes.list --filter="cat $FILE | reprocess --sleep 3 --allow-many"
+      split -l "${SOCORRO_LIMIT}" crashes.list --filter="cat $FILE | reprocess --sleep 3 --allow-many"
       if [ $? -ne 0 ]; then
         echo "Error doing reprocesss: aborting"
         exit 1
