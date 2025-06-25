@@ -4,91 +4,78 @@ export DEBUGINFOD_URLS="https://debuginfod.fedoraproject.org/"
 
 . $(dirname $0)/../common.sh
 
-URL="https://fedora.mirror.wearetriple.com/linux"
-RELEASES="41 42 43 test/43_Beta"
+URLS="
+https://fedora.mirror.wearetriple.com/linux
+https://ftp-stud.hs-esslingen.de/pub/Mirrors/rpmfusion.org/free/fedora/
+https://ftp-stud.hs-esslingen.de/pub/Mirrors/rpmfusion.org/nonfree/fedora/
+"
+
+RELEASES="
+rawhide
+41
+42
+42_Beta
+"
 
 ARCHITECTURES="
 aarch64
 x86_64
 "
 
+function get_release_regex() {
+  local release_list=$(echo ${RELEASES} | tr ' ' '\|')
+  printf "(${release_list})"
+}
+
+function get_architecture_regex() {
+  local architecture_list=$(echo ${ARCHITECTURES} | tr ' ' '\|')
+  printf "(${architecture_list})"
+}
+
 function get_architecture_escaped_regex() {
   local architecture_list=$(echo ${ARCHITECTURES} | sed -e "s/ /\\\|/")
   printf "\(${architecture_list}\)"
 }
 
-get_package_urls() {
-  local package_name=${1}
-  local dbg_package_name="${package_name}-debuginfo"
-  local url=${3:-$URL}
+function get_package_folder_regex() {
+  local package_folder_list=$(echo "${PACKAGES}" | grep -v '^$' | cut -d' ' -f2 | sort -u | tr '\n' '\|')
+  printf "(${package_folder_list%%|})"
+}
+
+function fetch_indexes() {
+  local release_regex=$(get_release_regex)
+  local architecture_regex=$(get_architecture_regex)
+  local package_folder_regex=$(get_package_folder_regex)
+
+  echo "${URLS}" | while read url; do
+    [ -z "${url}" ] && continue
+    local regex="${url}/((releases|updates|development)/)?(testing/)?(test/)?(${release_regex}/)?(Everything/)?(${architecture_regex}/)?((os|debug)/)?(tree/)?(Packages/)?(${package_folder_regex}/)?$"
+    ${WGET} -o wget_indexes.log --directory-prefix indexes --convert-links --recursive -l 9 --accept-regex "${regex}" "${url}/"
+  done
+}
+
+function get_package_urls() {
+  truncate -s 0 all-packages.txt unfiltered-packages.txt
+
+  find indexes -name index.html -exec xmllint --html --xpath '//a/@href' {} \; 2>xmllint_error.log | \
+    grep -o "https\?://.*\.rpm" | sort -u >> all-packages.txt
 
   local architecture_escaped_regex=$(get_architecture_escaped_regex)
-  find . -name "index.html*" -exec grep -h -o "${url}.*/\(${package_name}-[0-9].*.${architecture_escaped_regex}.rpm\|${dbg_package_name}-[0-9].*.${architecture_escaped_regex}.rpm\)\"" {} \; | \
-  cut -d'"' -f1
-}
-
-get_package_indexes() {
-  local pkg_path=${2}
-  local url=${3:-$URL}
-
-  local everything_dir=""
-  local packages_dir=""
-  local tree_dir=""
-
-  if [ -z "${3}" ]; then
-    everything_dir="Everything"
-    packages_dir="Packages"
-    tree_dir="tree"
-  fi
-
-  for arch in ${ARCHITECTURES}; do
-    for release in ${RELEASES}; do
-      printf "${url}/releases/${release}/Everything/${arch}/os/Packages/${pkg_path}/\n"
-      printf "${url}/releases/${release}/Everything/${arch}/debug/${tree_dir}/${packages_dir}/${pkg_path}/\n"
-      printf "${url}/updates/${release}/${everything_dir}/${arch}/${packages_dir}/${pkg_path}/\n"
-      printf "${url}/updates/${release}/${everything_dir}/${arch}/debug/${packages_dir}/${pkg_path}/\n"
-      printf "${url}/updates/testing/${release}/${everything_dir}/${arch}/${packages_dir}/${pkg_path}/\n"
-      printf "${url}/updates/testing/${release}/${everything_dir}/${arch}/debug/${packages_dir}/${pkg_path}/\n"
-      printf "${url}/development/${release}/Everything/${arch}/os/Packages/${pkg_path}/\n"
-      printf "${url}/development/${release}/Everything/${arch}/debug/${tree_dir}/${packages_dir}/${pkg_path}/\n"
-    done
-
-    # Rawhide
-    printf "${url}/development/rawhide/Everything/${arch}/os/Packages/${pkg_path}/\n"
-    printf "${url}/development/rawhide/Everything/${arch}/debug/${tree_dir}/${packages_dir}/${pkg_path}/\n"
+  echo "${PACKAGES}" | grep -v '^$' | cut -d' ' -f1 | while read package; do
+    grep -o "https\?://.*/${package}\(-debuginfo\)\?-[0-9].*\.fc..\.${architecture_escaped_regex}\.rpm" all-packages.txt >> unfiltered-packages.txt
   done
 }
 
-fetch_packages() {
-  echo "${1}" | while read line; do
-    [ -z "${line}" ] && continue
-    get_package_indexes ${line}
-  done | sort -u > indexes.txt
-
-  sort indexes.txt | ${WGET} -o wget_packages_urls.log -k -i -
-
-  find . -type f -name "index.html*" | while read path; do
-    mv "${path}" "${path}.bak"
-    xmllint --nowarning --format --html --output "${path}" "${path}.bak" 2>/dev/null
-    rm -f "${path}.bak"
-  done
-
-  echo "${1}" | while read line; do
-    [ -z "${line}" ] && continue
-    get_package_urls ${line} >> unfiltered-packages.txt
-  done
-
-  touch packages.txt
+function fetch_packages() {
+  truncate -s 0 downloads.txt
   cat unfiltered-packages.txt | while read line; do
     local package_name=$(echo "${line}" | rev | cut -d'/' -f1 | rev)
     if ! grep -q -F "${package_name}" SHA256SUMS; then
-      echo "${line}" >> packages.txt
+      echo "${line}" >> downloads.txt
     fi
   done
 
-  find . -name "index.html*" -exec rm -f {} \;
-
-  sort packages.txt | ${WGET} -o wget_packages.log -P downloads -c -i -
+  sort downloads.txt | ${WGET} -o wget_packages.log -P downloads -c -i -
 }
 
 function get_version() {
@@ -107,16 +94,17 @@ function find_debuginfo_package() {
 }
 
 function remove_temp_files() {
-  rm -rf downloads symbols packages debug-packages tmp \
-         symbols*.zip indexes.txt packages.txt unfiltered-packages.txt \
-         crashes.list symbols.list
+  rm -rf all-packages.txt crashes.list downloads downloads.txt indexes \
+         packages symbols symbols.list tmp unfiltered-packages.txt \
+         xmllint_error.log
 }
 
 echo "Cleaning up temporary files..."
 remove_temp_files
-mkdir -p downloads symbols tmp
+mkdir -p downloads indexes symbols tmp
 
-packages="
+# <package folder> <package name>
+PACKAGES="
 alsa-lib a
 apitrace-libs a
 atk a
@@ -129,7 +117,7 @@ dbus-libs d
 dconf d
 egl-wayland e
 expat e
-ffmpeg-libs f https://mirror.nl.leaseweb.net/rpmfusion/free/fedora
+ffmpeg-libs f
 firefox f
 fontconfig f
 freetype f
@@ -146,7 +134,7 @@ gtk3 g
 highway h
 ibus-libs i
 intel-gmmlib i
-intel-media-driver i https://mirror.nl.leaseweb.net/rpmfusion/nonfree/fedora
+intel-media-driver i
 jemalloc j
 libavcodec-free l
 libcloudproviders l
@@ -202,22 +190,25 @@ pulseaudio-libs p
 speech-dispatcher s
 systemd-libs s
 thunderbird t
-x264-libs x https://mirror.nl.leaseweb.net/rpmfusion/free/fedora
-x265-libs x https://mirror.nl.leaseweb.net/rpmfusion/free/fedora
-xorg-x11-drv-nvidia-[0-9][0-9][0-9]xx-cuda-libs x https://mirror.nl.leaseweb.net/rpmfusion/nonfree/fedora
-xorg-x11-drv-nvidia-[0-9][0-9][0-9]xx-libs x https://mirror.nl.leaseweb.net/rpmfusion/nonfree/fedora
-xorg-x11-drv-nvidia-[0-9][0-9][0-9]xx x https://mirror.nl.leaseweb.net/rpmfusion/nonfree/fedora
-xorg-x11-drv-nvidia-[0-9][0-9][0-9]xx-xorg-libs x https://mirror.nl.leaseweb.net/rpmfusion/nonfree/fedora
-xorg-x11-drv-nvidia-cuda-libs x https://mirror.nl.leaseweb.net/rpmfusion/nonfree/fedora
-xorg-x11-drv-nvidia-libs x https://mirror.nl.leaseweb.net/rpmfusion/nonfree/fedora
-xorg-x11-drv-nvidia x https://mirror.nl.leaseweb.net/rpmfusion/nonfree/fedora
-xorg-x11-drv-nvidia-xorg-libs x https://mirror.nl.leaseweb.net/rpmfusion/nonfree/fedora
-xvidcore x https://mirror.nl.leaseweb.net/rpmfusion/free/fedora
+x264-libs x
+x265-libs x
+xorg-x11-drv-nvidia-[0-9][0-9][0-9]xx-cuda-libs x
+xorg-x11-drv-nvidia-[0-9][0-9][0-9]xx-libs x
+xorg-x11-drv-nvidia-[0-9][0-9][0-9]xx x
+xorg-x11-drv-nvidia-[0-9][0-9][0-9]xx-xorg-libs x
+xorg-x11-drv-nvidia-cuda-libs x
+xorg-x11-drv-nvidia-libs x
+xorg-x11-drv-nvidia x
+xorg-x11-drv-nvidia-xorg-libs x
+xvidcore x
 zlib z
 zvbi z
 "
 
-fetch_packages "${packages}"
+echo "Fetching packages..."
+fetch_indexes
+get_package_urls
+fetch_packages
 
 function process_packages() {
   local package_name="${1}"
@@ -285,7 +276,7 @@ function process_packages() {
 }
 
 echo "Processing packages..."
-echo "${packages}" | while read line; do
+echo "${PACKAGES}" | while read line; do
   [ -z "${line}" ] && continue
   echo "Processing ${line}"
   process_packages ${line}
