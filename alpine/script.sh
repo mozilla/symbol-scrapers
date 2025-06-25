@@ -7,7 +7,7 @@
 
 URL="http://dl-cdn.alpinelinux.org/alpine"
 
-VERSIONS="
+RELEASES="
 edge
 v3.17
 v3.18
@@ -17,61 +17,70 @@ v3.21
 "
 
 REPOS="
-main/x86_64
-community/x86_64
+main
+community
 "
 
 ARCHITECTURES="
 x86_64
 "
 
-get_package_urls() {
-  # Alpine servers have the '+' character encoded in the URLs
-  local package_name=$(echo "${1}" | sed -e 's/+/\%2B/g')
-  local dbg_package_name="${package_name}-dbg"
-  local url="${URL}"
-
-  find . -name "index.html*" -exec grep -o "${url}.*/\(${package_name}-[0-9].*.apk\|${dbg_package_name}-[0-9].*.apk\)\"" {} \; | \
-  cut -d'"' -f1
+function get_release_regex() {
+  local release_list=$(echo ${RELEASES} | tr ' ' '\|')
+  printf "(${release_list})"
 }
 
-get_package_indexes() {
-  local version="${1}"
-  echo "${REPOS}" | while read line; do
-    [ -z "${line}" ] && continue
-    echo "${URL}/${version}/${line}/"
-  done | sort -u > indexes.txt
+function get_repo_regex() {
+  local repo_regex=$(echo ${REPOS} | tr ' ' '\|')
+  printf "(${repo_regex})"
 }
 
-fetch_packages() {
-  local packages="${1}"
-  local version="${2}"
-  get_package_indexes "${version}"
+function get_architecture_regex() {
+  local architecture_list=$(echo ${ARCHITECTURES} | tr ' ' '\|')
+  printf "(${architecture_list})"
+}
 
-  sort indexes.txt | ${WGET} -o wget_packages_urls.log -k -i -
+function fetch_indexes() {
+  local release_regex=$(get_release_regex)
+  local repo_regex=$(get_repo_regex)
+  local architecture_regex=$(get_architecture_regex)
 
-  find . -name "index.html*" | while read path; do
-    mv "${path}" "${path}.bak"
-    xmllint --nowarning --format --html --output "${path}" "${path}.bak" 2>/dev/null
-    rm -f "${path}.bak"
+  local regex="${URL}/(${release_regex}/)?(${repo_regex}/)?(${architecture_regex}/)?$"
+  ${WGET} -o wget_indexes.log --directory-prefix indexes --convert-links --recursive --accept-regex "${regex}" "${URL}/"
+}
+
+function get_package_urls() {
+  truncate -s 0 all-packages.txt unfiltered-packages.txt
+
+  find indexes -name index.html -exec xmllint --html --xpath '//a/@href' {} \; 2>xmllint_error.log | \
+    grep -o "https\?://.*\.apk" | sort -u >> all-packages.txt
+
+  echo "${PACKAGES}" | grep -v '^$' | while read line; do
+    local package_name="$(echo ${line} | cut -d' ' -f1)"
+    grep -o "https\?://.*/${package_name}\(-dbg\)\?-[0-9].*\.apk" all-packages.txt >> unfiltered-packages.txt
   done
+}
 
-  echo "${1}" | while read line; do
-    [ -z "${line}" ] && continue
-    get_package_urls ${line} >> unfiltered-packages.txt
+# Alpine packages have the same names across different architectures and distro
+# versions, so we need to fetch them in separate directories to avoid each
+# combination overwriting the others.
+function fetch_packages() {
+  echo "${RELEASES}" | while read release; do
+    [ -z "${release}" ] && continue
+    echo "${ARCHITECTURES}" | grep -v '^$' | while read architecture; do
+      [ -z "${architecture}" ] && continue
+      truncate -s 0 downloads.txt
+      local download_folder="downloads/${release}/${architecture}"
+      mkdir -p "${download_folder}"
+      grep "${release}.*${architecture}" unfiltered-packages.txt | while read line; do
+        local package_name=$(echo "${line}" | rev | cut -d'/' -f1 | rev)
+        if ! grep -q "${release}.*${architecture}.*${package_name}" SHA256SUMS; then
+          echo "${line}" >> downloads.txt
+        fi
+      done
+      sort downloads.txt | ${WGET} -o wget_packages.log -P "${download_folder}" -c -i -
+    done
   done
-
-  touch packages.txt
-  cat unfiltered-packages.txt | while read line; do
-    local package_name=$(echo "${line}" | rev | cut -d'/' -f1 | rev)
-    if ! grep -q -F "${package_name}" SHA256SUMS; then
-      echo "${line}" >> packages.txt
-    fi
-  done
-
-  find . -name "index.html*" -exec rm -f {} \;
-
-  sort packages.txt | ${WGET} -o wget_packages.log -P downloads -c -i -
 }
 
 function get_version() {
@@ -84,9 +93,10 @@ function get_version() {
 }
 
 function find_debuginfo_package() {
-  local package_name="${1}"
-  local version="${2}"
-  find downloads -name "${package_name}-dbg-${version}.apk" -type f
+  local download_dir="${1}"
+  local package_name="${2}"
+  local version="${3}"
+  find "downloads/${download_dir}" -name "${package_name}-dbg-${version}.apk" -type f
 }
 
 function unpack_package() {
@@ -106,12 +116,13 @@ function unpack_package() {
 }
 
 function process_packages() {
-  local package_name="${1}"
-  local debug_package_name="${2:-${package_name}}"
-  find downloads -name "${package_name}-[0-9]*.apk" -type f | grep -v -e "-dbg-" | while read package; do
-    local package_filename="${package##downloads/}"
+  local download_dir="${1}"
+  local package_name="${2}"
+  local debug_package_name="${3:-${package_name}}"
+  find "downloads/${download_dir}" -name "${package_name}-[0-9]*.apk" -type f | grep -v -e "-dbg-" | while read package; do
+    local package_filename="$(basename ${package})"
     local version=$(get_version "${package_name}" "${package_filename}")
-    local debuginfo_package=$(find_debuginfo_package "${debug_package_name}" "${version}")
+    local debuginfo_package=$(find_debuginfo_package "${download_dir}" "${debug_package_name}" "${version}")
 
     if [ -n "${debuginfo_package}" ]; then
       unpack_package ${package} ${debuginfo_package}
@@ -176,15 +187,17 @@ function process_packages() {
 }
 
 function remove_temp_files() {
-  rm -rf downloads symbols packages tmp symbols*.zip indexes.txt packages.txt \
-         unfiltered-packages.txt crashes.list symbols.list
+  rm -rf all-packages.txt crashes.list downloads downloads.txt indexes \
+         packages symbols symbols.list tmp unfiltered-packages.txt \
+         xmllint_error.log
 }
 
 echo "Cleaning up temporary files..."
 remove_temp_files
-mkdir -p symbols
+mkdir -p downloads indexes symbols tmp
 
-packages="
+# <package name> [<debug package name>]
+PACKAGES="
 alsa-lib
 aom-libs
 brotli-libs
@@ -255,7 +268,7 @@ libxrandr
 libxrender
 libxshmfence
 libxxf86vm
-llvm17-libs
+llvm[0-9][0-9]-libs
 mesa
 mesa-dri-gallium mesa
 mesa-egl mesa
@@ -293,20 +306,21 @@ x265-libs
 zlib
 "
 
-echo "${VERSIONS}" | while read version; do
-  [ -z "${version}" ] && continue
+echo "Fetching packages..."
+fetch_indexes
+get_package_urls
+fetch_packages
+
+echo "Processing packages..."
+echo "${RELEASES}" | while read release; do
+  [ -z "${release}" ] && continue
   echo "${ARCHITECTURES}" | while read architecture; do
     [ -z "${architecture}" ] && continue
-    mkdir -p downloads tmp
-    fetch_packages "${packages}" "${version}"
-
-    echo "${packages}" | while read line; do
+    echo "${PACKAGES}" | while read line; do
       [ -z "${line}" ] && continue
-      process_packages ${line}
+      echo "Processing ${release}/${architecture} ${line}"
+      process_packages "${release}/${architecture}" ${line}
     done
-
-    cat unfiltered-packages.txt | rev | cut -d'/' -f1 | rev | sed -e "s/$/,$(date "+%s")/" >> SHA256SUMS.new
-    rm -rf downloads tmp indexes.txt packages.txt unfiltered-packages.txt
   done
 done
 
@@ -320,7 +334,7 @@ echo "Reprocessing crashes..."
 reprocess_crashes
 
 echo "Updating sha256sums..."
-mv -f SHA256SUMS.new SHA256SUMS
+cat unfiltered-packages.txt | sort -u | sed -e "s/$/,$(date "+%s")/" > SHA256SUMS
 
 echo "Cleaning up temporary files..."
 remove_temp_files

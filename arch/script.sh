@@ -7,69 +7,65 @@ export DEBUGINFOD_URLS="https://debuginfod.archlinux.org/"
 URL="https://geo.mirror.pkgbuild.com"
 
 REPOS="
-core-testing/os/x86_64
-core-testing-debug/os/x86_64
-extra-testing/os/x86_64
-extra-testing-debug/os/x86_64
-core/os/x86_64
-core-debug/os/x86_64
-extra/os/x86_64
-extra-debug/os/x86_64
+core-testing
+core-testing-debug
+extra-testing
+extra-testing-debug
+core
+core-debug
+extra
+extra-debug
 "
 
 ARCHITECTURES="
 x86_64
 "
 
+function get_repo_regex() {
+  local repo_regex=$(echo ${REPOS} | tr ' ' '\|')
+  printf "(${repo_regex})"
+}
+
+function get_architecture_regex() {
+  local architecture_list=$(echo ${ARCHITECTURES} | tr ' ' '\|')
+  printf "(${architecture_list})"
+}
+
 function get_architecture_escaped_regex() {
   local architecture_list=$(echo ${ARCHITECTURES} | sed -e "s/ /\\\|/")
   printf "\(${architecture_list}\)"
 }
 
-function get_package_urls() {
-  local package_name="${1}"
-  local dbg_package_name="${package_name}-debug"
-  local url=${2:-$URL}
+function fetch_indexes() {
+  local repo_regex=$(get_repo_regex)
+  local architecture_regex=$(get_architecture_regex)
 
-  local architecture_escaped_regex=$(get_architecture_escaped_regex)
-  find . -name "index.html*" -exec grep -o "https\?://.*/${package}\(-debug\)\?-[0-9].*-${architecture_escaped_regex}\.pkg\.tar\.zst\"" {} \; | \
-  cut -d'"' -f1
+  local regex="${URL}/(${repo_regex}/)?(os/)?(${architecture_regex}/)?$"
+  ${WGET} -o wget_indexes.log --directory-prefix indexes --convert-links --recursive --accept-regex "${regex}" "${URL}/"
 }
 
-function get_package_indexes() {
-  echo "${REPOS}" | while read line; do
-    [ -z "${line}" ] && continue
-    printf "${URL}/${line}/\n"
-  done | sort -u > indexes.txt
+function get_package_urls() {
+  truncate -s 0 all-packages.txt unfiltered-packages.txt
+
+  find indexes -name index.html -exec xmllint --html --xpath '//a/@href' {} \; 2>xmllint_error.log | \
+    grep -o "https\?://.*\.pkg\.tar\.zst" | sort -u >> all-packages.txt
+
+  local architecture_escaped_regex=$(get_architecture_escaped_regex)
+  echo "${PACKAGES}" | grep -v '^$' | cut -d' ' -f1 | while read package; do
+    grep -o "https\?://.*/${package}\(-debug\)\?-[0-9].*-${architecture_escaped_regex}\.pkg\.tar\.zst" all-packages.txt >> unfiltered-packages.txt
+  done
 }
 
 function fetch_packages() {
-  get_package_indexes
-
-  ${WGET} -o wget_packages_urls.log -k -i indexes.txt
-
-  find . -name "index.html*" | while read path; do
-    mv "${path}" "${path}.bak"
-    xmllint --nowarning --format --html --output "${path}" "${path}.bak" 2>/dev/null
-    rm -f "${path}.bak"
-  done
-
-  echo "${1}" | while read line; do
-    [ -z "${line}" ] && continue
-    get_package_urls ${line} >> unfiltered-packages.txt
-  done
-
-  find . -name "index.html*" -exec rm -f {} \;
-
-  touch packages.txt
+  truncate -s 0 downloads.txt
   cat unfiltered-packages.txt | while read line; do
     local package_name=$(echo "${line}" | rev | cut -d'/' -f1 | rev)
     if ! grep -q -F "${package_name}" SHA256SUMS; then
-      echo "${line}" >> packages.txt
+      echo "${line}" >> downloads.txt
     fi
   done
 
-  sort packages.txt | ${WGET} -o wget_packages.log -P downloads -c -i -
+  sort downloads.txt | ${WGET} -o wget_packages.log -P downloads -c -i -
 }
 
 function get_version() {
@@ -100,16 +96,16 @@ function unpack_package() {
 }
 
 function remove_temp_files() {
-  rm -rf downloads symbols packages debug-packages tmp \
-         symbols*.zip indexes.txt packages.txt unfiltered-packages.txt \
-         crashes.list symbols.list
+  rm -rf all-packages.txt crashes.list downloads downloads.txt indexes \
+         packages symbols symbols.list tmp unfiltered-packages.txt \
+         xmllint_error.log
 }
 
 echo "Cleaning up temporary files..."
 remove_temp_files
-mkdir -p downloads symbols tmp
+mkdir -p downloads indexes symbols tmp
 
-packages="
+PACKAGES="
 amdvlk
 apitrace
 atk
@@ -179,7 +175,10 @@ x265
 zvbi
 "
 
-fetch_packages "${packages}"
+echo "Fetching packages..."
+fetch_indexes
+get_package_urls
+fetch_packages
 
 function process_packages() {
   local package_name="${1}"
@@ -247,7 +246,7 @@ function process_packages() {
 }
 
 echo "Processing packages..."
-echo "${packages}" | while read line; do
+echo "${PACKAGES}" | while read line; do
   [ -z "${line}" ] && continue
   echo "Processing ${line}"
   process_packages ${line}

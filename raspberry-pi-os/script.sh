@@ -5,73 +5,76 @@ export DEBUGINFOD_URLS=""
 
 . $(dirname $0)/../common.sh
 
-# Unified repository used for debug symbol package
-URL="https://archive.raspberrypi.com/debian/pool"
-DDEB_URL=$URL
+# Unified repository used for debug symbol packages
+POOLS="
+https://archive.raspberrypi.com/debian/pool
+"
 
-# No separate updates repository
-UPDATES_URL=""
-DDEB_UPDATES_URL=""
+AREAS="
+beta
+main
+untested
+"
 
 ARCHITECTURES="
 armhf
 arm64
 "
 
+function get_area_regex() {
+  local area_regex=$(echo ${AREAS} | tr ' ' '\|')
+  printf "(${area_regex})"
+}
+
 function get_architecture_escaped_regex() {
   local architecture_list=$(echo ${ARCHITECTURES} | sed -e "s/ /\\\|/")
   printf "\(${architecture_list}\)"
 }
 
-get_package_urls() {
-  local package_name="${1}"
-  local pkg_path="${2}"
-  local main_path="main/${pkg_path}"
-  local dbg_package_name="${3:-$package_name}"
-  local dbgsym_package_name="${4:-$package_name}"
-  local alt_url="${5:-$UPDATES_URL}"
-  local url="${URL}"
-  local ddeb_url="${DDEB_URL}"
-  local ddeb_alt_url="${DDEB_UPDATES_URL}"
-
-  local urls="${url}/${main_path}/ ${ddeb_url}/${main_path}/"
-
-  if [ -n "${alt_url}" ]; then
-    urls="${urls} ${alt_url}/${main_path}/ ${ddeb_alt_url}/${main_path}/"
-  fi
-
-  ${WGET} -o wget_packages_urls.log -k ${urls}
-  local architecture_escaped_regex=$(get_architecture_escaped_regex)
-  find . -name "index.html*" -exec grep -o "${url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_${architecture_escaped_regex}.deb\"" {} \; | cut -d'"' -f1
-  find . -name "index.html*" -exec grep -o "${url}/${non_free_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_${architecture_escaped_regex}.deb\"" {} \; | cut -d'"' -f1
-  find . -name "index.html*" -exec grep -o "${ddeb_url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_${architecture_escaped_regex}.deb\"" {} \; | cut -d'"' -f1
-  find . -name "index.html*" -exec grep -o "${ddeb_url}/${non_free_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_${architecture_escaped_regex}.deb\"" {} \; | cut -d'"' -f1
-
-  if [ -n "${alt_url}" ]; then
-    find . -name "index.html*" -exec grep -o "${alt_url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_${architecture_escaped_regex}.deb\"" {} \; | cut -d'"' -f1
-    find . -name "index.html*" -exec grep -o "${ddeb_alt_url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_${architecture_escaped_regex}.deb\"" {} \; | cut -d'"' -f1
-  fi
-
-  find . -name "index.html*" -exec rm -f {} \;
+function get_top_level_folder_regex() {
+  local top_level_folder_regex=$(echo "${PACKAGES}" | grep -v '^$' | cut -d' ' -f2 | cut -d'/' -f1 | sort -u | tr '\n' '\|')
+  printf "(${top_level_folder_regex%%|})"
 }
 
-fetch_packages() {
-  echo "${1}" | while read line; do
-    [ -z "${line}" ] && continue
-    echo "Fetching ${line}"
-    get_package_urls ${line} >> unfiltered-packages.txt
-  done
+function get_package_folder_regex() {
+  local package_folder_list=$(echo "${PACKAGES}" | grep -v '^$' | cut -d' ' -f2 | cut -d'/' -f2 | sort -u | tr '\n' '\|')
+  printf "(${package_folder_list%%|})"
+}
 
-  touch packages.txt
+function fetch_indexes() {
+  local area_regex=$(get_area_regex)
+  local top_level_folder_regex=$(get_top_level_folder_regex)
+  local package_folder_regex=$(get_package_folder_regex)
+
+  echo "${POOLS}" | while read url; do
+    [ -z "${url}" ] && continue
+    local regex="${url}/(${area_regex}/)?(${top_level_folder_regex}/)?(${package_folder_regex}/)?$"
+    ${WGET} -o wget_indexes.log --directory-prefix indexes --convert-links --recursive --accept-regex "${regex}" "${url}/"
+  done
+}
+
+function get_package_urls() {
+  truncate -s 0 all-packages.txt unfiltered-packages.txt
+
+  find indexes -name index.html -exec xmllint --html --xpath '//a/@href' {} \; 2>xmllint_error.log | \
+    grep -o "https\?://.*\.deb" | sort -u >> all-packages.txt
+
+  local architecture_escaped_regex=$(get_architecture_escaped_regex)
+  echo "${PACKAGES}" | grep -v '^$' | cut -d' ' -f1 | while read package; do
+    grep -o "https\?://.*/${package}\(-dbg\(sym\)\?\)\?_[^\_]*_${architecture_escaped_regex}\.deb" all-packages.txt >> unfiltered-packages.txt
+  done
+}
+
+function fetch_packages() {
+  truncate -s 0 downloads.txt
   cat unfiltered-packages.txt | while read line; do
     local package_name=$(echo "${line}" | rev | cut -d'/' -f1 | rev)
-    if ! grep -q -s -F "${package_name}" SHA256SUMS; then
-      echo "${line}" >> packages.txt
+    if ! grep -q -F "${package_name}" SHA256SUMS; then
+      echo "${line}" >> downloads.txt
     fi
   done
 
-  sed -i -e 's/%2b/+/g' packages.txt
-  sort packages.txt | ${WGET} -o wget_packages.log -P downloads -c -i -
+  sort downloads.txt | ${WGET} -o wget_packages.log -P downloads -c -i -
 }
 
 function get_version() {
@@ -117,28 +120,26 @@ function unpack_package() {
 }
 
 function remove_temp_files() {
-  rm -rf downloads symbols packages debug-packages tmp \
-         symbols*.zip indexes.txt packages.txt unfiltered-packages.txt \
-         crashes.list symbols.list
+  rm -rf all-packages.txt crashes.list downloads downloads.txt indexes \
+         packages symbols symbols.list tmp unfiltered-packages.txt \
+         xmllint_error.log
 }
 
 echo "Cleaning up temporary files..."
 remove_temp_files
-mkdir -p downloads symbols tmp
+mkdir -p downloads indexes symbols tmp
 
 # Note that the 64-bit rpi-os repository doesn't mirror all packages from
 # arm64 debian, only those specifically packaged for rpi-os or with downstream
 # patches.
-packages="
+PACKAGES="
 firefox f/firefox
 libasound2 a/alsa-lib
 libatk1.0-0 a/atk1.0
 libatk-bridge2.0-0 a/at-spi2-core
 libatspi2.0-0 a/at-spi2-core
-libavcodec58 f/ffmpeg
-libavcodec59 f/ffmpeg
-libavutil56 f/ffmpeg
-libavutil57 f/ffmpeg
+libavcodec[0-9][0-9] f/ffmpeg
+libavutil[0-9][0-9] f/ffmpeg
 libc6 g/glibc
 libcairo2 c/cairo
 libdrm2 libd/libdrm
@@ -160,7 +161,9 @@ zlib1g z/zlib
 "
 
 echo "Fetching packages..."
-fetch_packages "${packages}"
+fetch_indexes
+get_package_urls
+fetch_packages
 
 function process_packages() {
   local package_name="${1}"
@@ -168,7 +171,7 @@ function process_packages() {
     find downloads -name "${package_name}_[0-9]*_${arch}.deb" -type f | grep -v dbg | while read package; do
       local package_filename="${package##downloads/}"
       local version=$(get_version "${package_name}" "${package_filename}")
-      local debug_package_name="${3:-$package_name}"
+      local debug_package_name="${package_name}"
       printf "package_name = ${package_name} version = ${version} dbg_package_name = ${debug_package_name}\n"
       local debuginfo_package=$(find_debuginfo_package "${package_name}" "${version}" "${debug_package_name}")
 
@@ -229,7 +232,7 @@ function process_packages() {
 }
 
 echo "Processing packages..."
-echo "${packages}" | while read line; do
+echo "${PACKAGES}" | while read line; do
   [ -z "${line}" ] && continue
   echo "Processing ${line}"
   process_packages ${line}
