@@ -37,6 +37,9 @@ function download_taskcluster_secret()
 function upload_symbols_directly()
 {
   for myfile in "${artifact_filenames[@]}"; do
+    if [ ! -f "${myfile}" ]; then
+      break
+    fi
     printf "Uploading ${myfile}\n"
     while : ; do
       res=$(curl -H "auth-token: ${SYMBOLS_API_TOKEN}" --form ${myfile}=@${myfile} https://symbols.mozilla.org/upload/)
@@ -115,7 +118,7 @@ function create_symbols_archive() {
   local symbols_size=0
   local paths=""
 
-  cd symbols
+  pushd symbols
 
   for path in $(find -type f -name '*.sym'); do
     symbols_size=$((symbols_size + $(stat -c "%s" "${path}")))
@@ -137,7 +140,7 @@ function create_symbols_archive() {
     7zz -bd -bso0 -spf a "../${archive}" ${paths}
   fi
 
-  cd ..
+  popd
 }
 
 function unpack_rpm_package() {
@@ -206,7 +209,7 @@ function reprocess_crashes()
 function update_sha256sums() {
   # We store the package names along with the current date, we will use these dates
   # in the future but for the time being we just need a package-name,number format.
-  cat unfiltered-packages.txt | rev | cut -d'/' -f1 | rev | sed -e "s/$/,$(date "+%s")/" > SHA256SUMS
+  cat unfiltered-packages.txt | rev | cut -d'/' -f1 | rev | sort | sed -e "s/$/,$(date "+%s")/" > SHA256SUMS
 }
 
 if [ -z "${DUMP_SYMS}" ]; then
