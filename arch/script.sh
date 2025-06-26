@@ -21,6 +21,76 @@ ARCHITECTURES="
 x86_64
 "
 
+PACKAGES="
+amdvlk
+apitrace
+atk
+at-spi2-atk
+at-spi2-core
+cairo
+dbus
+dbus-glib
+dconf
+egl-wayland
+expat
+ffmpeg
+firefox
+firefox-developer-edition
+gcc-libs
+gdk-pixbuf2
+glib2
+glibc
+gperftools
+gtk3
+gvfs
+highway
+intel-gmmlib
+intel-media-driver
+jemalloc
+libcloudproviders
+libcups
+libdrm
+libevent
+libffi
+libglvnd
+libibus
+libice
+libp11-kit
+libpipewire
+libpulse
+libsm
+libspeechd
+libva
+libva-mesa-driver
+libva-nvidia-driver
+libva-vdpau-driver
+libx11
+libxcb
+libxext
+libxkbcommon
+llvm-libs
+mesa
+nspr
+nss
+numactl
+nvidia-utils
+opencl-nvidia
+pango
+pcre2
+pipewire
+pixman
+systemd-libs
+vulkan-icd-loader
+vulkan-intel
+vulkan-nouveau
+vulkan-radeon
+vulkan-swrast
+wayland
+x264
+x265
+zvbi
+"
+
 function get_repo_regex() {
   local repo_regex=$(echo ${REPOS} | tr ' ' '\|')
   printf "(${repo_regex})"
@@ -95,91 +165,6 @@ function unpack_package() {
   fi
 }
 
-function remove_temp_files() {
-  rm -rf all-packages.txt crashes.list downloads downloads.txt indexes \
-         packages symbols symbols.list tmp unfiltered-packages.txt \
-         xmllint_error.log
-}
-
-echo "Cleaning up temporary files..."
-remove_temp_files
-mkdir -p downloads indexes symbols tmp
-
-PACKAGES="
-amdvlk
-apitrace
-atk
-at-spi2-atk
-at-spi2-core
-cairo
-dbus
-dbus-glib
-dconf
-egl-wayland
-expat
-ffmpeg
-firefox
-firefox-developer-edition
-gcc-libs
-gdk-pixbuf2
-glib2
-glibc
-gperftools
-gtk3
-gvfs
-highway
-intel-gmmlib
-intel-media-driver
-jemalloc
-libcloudproviders
-libcups
-libdrm
-libevent
-libffi
-libglvnd
-libibus
-libice
-libp11-kit
-libpipewire
-libpulse
-libsm
-libspeechd
-libva
-libva-mesa-driver
-libva-nvidia-driver
-libva-vdpau-driver
-libx11
-libxcb
-libxext
-libxkbcommon
-llvm-libs
-mesa
-nspr
-nss
-numactl
-nvidia-utils
-opencl-nvidia
-pango
-pcre2
-pipewire
-pixman
-systemd-libs
-vulkan-icd-loader
-vulkan-intel
-vulkan-nouveau
-vulkan-radeon
-vulkan-swrast
-wayland
-x264
-x265
-zvbi
-"
-
-echo "Fetching packages..."
-fetch_indexes
-get_package_urls
-fetch_packages
-
 function process_packages() {
   local package_name="${1}"
   for arch in ${ARCHITECTURES}; do
@@ -244,6 +229,21 @@ function process_packages() {
     done
   done
 }
+
+function remove_temp_files() {
+  rm -rf all-packages.txt crashes.list downloads downloads.txt indexes \
+         packages symbols symbols.list tmp unfiltered-packages.txt \
+         xmllint_error.log
+}
+
+echo "Cleaning up temporary files..."
+remove_temp_files
+mkdir -p downloads indexes symbols tmp
+
+echo "Fetching packages..."
+fetch_indexes
+get_package_urls
+fetch_packages
 
 echo "Processing packages..."
 echo "${PACKAGES}" | while read line; do
