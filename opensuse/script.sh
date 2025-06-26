@@ -19,103 +19,6 @@ ARCHITECTURES="
 x86_64
 "
 
-function get_release_regex() {
-  local release_list=$(echo ${RELEASES} | tr ' ' '\|')
-  printf "(${release_list})"
-}
-
-function get_release_name_regex() {
-  printf "("
-  for release in ${RELEASES}; do
-    if [ "${release}" = "tumbleweed" ]; then
-      printf "openSUSE_Tumbleweed|"
-    else
-      printf "openSUSE_Leap_${release}|"
-    fi
-  done
-  printf "openSUSE_Factory)"
-}
-
-function get_architecture_regex() {
-  local architecture_list=$(echo ${ARCHITECTURES} | tr ' ' '\|')
-  printf "(${architecture_list})"
-}
-
-function get_architecture_escaped_regex() {
-  local architecture_list=$(echo ${ARCHITECTURES} | sed -e "s/ /\\\|/")
-  printf "\(${architecture_list}\)"
-}
-
-function fetch_indexes() {
-  local architecture_regex=$(get_architecture_regex)
-  local release_regex=$(get_release_regex)
-
-  local url="${URL}"
-  local regex="${url}/(debug/)?(update/)?(distribution/)?(leap/)?(${release_regex}(-test)?/)?(repo/)?((oss|debug)/)?(${architecture_regex}/)?$"
-  ${WGET} -o wget_indexes.log --directory-prefix indexes --convert-links --recursive -l 8 --accept-regex "${regex}" "${url}/"
-
-  local release_name_regex=$(get_release_name_regex)
-  regex="${url}/(repositories/)?((mozilla|mozilla%3A)/)?(Factory/)?(${release_name_regex}(_debug)?/)?(${architecture_regex}/)?$"
-  ${WGET} -o wget_indexes.log --directory-prefix indexes --convert-links --recursive --accept-regex "${regex}" "${url}/"
-
-  url="${URL2}"
-  regex="${url}/(${release_name_regex}/)?(Essentials/)?(${architecture_regex}/)?$"
-  ${WGET} -o wget_indexes.log --directory-prefix indexes --convert-links --recursive --accept-regex "${regex}" "${url}/"
-
-  url="${URL3}"
-  regex="${url}/(leap/)?(${release_regex}/)?(${architecture_regex}/)?$"
-  ${WGET} -o wget_indexes.log --directory-prefix indexes --convert-links --recursive --accept-regex "${regex}" "${url}/"
-}
-
-function get_package_urls() {
-  truncate -s 0 all-packages.txt unfiltered-packages.txt
-
-  find indexes -name index.html -exec xmllint --html --xpath '//a/@href' {} \; 2>xmllint_error.log | \
-    grep -o "https\?://.*\.rpm" | grep -v -- "-32bit-" | sort -u >> all-packages.txt
-
-  local architecture_escaped_regex=$(get_architecture_escaped_regex)
-  echo "${PACKAGES}" | grep -v '^$' | cut -d' ' -f2 | while read package; do
-    grep -o "https\?://.*/${package}\(-debuginfo\)\?-[0-9].*\.${architecture_escaped_regex}\.rpm" all-packages.txt >> unfiltered-packages.txt
-  done
-}
-
-function fetch_packages() {
-  truncate -s 0 downloads.txt
-  cat unfiltered-packages.txt | while read line; do
-    local package_name=$(echo "${line}" | rev | cut -d'/' -f1 | rev)
-    if ! grep -q -F "${package_name}" SHA256SUMS; then
-      echo "${line}" >> downloads.txt
-    fi
-  done
-
-  sort downloads.txt | ${WGET} -o wget_packages.log -P downloads -c -i -
-}
-
-function get_version() {
-  local package_name="${1}"
-  local filename="${2}"
-
-  local version="${filename##${package_name}-}"
-  version="${version%%.rpm}"
-  printf "${version}"
-}
-
-function find_debuginfo_package() {
-  local package_name="${1}"
-  local version="${2}"
-  find downloads -name "${package_name}-debuginfo-${version}.rpm" -type f
-}
-
-function remove_temp_files() {
-  rm -rf all-packages.txt crashes.list downloads downloads.txt indexes \
-         packages symbols symbols.list tmp unfiltered-packages.txt \
-         xmllint_error.log
-}
-
-echo "Cleaning up temporary files..."
-remove_temp_files
-mkdir -p downloads indexes symbols tmp
-
 PACKAGES="
 alsa
 apitrace-wrappers
@@ -237,10 +140,92 @@ speech-dispatcher
 x11-video-nvidiaG[0-9][0-9]
 "
 
-echo "Fetching packages..."
-fetch_indexes
-get_package_urls
-fetch_packages
+function get_release_regex() {
+  local release_list=$(echo ${RELEASES} | tr ' ' '\|')
+  printf "(${release_list})"
+}
+
+function get_release_name_regex() {
+  printf "("
+  for release in ${RELEASES}; do
+    if [ "${release}" = "tumbleweed" ]; then
+      printf "openSUSE_Tumbleweed|"
+    else
+      printf "openSUSE_Leap_${release}|"
+    fi
+  done
+  printf "openSUSE_Factory)"
+}
+
+function get_architecture_regex() {
+  local architecture_list=$(echo ${ARCHITECTURES} | tr ' ' '\|')
+  printf "(${architecture_list})"
+}
+
+function get_architecture_escaped_regex() {
+  local architecture_list=$(echo ${ARCHITECTURES} | sed -e "s/ /\\\|/")
+  printf "\(${architecture_list}\)"
+}
+
+function fetch_indexes() {
+  local architecture_regex=$(get_architecture_regex)
+  local release_regex=$(get_release_regex)
+
+  local url="${URL}"
+  local regex="${url}/(debug/)?(update/)?(distribution/)?(leap/)?(${release_regex}(-test)?/)?(repo/)?((oss|debug)/)?(${architecture_regex}/)?$"
+  ${WGET} -o wget_indexes.log --directory-prefix indexes --convert-links --recursive -l 8 --accept-regex "${regex}" "${url}/"
+
+  local release_name_regex=$(get_release_name_regex)
+  regex="${url}/(repositories/)?((mozilla|mozilla%3A)/)?(Factory/)?(${release_name_regex}(_debug)?/)?(${architecture_regex}/)?$"
+  ${WGET} -o wget_indexes.log --directory-prefix indexes --convert-links --recursive --accept-regex "${regex}" "${url}/"
+
+  url="${URL2}"
+  regex="${url}/(${release_name_regex}/)?(Essentials/)?(${architecture_regex}/)?$"
+  ${WGET} -o wget_indexes.log --directory-prefix indexes --convert-links --recursive --accept-regex "${regex}" "${url}/"
+
+  url="${URL3}"
+  regex="${url}/(leap/)?(${release_regex}/)?(${architecture_regex}/)?$"
+  ${WGET} -o wget_indexes.log --directory-prefix indexes --convert-links --recursive --accept-regex "${regex}" "${url}/"
+}
+
+function get_package_urls() {
+  truncate -s 0 all-packages.txt unfiltered-packages.txt
+
+  find indexes -name index.html -exec xmllint --html --xpath '//a/@href' {} \; 2>xmllint_error.log | \
+    grep -o "https\?://.*\.rpm" | grep -v -- "-32bit-" | sort -u >> all-packages.txt
+
+  local architecture_escaped_regex=$(get_architecture_escaped_regex)
+  echo "${PACKAGES}" | grep -v '^$' | cut -d' ' -f2 | while read package; do
+    grep -o "https\?://.*/${package}\(-debuginfo\)\?-[0-9].*\.${architecture_escaped_regex}\.rpm" all-packages.txt >> unfiltered-packages.txt
+  done
+}
+
+function fetch_packages() {
+  truncate -s 0 downloads.txt
+  cat unfiltered-packages.txt | while read line; do
+    local package_name=$(echo "${line}" | rev | cut -d'/' -f1 | rev)
+    if ! grep -q -F "${package_name}" SHA256SUMS; then
+      echo "${line}" >> downloads.txt
+    fi
+  done
+
+  sort downloads.txt | ${WGET} -o wget_packages.log -P downloads -c -i -
+}
+
+function get_version() {
+  local package_name="${1}"
+  local filename="${2}"
+
+  local version="${filename##${package_name}-}"
+  version="${version%%.rpm}"
+  printf "${version}"
+}
+
+function find_debuginfo_package() {
+  local package_name="${1}"
+  local version="${2}"
+  find downloads -name "${package_name}-debuginfo-${version}.rpm" -type f
+}
 
 function process_packages() {
   local package_name="${1}"
@@ -306,6 +291,21 @@ function process_packages() {
     done
   done
 }
+
+function remove_temp_files() {
+  rm -rf all-packages.txt crashes.list downloads downloads.txt indexes \
+         packages symbols symbols.list tmp unfiltered-packages.txt \
+         xmllint_error.log
+}
+
+echo "Cleaning up temporary files..."
+remove_temp_files
+mkdir -p downloads indexes symbols tmp
+
+echo "Fetching packages..."
+fetch_indexes
+get_package_urls
+fetch_packages
 
 echo "Processing packages..."
 echo "${PACKAGES}" | while read line; do

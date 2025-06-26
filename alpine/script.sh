@@ -25,6 +25,116 @@ aarch64
 x86_64
 "
 
+# <package name> [<debug package name>]
+PACKAGES="
+alsa-lib
+aom-libs
+brotli-libs
+busybox-binsh
+cairo
+cairo-gobject cairo
+cups-libs
+dbus-libs
+dconf
+ffmpeg-libavcodec
+ffmpeg-libavutil
+ffmpeg-libswresample
+firefox
+firefox-esr
+fontconfig
+freetype
+fribidi
+gdk-pixbuf
+glib
+graphite2
+gtk+3.0
+harfbuzz
+icu-libs
+lame-libs
+libatk-1.0
+libatk-bridge-2.0
+libbsd
+libbz2
+libcrypto3
+libdav1d
+libdrm
+libepoxy
+libevent
+libexpat
+libffi
+libgcc
+libintl
+libjpeg-turbo
+libjxl
+libmount
+libpciaccess
+libpng
+libpulse
+libssl3
+libstdc++
+libtheora
+libva
+libva-vdpau-driver
+libvorbis
+libvpx
+libwebp
+libwebpdemux
+libwebpmux
+libx11
+libxau
+libxbcommon
+libxcb
+libxcomposite
+libxcursor
+libxdamage
+libxdmcp
+libxext
+libxfixes
+libxft
+libxi
+libxinerama
+libxrandr
+libxrender
+libxshmfence
+libxxf86vm
+llvm[0-9][0-9]-libs
+mesa
+mesa-dri-gallium mesa
+mesa-egl mesa
+mesa-gbm mesa
+mesa-glapi mesa
+mesa-gles mesa
+mesa-gl mesa
+mesa-osmesa mesa
+mesa-va-gallium mesa
+mesa-vdpau-gallium mesa
+mesa-vulkan-ati mesa
+mesa-vulkan-intel mesa
+mesa-vulkan-layers mesa
+mesa-vulkan-swrast mesa
+mesa-xatracker mesa
+musl
+nspr
+nss
+opus
+pango
+pciutils-libs
+pcre2
+pipewire
+pipewire-libs
+pixman
+rav1e-libs
+scudo-malloc
+sqlite-libs
+wayland
+wayland-libs-client wayland
+wayland-libs-cursor wayland
+wayland-libs-egl wayland
+x264-libs
+x265-libs
+zlib
+"
+
 function get_release_regex() {
   local release_list=$(echo ${RELEASES} | tr ' ' '\|')
   printf "(${release_list})"
@@ -195,116 +305,6 @@ function remove_temp_files() {
 echo "Cleaning up temporary files..."
 remove_temp_files
 mkdir -p downloads indexes symbols tmp
-
-# <package name> [<debug package name>]
-PACKAGES="
-alsa-lib
-aom-libs
-brotli-libs
-busybox-binsh
-cairo
-cairo-gobject cairo
-cups-libs
-dbus-libs
-dconf
-ffmpeg-libavcodec
-ffmpeg-libavutil
-ffmpeg-libswresample
-firefox
-firefox-esr
-fontconfig
-freetype
-fribidi
-gdk-pixbuf
-glib
-graphite2
-gtk+3.0
-harfbuzz
-icu-libs
-lame-libs
-libatk-1.0
-libatk-bridge-2.0
-libbsd
-libbz2
-libcrypto3
-libdav1d
-libdrm
-libepoxy
-libevent
-libexpat
-libffi
-libgcc
-libintl
-libjpeg-turbo
-libjxl
-libmount
-libpciaccess
-libpng
-libpulse
-libssl3
-libstdc++
-libtheora
-libva
-libva-vdpau-driver
-libvorbis
-libvpx
-libwebp
-libwebpdemux
-libwebpmux
-libx11
-libxau
-libxbcommon
-libxcb
-libxcomposite
-libxcursor
-libxdamage
-libxdmcp
-libxext
-libxfixes
-libxft
-libxi
-libxinerama
-libxrandr
-libxrender
-libxshmfence
-libxxf86vm
-llvm[0-9][0-9]-libs
-mesa
-mesa-dri-gallium mesa
-mesa-egl mesa
-mesa-gbm mesa
-mesa-glapi mesa
-mesa-gles mesa
-mesa-gl mesa
-mesa-osmesa mesa
-mesa-va-gallium mesa
-mesa-vdpau-gallium mesa
-mesa-vulkan-ati mesa
-mesa-vulkan-intel mesa
-mesa-vulkan-layers mesa
-mesa-vulkan-swrast mesa
-mesa-xatracker mesa
-musl
-nspr
-nss
-opus
-pango
-pciutils-libs
-pcre2
-pipewire
-pipewire-libs
-pixman
-rav1e-libs
-scudo-malloc
-sqlite-libs
-wayland
-wayland-libs-client wayland
-wayland-libs-cursor wayland
-wayland-libs-egl wayland
-x264-libs
-x265-libs
-zlib
-"
 
 echo "Fetching packages..."
 fetch_indexes

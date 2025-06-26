@@ -22,87 +22,6 @@ aarch64
 x86_64
 "
 
-function get_release_regex() {
-  local release_list=$(echo ${RELEASES} | tr ' ' '\|')
-  printf "(${release_list})"
-}
-
-function get_architecture_regex() {
-  local architecture_list=$(echo ${ARCHITECTURES} | tr ' ' '\|')
-  printf "(${architecture_list})"
-}
-
-function get_architecture_escaped_regex() {
-  local architecture_list=$(echo ${ARCHITECTURES} | sed -e "s/ /\\\|/")
-  printf "\(${architecture_list}\)"
-}
-
-function get_package_folder_regex() {
-  local package_folder_list=$(echo "${PACKAGES}" | grep -v '^$' | cut -d' ' -f2 | sort -u | tr '\n' '\|')
-  printf "(${package_folder_list%%|})"
-}
-
-function fetch_indexes() {
-  local release_regex=$(get_release_regex)
-  local architecture_regex=$(get_architecture_regex)
-  local package_folder_regex=$(get_package_folder_regex)
-
-  echo "${URLS}" | while read url; do
-    [ -z "${url}" ] && continue
-    local regex="${url}/((releases|updates|development)/)?(testing/)?(test/)?(${release_regex}/)?(Everything/)?(${architecture_regex}/)?((os|debug)/)?(tree/)?(Packages/)?(${package_folder_regex}/)?$"
-    ${WGET} -o wget_indexes.log --directory-prefix indexes --convert-links --recursive -l 9 --accept-regex "${regex}" "${url}/"
-  done
-}
-
-function get_package_urls() {
-  truncate -s 0 all-packages.txt unfiltered-packages.txt
-
-  find indexes -name index.html -exec xmllint --html --xpath '//a/@href' {} \; 2>xmllint_error.log | \
-    grep -o "https\?://.*\.rpm" | sort -u >> all-packages.txt
-
-  local architecture_escaped_regex=$(get_architecture_escaped_regex)
-  echo "${PACKAGES}" | grep -v '^$' | cut -d' ' -f1 | while read package; do
-    grep -o "https\?://.*/${package}\(-debuginfo\)\?-[0-9].*\.fc..\.${architecture_escaped_regex}\.rpm" all-packages.txt >> unfiltered-packages.txt
-  done
-}
-
-function fetch_packages() {
-  truncate -s 0 downloads.txt
-  cat unfiltered-packages.txt | while read line; do
-    local package_name=$(echo "${line}" | rev | cut -d'/' -f1 | rev)
-    if ! grep -q -F "${package_name}" SHA256SUMS; then
-      echo "${line}" >> downloads.txt
-    fi
-  done
-
-  sort downloads.txt | ${WGET} -o wget_packages.log -P downloads -c -i -
-}
-
-function get_version() {
-  local package_name="${1}"
-  local filename="${2}"
-
-  local version="${filename##${package_name}-}"
-  version="${version%%.rpm}"
-  printf "${version}"
-}
-
-function find_debuginfo_package() {
-  local package_name="${1}"
-  local version="${2}"
-  find downloads -name "${package_name}-debuginfo-${version}.rpm" -type f
-}
-
-function remove_temp_files() {
-  rm -rf all-packages.txt crashes.list downloads downloads.txt indexes \
-         packages symbols symbols.list tmp unfiltered-packages.txt \
-         xmllint_error.log
-}
-
-echo "Cleaning up temporary files..."
-remove_temp_files
-mkdir -p downloads indexes symbols tmp
-
 # <package folder> <package name>
 PACKAGES="
 alsa-lib a
@@ -205,10 +124,76 @@ zlib z
 zvbi z
 "
 
-echo "Fetching packages..."
-fetch_indexes
-get_package_urls
-fetch_packages
+function get_release_regex() {
+  local release_list=$(echo ${RELEASES} | tr ' ' '\|')
+  printf "(${release_list})"
+}
+
+function get_architecture_regex() {
+  local architecture_list=$(echo ${ARCHITECTURES} | tr ' ' '\|')
+  printf "(${architecture_list})"
+}
+
+function get_architecture_escaped_regex() {
+  local architecture_list=$(echo ${ARCHITECTURES} | sed -e "s/ /\\\|/")
+  printf "\(${architecture_list}\)"
+}
+
+function get_package_folder_regex() {
+  local package_folder_list=$(echo "${PACKAGES}" | grep -v '^$' | cut -d' ' -f2 | sort -u | tr '\n' '\|')
+  printf "(${package_folder_list%%|})"
+}
+
+function fetch_indexes() {
+  local release_regex=$(get_release_regex)
+  local architecture_regex=$(get_architecture_regex)
+  local package_folder_regex=$(get_package_folder_regex)
+
+  echo "${URLS}" | while read url; do
+    [ -z "${url}" ] && continue
+    local regex="${url}/((releases|updates|development)/)?(testing/)?(test/)?(${release_regex}/)?(Everything/)?(${architecture_regex}/)?((os|debug)/)?(tree/)?(Packages/)?(${package_folder_regex}/)?$"
+    ${WGET} -o wget_indexes.log --directory-prefix indexes --convert-links --recursive -l 9 --accept-regex "${regex}" "${url}/"
+  done
+}
+
+function get_package_urls() {
+  truncate -s 0 all-packages.txt unfiltered-packages.txt
+
+  find indexes -name index.html -exec xmllint --html --xpath '//a/@href' {} \; 2>xmllint_error.log | \
+    grep -o "https\?://.*\.rpm" | sort -u >> all-packages.txt
+
+  local architecture_escaped_regex=$(get_architecture_escaped_regex)
+  echo "${PACKAGES}" | grep -v '^$' | cut -d' ' -f1 | while read package; do
+    grep -o "https\?://.*/${package}\(-debuginfo\)\?-[0-9].*\.fc..\.${architecture_escaped_regex}\.rpm" all-packages.txt >> unfiltered-packages.txt
+  done
+}
+
+function fetch_packages() {
+  truncate -s 0 downloads.txt
+  cat unfiltered-packages.txt | while read line; do
+    local package_name=$(echo "${line}" | rev | cut -d'/' -f1 | rev)
+    if ! grep -q -F "${package_name}" SHA256SUMS; then
+      echo "${line}" >> downloads.txt
+    fi
+  done
+
+  sort downloads.txt | ${WGET} -o wget_packages.log -P downloads -c -i -
+}
+
+function get_version() {
+  local package_name="${1}"
+  local filename="${2}"
+
+  local version="${filename##${package_name}-}"
+  version="${version%%.rpm}"
+  printf "${version}"
+}
+
+function find_debuginfo_package() {
+  local package_name="${1}"
+  local version="${2}"
+  find downloads -name "${package_name}-debuginfo-${version}.rpm" -type f
+}
 
 function process_packages() {
   local package_name="${1}"
@@ -274,6 +259,21 @@ function process_packages() {
     done
   done
 }
+
+function remove_temp_files() {
+  rm -rf all-packages.txt crashes.list downloads downloads.txt indexes \
+         packages symbols symbols.list tmp unfiltered-packages.txt \
+         xmllint_error.log
+}
+
+echo "Cleaning up temporary files..."
+remove_temp_files
+mkdir -p downloads indexes symbols tmp
+
+echo "Fetching packages..."
+fetch_indexes
+get_package_urls
+fetch_packages
 
 echo "Processing packages..."
 echo "${PACKAGES}" | while read line; do
