@@ -221,6 +221,7 @@ Mesa-libEGL1
 Mesa-libGL1
 Mesa-libva
 MozillaFirefox
+MozillaThunderbird
 mozilla-nspr
 mozilla-nss
 nvidia-compute-G[0-9][0-9]
