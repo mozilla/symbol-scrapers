@@ -54,7 +54,7 @@ fetch_packages() {
 
   touch packages.txt
   cat unfiltered-packages.txt | while read line; do
-    package_name=$(echo "${line}" | rev | cut -d'/' -f1 | rev)
+    local package_name=$(echo "${line}" | rev | cut -d'/' -f1 | rev)
     if ! grep -q -F "${package_name}" SHA256SUMS; then
       echo "${line}" >> packages.txt
     fi
@@ -65,10 +65,10 @@ fetch_packages() {
 }
 
 function get_version() {
-  package_name="${1}"
-  filename="${2}"
+  local package_name="${1}"
+  local filename="${2}"
 
-  version="${filename##${package_name}_}"
+  local version="${filename##${package_name}_}"
   version="${version%%.deb}"
   printf "${version}"
 }
@@ -88,7 +88,7 @@ function unpack_package() {
   local package_name="${1}"
   local debug_package_name="${2}"
   mkdir packages
-  data_file=$(ar t "${package_name}" | grep ^data)
+  local data_file=$(ar t "${package_name}" | grep ^data)
   ar x "${package_name}" "${data_file}" && \
   tar -C packages -x -a -f "${data_file}"
   if [ $? -ne 0 ]; then
@@ -291,8 +291,8 @@ function process_packages() {
           fi
 
           # Copy the symbol file and debug information
-          debugid=$(head -n 1 "${tmpfile}" | cut -d' ' -f4)
-          filename="$(basename "${path}")"
+          local debugid=$(head -n 1 "${tmpfile}" | cut -d' ' -f4)
+          local filename="$(basename "${path}")"
           mkdir -p "symbols/${filename}/${debugid}"
           cp "${tmpfile}" "symbols/${filename}/${debugid}/${filename}.sym"
           local soname=$(get_soname "${path}")
