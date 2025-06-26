@@ -9,11 +9,10 @@ URL="http://dl-cdn.alpinelinux.org/alpine"
 
 RELEASES="
 edge
-v3.17
-v3.18
 v3.19
 v3.20
 v3.21
+v3.22
 "
 
 REPOS="
@@ -22,6 +21,7 @@ community
 "
 
 ARCHITECTURES="
+aarch64
 x86_64
 "
 
