@@ -50,12 +50,22 @@ opensuse/leap/16.0/x86_64
 opensuse/tumbleweed/x86_64
 "
 
+ARCHITECTURES="
+x86_64
+"
+
+function get_architecture_escaped_regex() {
+  local architecture_list=$(echo ${ARCHITECTURES} | sed -e "s/ /\\\|/")
+  printf "\(${architecture_list}\)"
+}
+
 get_package_urls() {
   local package_name="${1}"
   local dbg_package_name="${package_name}-debuginfo"
   local url=${2:-$URL}
 
-  find . -name "index.html*" -exec grep -o "${url}.*/\(${package_name}-[0-9].*.x86_64.rpm\|${dbg_package_name}-[0-9].*.x86_64.rpm\)\"" {} \; | \
+  local architecture_escaped_regex=$(get_architecture_escaped_regex)
+  find . -name "index.html*" -exec grep -o "${url}.*/\(${package_name}-[0-9].*.${architecture_escaped_regex}.rpm\|${dbg_package_name}-[0-9].*.${architecture_escaped_regex}.rpm\)\"" {} \; | \
   cut -d'"' -f1 | \
   grep -v 32bit
 }
@@ -254,63 +264,66 @@ fetch_packages "${packages}"
 
 function process_packages() {
   local package_name="${1}"
-  find downloads -name "${package_name}-[0-9]*.rpm" -type f | grep -v debuginfo | while read package; do
-    local package_filename="${package##downloads/}"
-    local version=$(get_version "${package_name}" "${package_filename}")
-    local debuginfo_package=$(find_debuginfo_package "${package_name}" "${version}")
+  for arch in ${ARCHITECTURES}; do
+    find downloads -name "${package_name}-[0-9]*.${arch}.rpm" -type f | grep -v debuginfo | while read package; do
+      local package_filename="${package##downloads/}"
+      local version=$(get_version "${package_name}" "${package_filename}")
+      printf "package_name = ${package_name} version = ${version}\n"
+      local debuginfo_package=$(find_debuginfo_package "${package_name}" "${version}")
 
-    if [ -n "${debuginfo_package}" ]; then
-      unpack_rpm_package ${package} ${debuginfo_package}
-    else
-      printf "***** Could not find debuginfo for ${package_filename}\n"
-      unpack_rpm_package ${package}
-    fi
-
-    find packages -type f | grep -v debug | while read path; do
-      if file "${path}" | grep -q ": *ELF" ; then
-        local debuginfo_path="$(find_debuginfo "${path}" "${version}")"
-
-        truncate -s 0 error.log
-        local tmpfile=$(mktemp --tmpdir=tmp)
-        printf "Writing symbol file for ${path} ${debuginfo_path} ... "
-        if [ -n "${debuginfo_path}" ]; then
-          ${DUMP_SYMS} --inlines "${path}" "${debuginfo_path}" 1> "${tmpfile}" 2> error.log
-        else
-          ${DUMP_SYMS} --inlines "${path}" 1> "${tmpfile}" 2> error.log
-        fi
-
-        if [ -s "${tmpfile}" -a -z "${debuginfo_path}" ]; then
-          printf "done w/o debuginfo\n"
-        elif [ -s "${tmpfile}" ]; then
-          printf "done\n"
-        else
-          printf "something went terribly wrong!\n"
-        fi
-
-        if [ -s error.log ]; then
-          printf "***** error log for package ${package} ${path} ${debuginfo_path}\n"
-          cat error.log
-          printf "***** error log for package ${package} ${path} ${debuginfo_path} ends here\n"
-        fi
-
-        # Copy the symbol file and debug information
-        local debugid=$(head -n 1 "${tmpfile}" | cut -d' ' -f4)
-        local filename="$(basename "${path}")"
-        mkdir -p "symbols/${filename}/${debugid}"
-        cp "${tmpfile}" "symbols/${filename}/${debugid}/${filename}.sym"
-        local soname=$(get_soname "${path}")
-        if [ -n "${soname}" ]; then
-          if [ "${soname}" != "${filename}" ]; then
-            mkdir -p "symbols/${soname}/${debugid}"
-            cp "${tmpfile}" "symbols/${soname}/${debugid}/${soname}.sym"
-          fi
-        fi
-
-        rm -f "${tmpfile}"
+      if [ -n "${debuginfo_package}" ]; then
+        unpack_rpm_package ${package} ${debuginfo_package}
+      else
+        printf "***** Could not find debuginfo for ${package_filename}\n"
+        unpack_rpm_package ${package}
       fi
-    done
 
-    rm -rf packages
+      find packages -type f | grep -v debug | while read path; do
+        if file "${path}" | grep -q ": *ELF" ; then
+          local debuginfo_path="$(find_debuginfo "${path}" "${version}")"
+
+          truncate -s 0 error.log
+          local tmpfile=$(mktemp --tmpdir=tmp)
+          printf "Writing symbol file for ${path} ${debuginfo_path} ... "
+          if [ -n "${debuginfo_path}" ]; then
+            ${DUMP_SYMS} --inlines "${path}" "${debuginfo_path}" 1> "${tmpfile}" 2> error.log
+          else
+            ${DUMP_SYMS} --inlines "${path}" 1> "${tmpfile}" 2> error.log
+          fi
+
+          if [ -s "${tmpfile}" -a -z "${debuginfo_path}" ]; then
+            printf "done w/o debuginfo\n"
+          elif [ -s "${tmpfile}" ]; then
+            printf "done\n"
+          else
+            printf "something went terribly wrong!\n"
+          fi
+
+          if [ -s error.log ]; then
+            printf "***** error log for package ${package} ${path} ${debuginfo_path}\n"
+            cat error.log
+            printf "***** error log for package ${package} ${path} ${debuginfo_path} ends here\n"
+          fi
+
+          # Copy the symbol file and debug information
+          local debugid=$(head -n 1 "${tmpfile}" | cut -d' ' -f4)
+          local filename="$(basename "${path}")"
+          mkdir -p "symbols/${filename}/${debugid}"
+          cp "${tmpfile}" "symbols/${filename}/${debugid}/${filename}.sym"
+          local soname=$(get_soname "${path}")
+          if [ -n "${soname}" ]; then
+            if [ "${soname}" != "${filename}" ]; then
+              mkdir -p "symbols/${soname}/${debugid}"
+              cp "${tmpfile}" "symbols/${soname}/${debugid}/${soname}.sym"
+            fi
+          fi
+
+          rm -f "${tmpfile}"
+        fi
+      done
+
+      rm -rf packages
+    done
   done
 }
 

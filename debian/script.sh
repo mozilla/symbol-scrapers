@@ -9,6 +9,16 @@ UPDATES_URL="http://deb.debian.org/debian-security/pool/updates"
 DDEB_URL="http://deb.debian.org/debian-debug/pool"
 DDEB_UPDATES_URL="http://deb.debian.org/debian-security-debug/pool/updates"
 
+ARCHITECTURES="
+i386
+amd64
+"
+
+function get_architecture_escaped_regex() {
+  local architecture_list=$(echo ${ARCHITECTURES} | sed -e "s/ /\\\|/")
+  printf "\(${architecture_list}\)"
+}
+
 get_package_urls() {
   local package_name="${1}"
   local pkg_path="${2}"
@@ -29,16 +39,17 @@ get_package_urls() {
   fi
 
   ${WGET} -o wget_packages_urls.log -k ${urls}
-  find . -name "index.html*" -exec grep -o "${url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).deb\"" {} \; | cut -d'"' -f1
-  find . -name "index.html*" -exec grep -o "${url}/${non_free_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).deb\"" {} \; | cut -d'"' -f1
-  find . -name "index.html*" -exec grep -o "${url}/${contrib_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).deb\"" {} \; | cut -d'"' -f1
-  find . -name "index.html*" -exec grep -o "${ddeb_url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).deb\"" {} \; | cut -d'"' -f1
-  find . -name "index.html*" -exec grep -o "${ddeb_url}/${non_free_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).deb\"" {} \; | cut -d'"' -f1
-  find . -name "index.html*" -exec grep -o "${ddeb_url}/${contrib_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).deb\"" {} \; | cut -d'"' -f1
+  local architecture_escaped_regex=$(get_architecture_escaped_regex)
+  find . -name "index.html*" -exec grep -o "${url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_${architecture_escaped_regex}.deb\"" {} \; | cut -d'"' -f1
+  find . -name "index.html*" -exec grep -o "${url}/${non_free_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_${architecture_escaped_regex}.deb\"" {} \; | cut -d'"' -f1
+  find . -name "index.html*" -exec grep -o "${url}/${contrib_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_${architecture_escaped_regex}.deb\"" {} \; | cut -d'"' -f1
+  find . -name "index.html*" -exec grep -o "${ddeb_url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_${architecture_escaped_regex}.deb\"" {} \; | cut -d'"' -f1
+  find . -name "index.html*" -exec grep -o "${ddeb_url}/${non_free_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_${architecture_escaped_regex}.deb\"" {} \; | cut -d'"' -f1
+  find . -name "index.html*" -exec grep -o "${ddeb_url}/${contrib_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_${architecture_escaped_regex}.deb\"" {} \; | cut -d'"' -f1
 
   if [ -n "${alt_url}" ]; then
-    find . -name "index.html*" -exec grep -o "${alt_url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).deb\"" {} \; | cut -d'"' -f1
-    find . -name "index.html*" -exec grep -o "${ddeb_alt_url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(i386\|amd64\).deb\"" {} \; | cut -d'"' -f1
+    find . -name "index.html*" -exec grep -o "${alt_url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_${architecture_escaped_regex}.deb\"" {} \; | cut -d'"' -f1
+    find . -name "index.html*" -exec grep -o "${ddeb_alt_url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_${architecture_escaped_regex}.deb\"" {} \; | cut -d'"' -f1
   fi
 
   find . -name "index.html*" -exec rm -f {} \;
@@ -258,7 +269,7 @@ fetch_packages "${packages}"
 
 function process_packages() {
   local package_name="${1}"
-  for arch in i386 amd64; do
+  for arch in ${ARCHITECTURES}; do
     find downloads -name "${package_name}_[0-9]*_${arch}.deb" -type f | grep -v dbg | while read package; do
       local package_filename="${package##downloads/}"
       local version=$(get_version "${package_name}" "${package_filename}")
@@ -267,10 +278,10 @@ function process_packages() {
       local debuginfo_package=$(find_debuginfo_package "${package_name}" "${version}" "${debug_package_name}")
 
       if [ -n "${debuginfo_package}" ]; then
-        unpack_package ${package} ${debuginfo_package}
+        unpack_package "${package}" "${debuginfo_package}"
       else
         printf "***** Could not find debuginfo for ${package_filename}\n"
-        unpack_package ${package}
+        unpack_package "${package}"
       fi
 
       find packages -type f | grep -v debug | while read path; do
