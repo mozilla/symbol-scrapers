@@ -21,6 +21,10 @@ main/x86_64
 community/x86_64
 "
 
+ARCHITECTURES="
+x86_64
+"
+
 get_package_urls() {
   # Alpine servers have the '+' character encoded in the URLs
   local package_name=$(echo "${1}" | sed -e 's/+/\%2B/g')
@@ -290,16 +294,19 @@ zlib
 
 echo "${VERSIONS}" | while read version; do
   [ -z "${version}" ] && continue
-  mkdir -p downloads tmp
-  fetch_packages "${packages}" "${version}"
+  echo "${ARCHITECTURES}" | while read architecture; do
+    [ -z "${architecture}" ] && continue
+    mkdir -p downloads tmp
+    fetch_packages "${packages}" "${version}"
 
-  echo "${packages}" | while read line; do
-    [ -z "${line}" ] && continue
-    process_packages ${line}
+    echo "${packages}" | while read line; do
+      [ -z "${line}" ] && continue
+      process_packages ${line}
+    done
+
+    cat unfiltered-packages.txt | rev | cut -d'/' -f1 | rev | sed -e "s/$/,$(date "+%s")/" >> SHA256SUMS.new
+    rm -rf downloads tmp indexes.txt packages.txt unfiltered-packages.txt
   done
-
-  cat unfiltered-packages.txt | rev | cut -d'/' -f1 | rev | sed -e "s/$/,$(date "+%s")/" >> SHA256SUMS.new
-  rm -rf downloads tmp indexes.txt packages.txt unfiltered-packages.txt
 done
 
 mv -f SHA256SUMS.new SHA256SUMS
