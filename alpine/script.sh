@@ -180,6 +180,7 @@ function remove_temp_files() {
          unfiltered-packages.txt crashes.list symbols.list
 }
 
+echo "Cleaning up temporary files..."
 remove_temp_files
 mkdir -p symbols
 
@@ -309,12 +310,17 @@ echo "${VERSIONS}" | while read version; do
   done
 done
 
-mv -f SHA256SUMS.new SHA256SUMS
-
+echo "Creating symbols archive..."
 create_symbols_archive
 
+echo "Uploading symbols..."
 upload_symbols
 
+echo "Reprocessing crashes..."
 reprocess_crashes
 
+echo "Updating sha256sums..."
+mv -f SHA256SUMS.new SHA256SUMS
+
+echo "Cleaning up temporary files..."
 remove_temp_files
