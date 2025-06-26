@@ -21,6 +21,37 @@ armhf
 arm64
 "
 
+# Note that the 64-bit rpi-os repository doesn't mirror all packages from
+# arm64 debian, only those specifically packaged for rpi-os or with downstream
+# patches.
+PACKAGES="
+firefox f/firefox
+libasound2 a/alsa-lib
+libatk1.0-0 a/atk1.0
+libatk-bridge2.0-0 a/at-spi2-core
+libatspi2.0-0 a/at-spi2-core
+libavcodec[0-9][0-9] f/ffmpeg
+libavutil[0-9][0-9] f/ffmpeg
+libc6 g/glibc
+libcairo2 c/cairo
+libdrm2 libd/libdrm
+libegl-mesa0 m/mesa
+libgbm1 m/mesa
+libgl1-mesa-dri m/mesa
+libglx-mesa0 m/mesa
+libgtk-3-0 g/gtk+3.0
+libpipewire-0.3-0 p/pipewire
+libpixman-1-0 p/pixman
+libpulse0 p/pulseaudio
+libspa-0.2-modules p/pipewire
+libspeechd2 s/speech-dispatcher
+libwayland-client0 w/wayland
+mesa-libgallium m/mesa
+mesa-va-drivers m/mesa
+mesa-vulkan-drivers m/mesa
+zlib1g z/zlib
+"
+
 function get_area_regex() {
   local area_regex=$(echo ${AREAS} | tr ' ' '\|')
   printf "(${area_regex})"
@@ -119,52 +150,6 @@ function unpack_package() {
   fi
 }
 
-function remove_temp_files() {
-  rm -rf all-packages.txt crashes.list downloads downloads.txt indexes \
-         packages symbols symbols.list tmp unfiltered-packages.txt \
-         xmllint_error.log
-}
-
-echo "Cleaning up temporary files..."
-remove_temp_files
-mkdir -p downloads indexes symbols tmp
-
-# Note that the 64-bit rpi-os repository doesn't mirror all packages from
-# arm64 debian, only those specifically packaged for rpi-os or with downstream
-# patches.
-PACKAGES="
-firefox f/firefox
-libasound2 a/alsa-lib
-libatk1.0-0 a/atk1.0
-libatk-bridge2.0-0 a/at-spi2-core
-libatspi2.0-0 a/at-spi2-core
-libavcodec[0-9][0-9] f/ffmpeg
-libavutil[0-9][0-9] f/ffmpeg
-libc6 g/glibc
-libcairo2 c/cairo
-libdrm2 libd/libdrm
-libegl-mesa0 m/mesa
-libgbm1 m/mesa
-libgl1-mesa-dri m/mesa
-libglx-mesa0 m/mesa
-libgtk-3-0 g/gtk+3.0
-libpipewire-0.3-0 p/pipewire
-libpixman-1-0 p/pixman
-libpulse0 p/pulseaudio
-libspa-0.2-modules p/pipewire
-libspeechd2 s/speech-dispatcher
-libwayland-client0 w/wayland
-mesa-libgallium m/mesa
-mesa-va-drivers m/mesa
-mesa-vulkan-drivers m/mesa
-zlib1g z/zlib
-"
-
-echo "Fetching packages..."
-fetch_indexes
-get_package_urls
-fetch_packages
-
 function process_packages() {
   local package_name="${1}"
   for arch in ${ARCHITECTURES}; do
@@ -230,6 +215,21 @@ function process_packages() {
     done
   done
 }
+
+function remove_temp_files() {
+  rm -rf all-packages.txt crashes.list downloads downloads.txt indexes \
+         packages symbols symbols.list tmp unfiltered-packages.txt \
+         xmllint_error.log
+}
+
+echo "Cleaning up temporary files..."
+remove_temp_files
+mkdir -p downloads indexes symbols tmp
+
+echo "Fetching packages..."
+fetch_indexes
+get_package_urls
+fetch_packages
 
 echo "Processing packages..."
 echo "${PACKAGES}" | while read line; do

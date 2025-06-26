@@ -25,114 +25,6 @@ i386
 amd64
 "
 
-function get_area_regex() {
-  local area_regex=$(echo ${AREAS} | tr ' ' '\|')
-  printf "(${area_regex})"
-}
-
-function get_architecture_escaped_regex() {
-  local architecture_list=$(echo ${ARCHITECTURES} | sed -e "s/ /\\\|/")
-  printf "\(${architecture_list}\)"
-}
-
-function get_top_level_folder_regex() {
-  local top_level_folder_regex=$(echo "${PACKAGES}" | grep -v '^$' | cut -d' ' -f2 | cut -d'/' -f1 | sort -u | tr '\n' '\|')
-  printf "(${top_level_folder_regex%%|})"
-}
-
-function get_package_folder_regex() {
-  local package_folder_list=$(echo "${PACKAGES}" | grep -v '^$' | cut -d' ' -f2 | cut -d'/' -f2 | sort -u | tr '\n' '\|')
-  printf "(${package_folder_list%%|})"
-}
-
-function fetch_indexes() {
-  local area_regex=$(get_area_regex)
-  local top_level_folder_regex=$(get_top_level_folder_regex)
-  local package_folder_regex=$(get_package_folder_regex)
-
-  echo "${POOLS}" | while read url; do
-    [ -z "${url}" ] && continue
-    local regex="${url}/(${area_regex}/)?(${top_level_folder_regex}/)?(${package_folder_regex}/)?$"
-    ${WGET} -o wget_indexes.log --directory-prefix indexes --convert-links --recursive --accept-regex "${regex}" "${url}/"
-  done
-}
-
-function get_package_urls() {
-  truncate -s 0 all-packages.txt unfiltered-packages.txt
-
-  find indexes -name index.html -exec xmllint --html --xpath '//a/@href' {} \; 2>xmllint_error.log | \
-    grep -o "https\?://.*\.d\?deb" | sort -u >> all-packages.txt
-
-  local architecture_escaped_regex=$(get_architecture_escaped_regex)
-  echo "${PACKAGES}" | grep -v '^$' | cut -d' ' -f1 | while read package; do
-    grep -o "https\?://.*/${package}\(-dbg\(sym\)\?\)\?_[^\_]*_${architecture_escaped_regex}\.d\?deb" all-packages.txt >> unfiltered-packages.txt
-  done
-}
-
-function fetch_packages() {
-  truncate -s 0 downloads.txt
-  cat unfiltered-packages.txt | while read line; do
-    local package_name=$(echo "${line}" | rev | cut -d'/' -f1 | rev)
-    if ! grep -q -F "${package_name}" SHA256SUMS; then
-      echo "${line}" >> downloads.txt
-    fi
-  done
-
-  sort downloads.txt | ${WGET} -o wget_packages.log -P downloads -c -i -
-}
-
-function get_version() {
-  local package_name="${1}"
-  local filename="${2}"
-
-  local version="${filename##${package_name}_}"
-  version="${version%%.deb}"
-  printf "${version}"
-}
-
-function find_debuginfo_package() {
-  local package_name="${1}"
-  local version="${2}"
-  local dbg_package_name="${3}"
-  local result=$(find downloads -name "${dbg_package_name}-dbg_${version}.deb" -type f)
-  if [ -z "${result}" ]; then
-    result=$(find downloads -name "${package_name}-dbgsym_${version}.ddeb" -type f)
-  fi
-  printf "${result}\n"
-}
-
-function unpack_package() {
-  local package_name="${1}"
-  local debug_package_name="${2}"
-  mkdir packages
-  local data_file=$(ar t "${package_name}" | grep ^data)
-  ar x "${package_name}" "${data_file}" && \
-  tar -C packages -x -a -f "${data_file}"
-  if [ $? -ne 0 ]; then
-    printf "Failed to extract ${package_name}\n" 2>>error.log
-  fi
-  rm -f "${data_file}"
-  if [ -n "${debug_package_name}" ]; then
-    data_file=$(ar t "${package_name}" | grep ^data)
-    ar x "${debug_package_name}" "${data_file}" && \
-    tar -C packages -x -a -f "${data_file}"
-    if [ $? -ne 0 ]; then
-      printf "Failed to extract ${debug_package_name}\n" 2>>error.log
-    fi
-    rm -f "${data_file}"
-  fi
-}
-
-function remove_temp_files() {
-  rm -rf all-packages.txt crashes.list downloads downloads.txt indexes \
-         packages symbols symbols.list tmp unfiltered-packages.txt \
-         xmllint_error.log
-}
-
-echo "Cleaning up temporary files..."
-remove_temp_files
-mkdir -p downloads indexes symbols tmp
-
 # <top-level package folder> <package folder> <package name>
 PACKAGES="
 apitrace-tracers a/apitrace
@@ -254,10 +146,103 @@ vdpau-va-driver v/vdpau-video
 zlib1g z/zlib
 "
 
-echo "Fetching packages..."
-fetch_indexes
-get_package_urls
-fetch_packages
+function get_area_regex() {
+  local area_regex=$(echo ${AREAS} | tr ' ' '\|')
+  printf "(${area_regex})"
+}
+
+function get_architecture_escaped_regex() {
+  local architecture_list=$(echo ${ARCHITECTURES} | sed -e "s/ /\\\|/")
+  printf "\(${architecture_list}\)"
+}
+
+function get_top_level_folder_regex() {
+  local top_level_folder_regex=$(echo "${PACKAGES}" | grep -v '^$' | cut -d' ' -f2 | cut -d'/' -f1 | sort -u | tr '\n' '\|')
+  printf "(${top_level_folder_regex%%|})"
+}
+
+function get_package_folder_regex() {
+  local package_folder_list=$(echo "${PACKAGES}" | grep -v '^$' | cut -d' ' -f2 | cut -d'/' -f2 | sort -u | tr '\n' '\|')
+  printf "(${package_folder_list%%|})"
+}
+
+function fetch_indexes() {
+  local area_regex=$(get_area_regex)
+  local top_level_folder_regex=$(get_top_level_folder_regex)
+  local package_folder_regex=$(get_package_folder_regex)
+
+  echo "${POOLS}" | while read url; do
+    [ -z "${url}" ] && continue
+    local regex="${url}/(${area_regex}/)?(${top_level_folder_regex}/)?(${package_folder_regex}/)?$"
+    ${WGET} -o wget_indexes.log --directory-prefix indexes --convert-links --recursive --accept-regex "${regex}" "${url}/"
+  done
+}
+
+function get_package_urls() {
+  truncate -s 0 all-packages.txt unfiltered-packages.txt
+
+  find indexes -name index.html -exec xmllint --html --xpath '//a/@href' {} \; 2>xmllint_error.log | \
+    grep -o "https\?://.*\.d\?deb" | sort -u >> all-packages.txt
+
+  local architecture_escaped_regex=$(get_architecture_escaped_regex)
+  echo "${PACKAGES}" | grep -v '^$' | cut -d' ' -f1 | while read package; do
+    grep -o "https\?://.*/${package}\(-dbg\(sym\)\?\)\?_[^\_]*_${architecture_escaped_regex}\.d\?deb" all-packages.txt >> unfiltered-packages.txt
+  done
+}
+
+function fetch_packages() {
+  truncate -s 0 downloads.txt
+  cat unfiltered-packages.txt | while read line; do
+    local package_name=$(echo "${line}" | rev | cut -d'/' -f1 | rev)
+    if ! grep -q -F "${package_name}" SHA256SUMS; then
+      echo "${line}" >> downloads.txt
+    fi
+  done
+
+  sort downloads.txt | ${WGET} -o wget_packages.log -P downloads -c -i -
+}
+
+function get_version() {
+  local package_name="${1}"
+  local filename="${2}"
+
+  local version="${filename##${package_name}_}"
+  version="${version%%.deb}"
+  printf "${version}"
+}
+
+function find_debuginfo_package() {
+  local package_name="${1}"
+  local version="${2}"
+  local dbg_package_name="${3}"
+  local result=$(find downloads -name "${dbg_package_name}-dbg_${version}.deb" -type f)
+  if [ -z "${result}" ]; then
+    result=$(find downloads -name "${package_name}-dbgsym_${version}.ddeb" -type f)
+  fi
+  printf "${result}\n"
+}
+
+function unpack_package() {
+  local package_name="${1}"
+  local debug_package_name="${2}"
+  mkdir packages
+  local data_file=$(ar t "${package_name}" | grep ^data)
+  ar x "${package_name}" "${data_file}" && \
+  tar -C packages -x -a -f "${data_file}"
+  if [ $? -ne 0 ]; then
+    printf "Failed to extract ${package_name}\n" 2>>error.log
+  fi
+  rm -f "${data_file}"
+  if [ -n "${debug_package_name}" ]; then
+    data_file=$(ar t "${package_name}" | grep ^data)
+    ar x "${debug_package_name}" "${data_file}" && \
+    tar -C packages -x -a -f "${data_file}"
+    if [ $? -ne 0 ]; then
+      printf "Failed to extract ${debug_package_name}\n" 2>>error.log
+    fi
+    rm -f "${data_file}"
+  fi
+}
 
 function process_packages() {
   local package_name="${1}"
@@ -324,6 +309,21 @@ function process_packages() {
     done
   done
 }
+
+function remove_temp_files() {
+  rm -rf all-packages.txt crashes.list downloads downloads.txt indexes \
+         packages symbols symbols.list tmp unfiltered-packages.txt \
+         xmllint_error.log
+}
+
+echo "Cleaning up temporary files..."
+remove_temp_files
+mkdir -p downloads indexes symbols tmp
+
+echo "Fetching packages..."
+fetch_indexes
+get_package_urls
+fetch_packages
 
 echo "Processing packages..."
 echo "${PACKAGES}" | while read line; do
