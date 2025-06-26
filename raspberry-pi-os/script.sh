@@ -5,130 +5,33 @@ export DEBUGINFOD_URLS=""
 
 . $(dirname $0)/../common.sh
 
-# Unified repository used for debug symbol package
-URL="https://archive.raspberrypi.com/debian/pool"
-DDEB_URL=$URL
+# Unified repository used for debug symbol packages
+POOLS="
+https://archive.raspberrypi.com/debian/pool
+"
 
-# No separate updates repository
-UPDATES_URL=""
-DDEB_UPDATES_URL=""
+AREAS="
+beta
+main
+untested
+"
 
-get_package_urls() {
-  local package_name="${1}"
-  local pkg_path="${2}"
-  local main_path="main/${pkg_path}"
-  local dbg_package_name="${3:-$package_name}"
-  local dbgsym_package_name="${4:-$package_name}"
-  local alt_url="${5:-$UPDATES_URL}"
-  local url="${URL}"
-  local ddeb_url="${DDEB_URL}"
-  local ddeb_alt_url="${DDEB_UPDATES_URL}"
-
-  local urls="${url}/${main_path}/ ${ddeb_url}/${main_path}/"
-
-  if [ -n "${alt_url}" ]; then
-    urls="${urls} ${alt_url}/${main_path}/ ${ddeb_alt_url}/${main_path}/"
-  fi
-
-  ${WGET} -o wget_packages_urls.log -k ${urls}
-
-  find . -name "index.html*" -exec grep -o "${url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(armhf\|arm64\).deb\"" {} \; | cut -d'"' -f1
-  find . -name "index.html*" -exec grep -o "${url}/${non_free_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(armhf\|arm64\).deb\"" {} \; | cut -d'"' -f1
-  find . -name "index.html*" -exec grep -o "${ddeb_url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(armhf\|arm64\).deb\"" {} \; | cut -d'"' -f1
-  find . -name "index.html*" -exec grep -o "${ddeb_url}/${non_free_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(armhf\|arm64\).deb\"" {} \; | cut -d'"' -f1
-
-  if [ -n "${alt_url}" ]; then
-    find . -name "index.html*" -exec grep -o "${alt_url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(armhf\|arm64\).deb\"" {} \; | cut -d'"' -f1
-    find . -name "index.html*" -exec grep -o "${ddeb_alt_url}/${main_path}/\(${package_name}\|${dbg_package_name}-dbg\|${dbgsym_package_name}-dbgsym\)_.*_\(armhf\|arm64\).deb\"" {} \; | cut -d'"' -f1
-  fi
-
-  find . -name "index.html*" -exec rm -f {} \;
-}
-
-fetch_packages() {
-  echo "${1}" | while read line; do
-    [ -z "${line}" ] && continue
-    echo "Fetching ${line}"
-    get_package_urls ${line} >> unfiltered-packages.txt
-  done
-
-  touch packages.txt
-  cat unfiltered-packages.txt | while read line; do
-    package_name=$(echo "${line}" | rev | cut -d'/' -f1 | rev)
-    if ! grep -q -s -F "${package_name}" SHA256SUMS; then
-      echo "${line}" >> packages.txt
-    fi
-  done
-
-  sed -i -e 's/%2b/+/g' packages.txt
-  sort packages.txt | ${WGET} -o wget_packages.log -P downloads -c -i -
-}
-
-function get_version() {
-  package_name="${1}"
-  filename="${2}"
-
-  version="${filename##${package_name}_}"
-  version="${version%%.deb}"
-  printf "${version}"
-}
-
-function find_debuginfo_package() {
-  local package_name="${1}"
-  local version="${2}"
-  local dbg_package_name="${3}"
-  local result=$(find downloads -name "${dbg_package_name}-dbg_${version}.deb" -type f)
-  if [ -z "${result}" ]; then
-    result=$(find downloads -name "${package_name}-dbgsym_${version}.deb" -type f)
-  fi
-  printf "${result}\n"
-}
-
-function unpack_package() {
-  local package_name="${1}"
-  local debug_package_name="${2}"
-  mkdir packages
-  data_file=$(ar t "${package_name}" | grep ^data)
-  ar x "${package_name}" "${data_file}" && \
-  tar -C packages -x -a -f "${data_file}"
-  if [ $? -ne 0 ]; then
-    printf "Failed to extract ${package_name}\n" 2>>error.log
-  fi
-  rm -f "${data_file}"
-  if [ -n "${debug_package_name}" ]; then
-    data_file=$(ar t "${package_name}" | grep ^data)
-    ar x "${debug_package_name}" "${data_file}" && \
-    tar -C packages -x -a -f "${data_file}"
-    if [ $? -ne 0 ]; then
-      printf "Failed to extract ${debug_package_name}\n" 2>>error.log
-    fi
-    rm -f "${data_file}"
-  fi
-}
-
-function remove_temp_files() {
-  rm -rf downloads symbols packages debug-packages tmp \
-         symbols*.zip indexes.txt packages.txt unfiltered-packages.txt \
-         crashes.list symbols.list
-}
-
-echo "Cleaning up temporary files..."
-remove_temp_files
-mkdir -p downloads symbols tmp
+ARCHITECTURES="
+armhf
+arm64
+"
 
 # Note that the 64-bit rpi-os repository doesn't mirror all packages from
 # arm64 debian, only those specifically packaged for rpi-os or with downstream
 # patches.
-packages="
+PACKAGES="
 firefox f/firefox
 libasound2 a/alsa-lib
 libatk1.0-0 a/atk1.0
 libatk-bridge2.0-0 a/at-spi2-core
 libatspi2.0-0 a/at-spi2-core
-libavcodec58 f/ffmpeg
-libavcodec59 f/ffmpeg
-libavutil56 f/ffmpeg
-libavutil57 f/ffmpeg
+libavcodec[0-9][0-9] f/ffmpeg
+libavutil[0-9][0-9] f/ffmpeg
 libc6 g/glibc
 libcairo2 c/cairo
 libdrm2 libd/libdrm
@@ -149,24 +52,119 @@ mesa-vulkan-drivers m/mesa
 zlib1g z/zlib
 "
 
-echo "Fetching packages..."
-fetch_packages "${packages}"
+function get_area_regex() {
+  local area_regex=$(echo ${AREAS} | tr ' ' '\|')
+  printf "(${area_regex})"
+}
+
+function get_arch_escaped_regex() {
+  local arch_list=$(echo ${ARCHITECTURES} | sed -e "s/ /\\\|/")
+  printf "\(${arch_list}\)"
+}
+
+function get_top_level_folder_regex() {
+  local top_level_folder_regex=$(echo "${PACKAGES}" | grep -v '^$' | cut -d' ' -f2 | cut -d'/' -f1 | sort -u | tr '\n' '\|')
+  printf "(${top_level_folder_regex%%|})"
+}
+
+function get_package_folder_regex() {
+  local package_folder_list=$(echo "${PACKAGES}" | grep -v '^$' | cut -d' ' -f2 | cut -d'/' -f2 | sort -u | tr '\n' '\|')
+  printf "(${package_folder_list%%|})"
+}
+
+function fetch_indexes() {
+  local area_regex=$(get_area_regex)
+  local top_level_folder_regex=$(get_top_level_folder_regex)
+  local package_folder_regex=$(get_package_folder_regex)
+
+  echo "${POOLS}" | while read url; do
+    [ -z "${url}" ] && continue
+    local regex="${url}/(${area_regex}/)?(${top_level_folder_regex}/)?(${package_folder_regex}/)?$"
+    ${WGET} -o wget_indexes.log --directory-prefix indexes --convert-links --recursive --accept-regex "${regex}" "${url}/"
+  done
+}
+
+function get_package_urls() {
+  truncate -s 0 all-packages.txt unfiltered-packages.txt
+
+  find indexes -name index.html -exec xmllint --html --xpath '//a/@href' {} \; 2>xmllint_error.log | \
+    grep -o "https\?://.*\.deb" | sort -u >> all-packages.txt
+
+  local arch_escaped_regex=$(get_arch_escaped_regex)
+  echo "${PACKAGES}" | grep -v '^$' | cut -d' ' -f1 | while read package; do
+    grep -o "https\?://.*/${package}\(-dbg\(sym\)\?\)\?_[^\_]*_${arch_escaped_regex}\.deb" all-packages.txt >> unfiltered-packages.txt
+  done
+}
+
+function fetch_packages() {
+  truncate -s 0 downloads.txt
+  cat unfiltered-packages.txt | while read line; do
+    local package_name=$(echo "${line}" | rev | cut -d'/' -f1 | rev)
+    if ! grep -q -F "${package_name}" SHA256SUMS; then
+      echo "${line}" >> downloads.txt
+    fi
+  done
+
+  sort downloads.txt | ${WGET} -o wget_packages.log -P downloads -c -i -
+}
+
+function get_version() {
+  local package_name="${1}"
+  local filename="${2}"
+
+  local version="${filename##${package_name}_}"
+  version="${version%%.deb}"
+  printf "${version}"
+}
+
+function find_debuginfo_package() {
+  local package_name="${1}"
+  local version="${2}"
+  local dbg_package_name="${3}"
+  local result=$(find downloads -name "${dbg_package_name}-dbg_${version}.deb" -type f)
+  if [ -z "${result}" ]; then
+    result=$(find downloads -name "${package_name}-dbgsym_${version}.deb" -type f)
+  fi
+  printf "${result}\n"
+}
+
+function unpack_package() {
+  local package_name="${1}"
+  local debug_package_name="${2}"
+  mkdir packages
+  local data_file=$(ar t "${package_name}" | grep ^data)
+  ar x "${package_name}" "${data_file}" && \
+  tar -C packages -x -a -f "${data_file}"
+  if [ $? -ne 0 ]; then
+    printf "Failed to extract ${package_name}\n" 2>>error.log
+  fi
+  rm -f "${data_file}"
+  if [ -n "${debug_package_name}" ]; then
+    data_file=$(ar t "${package_name}" | grep ^data)
+    ar x "${debug_package_name}" "${data_file}" && \
+    tar -C packages -x -a -f "${data_file}"
+    if [ $? -ne 0 ]; then
+      printf "Failed to extract ${debug_package_name}\n" 2>>error.log
+    fi
+    rm -f "${data_file}"
+  fi
+}
 
 function process_packages() {
   local package_name="${1}"
-  for arch in armhf arm64; do
+  for arch in ${ARCHITECTURES}; do
     find downloads -name "${package_name}_[0-9]*_${arch}.deb" -type f | grep -v dbg | while read package; do
       local package_filename="${package##downloads/}"
       local version=$(get_version "${package_name}" "${package_filename}")
-      local debug_package_name="${3:-$package_name}"
+      local debug_package_name="${package_name}"
       printf "package_name = ${package_name} version = ${version} dbg_package_name = ${debug_package_name}\n"
       local debuginfo_package=$(find_debuginfo_package "${package_name}" "${version}" "${debug_package_name}")
 
       if [ -n "${debuginfo_package}" ]; then
-        unpack_package ${package} ${debuginfo_package}
+        unpack_package "${package}" "${debuginfo_package}"
       else
         printf "***** Could not find debuginfo for ${package_filename}\n"
-        unpack_package ${package}
+        unpack_package "${package}"
       fi
 
       find packages -type f | grep -v debug | while read path; do
@@ -197,8 +195,8 @@ function process_packages() {
           fi
 
           # Copy the symbol file and debug information
-          debugid=$(head -n 1 "${tmpfile}" | cut -d' ' -f4)
-          filename="$(basename "${path}")"
+          local debugid=$(head -n 1 "${tmpfile}" | cut -d' ' -f4)
+          local filename="$(basename "${path}")"
           mkdir -p "symbols/${filename}/${debugid}"
           cp "${tmpfile}" "symbols/${filename}/${debugid}/${filename}.sym"
           local soname=$(get_soname "${path}")
@@ -218,8 +216,23 @@ function process_packages() {
   done
 }
 
+function remove_temp_files() {
+  rm -rf all-packages.txt crashes.list downloads downloads.txt indexes \
+         packages symbols symbols.list tmp unfiltered-packages.txt \
+         xmllint_error.log
+}
+
+echo "Cleaning up temporary files..."
+remove_temp_files
+mkdir -p downloads indexes symbols tmp
+
+echo "Fetching packages..."
+fetch_indexes
+get_package_urls
+fetch_packages
+
 echo "Processing packages..."
-echo "${packages}" | while read line; do
+echo "${PACKAGES}" | while read line; do
   [ -z "${line}" ] && continue
   echo "Processing ${line}"
   process_packages ${line}

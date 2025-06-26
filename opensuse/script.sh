@@ -5,132 +5,21 @@ export DEBUGINFOD_URLS="https://debuginfod.opensuse.org/"
 . $(dirname $0)/../common.sh
 
 URL="https://download.opensuse.org"
-
-REPOS="
-debug/distribution/leap/15.6/repo/oss/x86_64
-debug/distribution/leap/16.0/repo/oss/x86_64
-
-debug/update/leap/15.6/oss/x86_64
-debug/update/leap/15.6-test/oss/x86_64
-debug/update/leap/16.0/oss/x86_64
-debug/update/leap/16.0-test/oss/x86_64
-
-distribution/leap/15.6/repo/oss/x86_64
-distribution/leap/16.0/repo/oss/x86_64
-
-tumbleweed/repo/oss/x86_64
-tumbleweed/repo/debug/x86_64
-
-update/leap/15.6/oss/x86_64/
-update/leap/15.6-test/oss/x86_64
-update/leap/16.0/oss/x86_64/
-update/leap/16.0-test/oss/x86_64
-
-repositories/mozilla/openSUSE_Leap_15.6/x86_64
-repositories/mozilla/openSUSE_Leap_15.6_debug/x86_64
-repositories/mozilla/openSUSE_Leap_16.0/x86_64
-repositories/mozilla/openSUSE_Leap_16.0_debug/x86_64
-repositories/mozilla/openSUSE_Tumbleweed/x86_64
-repositories/mozilla%3A/Factory/openSUSE_Factory/x86_64
-"
-
 URL2="https://ftp.gwdg.de/pub/linux/misc/packman/suse"
+URL3="https://download.nvidia.com/opensuse"
 
-REPOS2="
-openSUSE_Leap_15.6/Essentials/x86_64
-openSUSE_Leap_16.0/Essentials/x86_64
-openSUSE_Tumbleweed/Essentials/x86_64
+RELEASES="
+15.5
+15.6
+16.0
+tumbleweed
 "
 
-URL3="https://download.nvidia.com"
-
-REPOS3="
-opensuse/leap/15.6/x86_64
-opensuse/leap/16.0/x86_64
-opensuse/tumbleweed/x86_64
+ARCHITECTURES="
+x86_64
 "
 
-get_package_urls() {
-  local package_name="${1}"
-  local dbg_package_name="${package_name}-debuginfo"
-  local url=${2:-$URL}
-
-  find . -name "index.html*" -exec grep -o "${url}.*/\(${package_name}-[0-9].*.x86_64.rpm\|${dbg_package_name}-[0-9].*.x86_64.rpm\)\"" {} \; | \
-  cut -d'"' -f1 | \
-  grep -v 32bit
-}
-
-get_package_indexes() {
-  echo "${REPOS}" | while read line; do
-    [ -z "${line}" ] && continue
-    echo "${URL}/${line}/"
-  done | sort -u > indexes.txt
-
-  echo "${REPOS2}" | while read line; do
-    [ -z "${line}" ] && continue
-    echo "${URL2}/${line}/"
-  done | sort -u >> indexes.txt
-
-  echo "${REPOS3}" | while read line; do
-    [ -z "${line}" ] && continue
-    echo "${URL3}/${line}/"
-  done | sort -u >> indexes.txt
-}
-
-fetch_packages() {
-  get_package_indexes
-
-  sort indexes.txt | ${WGET} -o wget_packages_urls.log -k -i -
-
-  find . -name "index.html*" | while read path; do
-    mv "${path}" "${path}.bak"
-    xmllint --nowarning --format --html --output "${path}" "${path}.bak" 2>/dev/null
-    rm -f "${path}.bak"
-  done
-
-  echo "${1}" | while read line; do
-    [ -z "${line}" ] && continue
-    get_package_urls ${line} >> unfiltered-packages.txt
-  done
-
-  touch packages.txt
-  cat unfiltered-packages.txt | while read line; do
-    package_name=$(echo "${line}" | rev | cut -d'/' -f1 | rev)
-    if ! grep -q -F "${package_name}" SHA256SUMS; then
-      echo "${line}" >> packages.txt
-    fi
-  done
-
-  find . -name "index.html*" -exec rm -f {} \;
-
-  sort packages.txt | ${WGET} -o wget_packages.log -P downloads -c -i -
-}
-
-function get_version() {
-  package_name="${1}"
-  filename="${2}"
-
-  version="${filename##${package_name}-}"
-  version="${version%%.rpm}"
-  printf "${version}"
-}
-
-function find_debuginfo_package() {
-  package_name="${1}"
-  version="${2}"
-  find downloads -name "${package_name}-debuginfo-${version}.rpm" -type f
-}
-
-function remove_temp_files() {
-  rm -rf downloads symbols packages debug-packages tmp \
-         symbols*.zip indexes.txt packages.txt unfiltered-packages.txt \
-         crashes.list symbols.list
-}
-
-remove_temp_files
-mkdir -p downloads symbols tmp
-
-packages="
+PACKAGES="
 alsa
 apitrace-wrappers
 at-spi2-atk-gtk2
@@ -219,8 +108,8 @@ libvulkan_intel
 libvulkan_radeon
 libwayland-client0
 libX11-6
-libx264-[0-9][0-9][0-9] http://packman.inode.at/suse
-libx265-[0-9][0-9][0-9] http://packman.inode.at/suse
+libx264-[0-9][0-9][0-9]
+libx265-[0-9][0-9][0-9]
 libxcb1
 libXext6
 libxkbcommon0
@@ -235,6 +124,7 @@ Mesa-libEGL1
 Mesa-libGL1
 Mesa-libva
 MozillaFirefox
+MozillaThunderbird
 mozilla-nspr
 mozilla-nss
 nvidia-compute-G[0-9][0-9]
@@ -250,81 +140,191 @@ speech-dispatcher
 x11-video-nvidiaG[0-9][0-9]
 "
 
-fetch_packages "${packages}"
+function get_release_regex() {
+  local release_list=$(echo ${RELEASES} | tr ' ' '\|')
+  printf "(${release_list})"
+}
 
-function process_packages() {
-  local package_name="${1}"
-  find downloads -name "${package_name}-[0-9]*.rpm" -type f | grep -v debuginfo | while read package; do
-    local package_filename="${package##downloads/}"
-    local version=$(get_version "${package_name}" "${package_filename}")
-    local debuginfo_package=$(find_debuginfo_package "${package_name}" "${version}")
-
-    if [ -n "${debuginfo_package}" ]; then
-      unpack_rpm_package ${package} ${debuginfo_package}
+function get_release_name_regex() {
+  printf "("
+  for release in ${RELEASES}; do
+    if [ "${release}" = "tumbleweed" ]; then
+      printf "openSUSE_Tumbleweed|"
     else
-      printf "***** Could not find debuginfo for ${package_filename}\n"
-      unpack_rpm_package ${package}
+      printf "openSUSE_Leap_${release}|"
     fi
+  done
+  printf "openSUSE_Factory)"
+}
 
-    find packages -type f | grep -v debug | while read path; do
-      if file "${path}" | grep -q ": *ELF" ; then
-        local debuginfo_path="$(find_debuginfo "${path}" "${version}")"
+function get_arch_regex() {
+  local arch_list=$(echo ${ARCHITECTURES} | tr ' ' '\|')
+  printf "(${arch_list})"
+}
 
-        truncate -s 0 error.log
-        local tmpfile=$(mktemp --tmpdir=tmp)
-        printf "Writing symbol file for ${path} ${debuginfo_path} ... "
-        if [ -n "${debuginfo_path}" ]; then
-          ${DUMP_SYMS} --inlines "${path}" "${debuginfo_path}" 1> "${tmpfile}" 2> error.log
-        else
-          ${DUMP_SYMS} --inlines "${path}" 1> "${tmpfile}" 2> error.log
-        fi
+function get_arch_escaped_regex() {
+  local arch_list=$(echo ${ARCHITECTURES} | sed -e "s/ /\\\|/")
+  printf "\(${arch_list}\)"
+}
 
-        if [ -s "${tmpfile}" -a -z "${debuginfo_path}" ]; then
-          printf "done w/o debuginfo\n"
-        elif [ -s "${tmpfile}" ]; then
-          printf "done\n"
-        else
-          printf "something went terribly wrong!\n"
-        fi
+function fetch_indexes() {
+  local arch_regex=$(get_arch_regex)
+  local release_regex=$(get_release_regex)
 
-        if [ -s error.log ]; then
-          printf "***** error log for package ${package} ${path} ${debuginfo_path}\n"
-          cat error.log
-          printf "***** error log for package ${package} ${path} ${debuginfo_path} ends here\n"
-        fi
+  local url="${URL}"
+  local regex="${url}/(debug/)?(update/)?(distribution/)?(leap/)?(${release_regex}(-test)?/)?(repo/)?((oss|debug)/)?(${arch_regex}/)?$"
+  ${WGET} -o wget_indexes.log --directory-prefix indexes --convert-links --recursive -l 8 --accept-regex "${regex}" "${url}/"
 
-        # Copy the symbol file and debug information
-        debugid=$(head -n 1 "${tmpfile}" | cut -d' ' -f4)
-        filename="$(basename "${path}")"
-        mkdir -p "symbols/${filename}/${debugid}"
-        cp "${tmpfile}" "symbols/${filename}/${debugid}/${filename}.sym"
-        local soname=$(get_soname "${path}")
-        if [ -n "${soname}" ]; then
-          if [ "${soname}" != "${filename}" ]; then
-            mkdir -p "symbols/${soname}/${debugid}"
-            cp "${tmpfile}" "symbols/${soname}/${debugid}/${soname}.sym"
-          fi
-        fi
+  local release_name_regex=$(get_release_name_regex)
+  regex="${url}/(repositories/)?((mozilla|mozilla%3A)/)?(Factory/)?(${release_name_regex}(_debug)?/)?(${arch_regex}/)?$"
+  ${WGET} -o wget_indexes.log --directory-prefix indexes --convert-links --recursive --accept-regex "${regex}" "${url}/"
 
-        rm -f "${tmpfile}"
-      fi
-    done
+  url="${URL2}"
+  regex="${url}/(${release_name_regex}/)?(Essentials/)?(${arch_regex}/)?$"
+  ${WGET} -o wget_indexes.log --directory-prefix indexes --convert-links --recursive --accept-regex "${regex}" "${url}/"
 
-    rm -rf packages
+  url="${URL3}"
+  regex="${url}/(leap/)?(${release_regex}/)?(${arch_regex}/)?$"
+  ${WGET} -o wget_indexes.log --directory-prefix indexes --convert-links --recursive --accept-regex "${regex}" "${url}/"
+}
+
+function get_package_urls() {
+  truncate -s 0 all-packages.txt unfiltered-packages.txt
+
+  find indexes -name index.html -exec xmllint --html --xpath '//a/@href' {} \; 2>xmllint_error.log | \
+    grep -o "https\?://.*\.rpm" | grep -v -- "-32bit-" | sort -u >> all-packages.txt
+
+  local arch_escaped_regex=$(get_arch_escaped_regex)
+  echo "${PACKAGES}" | grep -v '^$' | cut -d' ' -f2 | while read package; do
+    grep -o "https\?://.*/${package}\(-debuginfo\)\?-[0-9].*\.${arch_escaped_regex}\.rpm" all-packages.txt >> unfiltered-packages.txt
   done
 }
 
-echo "${packages}" | while read line; do
+function fetch_packages() {
+  truncate -s 0 downloads.txt
+  cat unfiltered-packages.txt | while read line; do
+    local package_name=$(echo "${line}" | rev | cut -d'/' -f1 | rev)
+    if ! grep -q -F "${package_name}" SHA256SUMS; then
+      echo "${line}" >> downloads.txt
+    fi
+  done
+
+  sort downloads.txt | ${WGET} -o wget_packages.log -P downloads -c -i -
+}
+
+function get_version() {
+  local package_name="${1}"
+  local filename="${2}"
+
+  local version="${filename##${package_name}-}"
+  version="${version%%.rpm}"
+  printf "${version}"
+}
+
+function find_debuginfo_package() {
+  local package_name="${1}"
+  local version="${2}"
+  find downloads -name "${package_name}-debuginfo-${version}.rpm" -type f
+}
+
+function process_packages() {
+  local package_name="${1}"
+  for arch in ${ARCHITECTURES}; do
+    find downloads -name "${package_name}-[0-9]*.${arch}.rpm" -type f | grep -v debuginfo | while read package; do
+      local package_filename="${package##downloads/}"
+      local version=$(get_version "${package_name}" "${package_filename}")
+      printf "package_name = ${package_name} version = ${version}\n"
+      local debuginfo_package=$(find_debuginfo_package "${package_name}" "${version}")
+
+      if [ -n "${debuginfo_package}" ]; then
+        unpack_rpm_package ${package} ${debuginfo_package}
+      else
+        printf "***** Could not find debuginfo for ${package_filename}\n"
+        unpack_rpm_package ${package}
+      fi
+
+      find packages -type f | grep -v debug | while read path; do
+        if file "${path}" | grep -q ": *ELF" ; then
+          local debuginfo_path="$(find_debuginfo "${path}" "${version}")"
+
+          truncate -s 0 error.log
+          local tmpfile=$(mktemp --tmpdir=tmp)
+          printf "Writing symbol file for ${path} ${debuginfo_path} ... "
+          if [ -n "${debuginfo_path}" ]; then
+            ${DUMP_SYMS} --inlines "${path}" "${debuginfo_path}" 1> "${tmpfile}" 2> error.log
+          else
+            ${DUMP_SYMS} --inlines "${path}" 1> "${tmpfile}" 2> error.log
+          fi
+
+          if [ -s "${tmpfile}" -a -z "${debuginfo_path}" ]; then
+            printf "done w/o debuginfo\n"
+          elif [ -s "${tmpfile}" ]; then
+            printf "done\n"
+          else
+            printf "something went terribly wrong!\n"
+          fi
+
+          if [ -s error.log ]; then
+            printf "***** error log for package ${package} ${path} ${debuginfo_path}\n"
+            cat error.log
+            printf "***** error log for package ${package} ${path} ${debuginfo_path} ends here\n"
+          fi
+
+          # Copy the symbol file and debug information
+          local debugid=$(head -n 1 "${tmpfile}" | cut -d' ' -f4)
+          local filename="$(basename "${path}")"
+          mkdir -p "symbols/${filename}/${debugid}"
+          cp "${tmpfile}" "symbols/${filename}/${debugid}/${filename}.sym"
+          local soname=$(get_soname "${path}")
+          if [ -n "${soname}" ]; then
+            if [ "${soname}" != "${filename}" ]; then
+              mkdir -p "symbols/${soname}/${debugid}"
+              cp "${tmpfile}" "symbols/${soname}/${debugid}/${soname}.sym"
+            fi
+          fi
+
+          rm -f "${tmpfile}"
+        fi
+      done
+
+      rm -rf packages
+    done
+  done
+}
+
+function remove_temp_files() {
+  rm -rf all-packages.txt crashes.list downloads downloads.txt indexes \
+         packages symbols symbols.list tmp unfiltered-packages.txt \
+         xmllint_error.log
+}
+
+echo "Cleaning up temporary files..."
+remove_temp_files
+mkdir -p downloads indexes symbols tmp
+
+echo "Fetching packages..."
+fetch_indexes
+get_package_urls
+fetch_packages
+
+echo "Processing packages..."
+echo "${PACKAGES}" | while read line; do
   [ -z "${line}" ] && continue
+  echo "Processing ${line}"
   process_packages ${line}
 done
 
+echo "Creating symbols archive..."
 create_symbols_archive
 
+echo "Uploading symbols..."
 upload_symbols
 
+echo "Reprocessing crashes..."
 reprocess_crashes
 
+echo "Updating sha256sums..."
 update_sha256sums
 
+echo "Cleaning up temporary files..."
 remove_temp_files
