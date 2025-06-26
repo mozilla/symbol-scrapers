@@ -108,6 +108,7 @@ libnvidia-glcore n/nvidia-graphics-drivers
 libnvidia-glvkspirv n/nvidia-graphics-drivers
 libopus0 o/opus libopus
 libpango-1.0-0 p/pango1.0
+libpangoft2-1.0-0 p/pango1.0
 libpcre2-8-0 p/pcre2
 libpcre3 p/pcre3
 libpcsclite1 p/pcsc-lite
