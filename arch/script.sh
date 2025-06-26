@@ -105,6 +105,7 @@ function remove_temp_files() {
          crashes.list symbols.list
 }
 
+echo "Cleaning up temporary files..."
 remove_temp_files
 mkdir -p downloads symbols tmp
 
@@ -245,17 +246,24 @@ function process_packages() {
   done
 }
 
+echo "Processing packages..."
 echo "${packages}" | while read line; do
   [ -z "${line}" ] && continue
+  echo "Processing ${line}"
   process_packages ${line}
 done
 
+echo "Creating symbols archive..."
 create_symbols_archive
 
+echo "Uploading symbols..."
 upload_symbols
 
+echo "Reprocessing crashes..."
 reprocess_crashes
 
+echo "Updating sha256sums..."
 update_sha256sums
 
+echo "Cleaning up temporary files..."
 remove_temp_files
