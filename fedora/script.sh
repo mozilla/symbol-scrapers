@@ -163,7 +163,8 @@ function get_package_urls() {
     grep -o "https\?://.*\.rpm" | sort -u >> all-packages.txt
 
   local architecture_escaped_regex=$(get_architecture_escaped_regex)
-  echo "${PACKAGES}" | grep -v '^$' | cut -d' ' -f1 | while read package; do
+  # Use percent encoding in package URLs, e.g. + -> %2B
+  echo "${PACKAGES}" | grep -v '^$' | cut -d' ' -f1 | sed 's/\+/%2B/g' | while read package; do
     grep -o "https\?://.*/${package}\(-debuginfo\)\?-[0-9].*\.fc..\.${architecture_escaped_regex}\.rpm" all-packages.txt >> unfiltered-packages.txt
   done
 }

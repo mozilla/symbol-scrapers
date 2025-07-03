@@ -166,7 +166,8 @@ function get_package_urls() {
     grep -o "https\?://.*\.apk" | sort -u >> all-packages.txt
 
   echo "${PACKAGES}" | grep -v '^$' | while read line; do
-    local package_name="$(echo ${line} | cut -d' ' -f1)"
+    # Use percent encoding in package URLs, e.g. + -> %2B
+    local package_name="$(echo ${line} | cut -d' ' -f1 | sed 's/\+/%2B/g')"
     grep -o "https\?://.*/${package_name}\(-dbg\)\?-[0-9].*\.apk" all-packages.txt >> unfiltered-packages.txt
   done
 }
