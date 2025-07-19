@@ -163,7 +163,7 @@ function get_top_level_folder_regex() {
 }
 
 function get_package_folder_regex() {
-  local package_folder_list=$(echo "${PACKAGES}" | grep -v '^$' | cut -d' ' -f2 | cut -d'/' -f2 | sort -u | tr '\n' '\|')
+  local package_folder_list=$(echo "${PACKAGES}" | grep -v '^$' | cut -d' ' -f2 | cut -d'/' -f2 | sort -u | tr '\n' '\|' | sed 's/\+/\\+/g')
   printf "(${package_folder_list%%|})"
 }
 
