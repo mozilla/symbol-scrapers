@@ -137,6 +137,7 @@ libxml2 libx/libxml2
 libxss1 libx/libxss
 libxvidcore4 x/xvidcore
 libzvbi0 z/zvbi
+mesa-libgallium m/mesa
 mesa-va-drivers m/mesa
 mesa-vulkan-drivers m/mesa
 nvidia-vaapi-driver n/nvidia-vaapi-driver
