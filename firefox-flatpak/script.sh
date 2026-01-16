@@ -10,7 +10,9 @@ process_flatpak                                                        \
 	"org.freedesktop.Platform.GL.Debug.default/x86_64/23.08"       \
 	"org.freedesktop.Platform.GL.Debug.default/x86_64/23.08-extra" \
 	"org.freedesktop.Platform.GL.Debug.default/x86_64/24.08"       \
-	"org.freedesktop.Platform.GL.Debug.default/x86_64/24.08extra"
+	"org.freedesktop.Platform.GL.Debug.default/x86_64/24.08extra"  \
+	"org.freedesktop.Platform.GL.Debug.default/x86_64/25.08"       \
+	"org.freedesktop.Platform.GL.Debug.default/x86_64/25.08-extra"
 
 create_symbols_archive
 
