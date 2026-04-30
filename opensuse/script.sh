@@ -9,9 +9,10 @@ URL2="https://ftp.gwdg.de/pub/linux/misc/packman/suse"
 URL3="https://download.nvidia.com/opensuse"
 
 RELEASES="
-15.5
 15.6
 16.0
+16.1
+slowroll
 tumbleweed
 "
 
