@@ -32,7 +32,12 @@ fetch_store_paths() {
       grep -Ev '(debug|symbols)' >> unfiltered-packages.txt || true
   done
 
-  sort -u unfiltered-packages.txt > packages.txt
+  sort -u unfiltered-packages.txt | while read store_path; do
+    local package_name=$(basename "${store_path}")
+    if ! grep -q -F "${package_name}" SHA256SUMS; then
+      echo "${store_path}"
+    fi
+  done > packages.txt
 }
 
 copy_store_path() {
