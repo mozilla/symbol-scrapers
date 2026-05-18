@@ -95,7 +95,7 @@ function find_debuginfo() {
   debuginfo_present="$?"
 
   if [ "${debuginfo_present}" -ne 0 ]; then
-    debuginfo=$(debuginfod-find debuginfo "${buildid}" 2>/dev/null)
+    debuginfo=$(env DEBUGINFOD_RETRY_LIMIT=0 debuginfod-find debuginfo "${buildid}" 2>/dev/null)
 
     if [ $? -ne 0 ]; then
       debuginfo="" # Discard debuginfod-find output on failure
