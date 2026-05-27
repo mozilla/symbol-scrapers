@@ -36,7 +36,8 @@ expat
 ffmpeg
 firefox
 firefox-developer-edition
-fontconfig-2
+fontconfig
+freetype
 gcc-libs
 gdk-pixbuf2
 glib2
