@@ -145,13 +145,12 @@ function create_symbols_archive() {
 
 function unpack_rpm_package() {
   mkdir packages
-  if [ -n "${1}" ]; then
-    7zz -so x "${1}" | cpio --quiet -i -d -D packages
-  fi
 
-  if [ -n "${2}" ]; then
-    7zz -so x "${2}" | cpio --quiet -i -d -D packages
-  fi
+  for package in $@; do
+    rpm2archive --nocompression "${package}"
+    tar -x -C packages -f "${package}.tar"
+    rm -f "${package}.tar"
+  done
 }
 
 function upload_symbols()
