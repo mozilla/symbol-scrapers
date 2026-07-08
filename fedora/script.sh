@@ -5,7 +5,7 @@ export DEBUGINFOD_URLS="https://debuginfod.fedoraproject.org/"
 . $(dirname $0)/../common.sh
 
 URLS="
-https://fedora.mirror.wearetriple.com/linux
+https://ftp.uni-stuttgart.de/fedora/
 https://ftp-stud.hs-esslingen.de/pub/Mirrors/rpmfusion.org/free/fedora/
 https://ftp-stud.hs-esslingen.de/pub/Mirrors/rpmfusion.org/nonfree/fedora/
 "
