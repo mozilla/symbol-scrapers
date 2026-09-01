@@ -217,8 +217,7 @@ function get_version() {
 function find_debuginfo_package() {
   local package_name="${1}"
   local version="${2}"
-  local dbg_package_name="${3}"
-  local result=$(find downloads -name "${dbg_package_name}-dbg_${version}.deb" -type f)
+  local result=$(find downloads -name "${package_name}-dbg_${version}.deb" -type f)
   if [ -z "${result}" ]; then
     result=$(find downloads -name "${package_name}-dbgsym_${version}.ddeb" -type f)
   fi
@@ -253,9 +252,8 @@ function process_packages() {
     find downloads -name "${package_name}_[0-9]*_${arch}.deb" -type f | grep -v dbg | while read package; do
       local package_filename="${package##downloads/}"
       local version=$(get_version "${package_name}" "${package_filename}")
-      local debug_package_name="${package_name}"
-      printf "package_name = ${package_name} version = ${version} dbg_package_name = ${debug_package_name}\n"
-      local debuginfo_package=$(find_debuginfo_package "${package_name}" "${version}" "${debug_package_name}")
+      printf "package_name = ${package_name} version = ${version}\n"
+      local debuginfo_package=$(find_debuginfo_package "${package_name}" "${version}")
 
       if [ -n "${debuginfo_package}" ]; then
         unpack_package "${package}" "${debuginfo_package}"
