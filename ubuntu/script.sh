@@ -266,7 +266,18 @@ function process_packages() {
 
       find packages -type f | grep -v debug | while read path; do
         if file "${path}" | grep -q ": *ELF" ; then
-          local debuginfo_path="$(find_debuginfo "${path}")"
+          case "${package_name}" in
+            libnvidia-*)
+              # Do not look up debug information for closed-source packages.
+              # This works around an issue we often encounter when Ubuntu
+              # debuginfod servers are not responding properly. See bug 2067940
+              # for more information.
+              local debuginfo_path=""
+              ;;
+            *)
+              local debuginfo_path="$(find_debuginfo "${path}")"
+              ;;
+          esac
 
           truncate -s 0 error.log
           local tmpfile=$(mktemp --tmpdir=tmp)
