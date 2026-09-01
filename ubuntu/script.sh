@@ -1,6 +1,12 @@
 #!/bin/sh
 
-export DEBUGINFOD_URLS="https://debuginfod.ubuntu.com/"
+# We use both the Debian and Ubuntu debuginfod servers because Ubuntu shares
+# several packages with Debian and oftentimes doesn't ship the debug
+# information for those. We also place it before the Ubuntu server because the
+# latter is also often down, so we prefer a quick miss on the Debian one (when
+# the debuginfo we're looking for is Ubuntu-specific) than a long timeout on
+# the Ubuntu one (when debuginfo we're looking for is actually from Debian).
+export DEBUGINFOD_URLS="https://debuginfod.debian.net/ https://debuginfod.ubuntu.com/"
 
 . $(dirname $0)/../common.sh
 
