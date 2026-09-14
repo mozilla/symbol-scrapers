@@ -5,12 +5,11 @@ export DEBUGINFOD_URLS="https://debuginfod.ubuntu.com/"
 . $(dirname $0)/../common.sh
 
 POOLS="
-https://ddebs.ubuntu.com/pool
+http://ddebs.ubuntu.com/pool
 https://nl.archive.ubuntu.com/ubuntu/pool
-https://ppa.launchpadcontent.net/mozillateam/firefox-next/ubuntu/pool
 https://ppa.launchpadcontent.net/mozillateam/ppa/ubuntu/pool
 https://ppa.launchpadcontent.net/mozillateam/prereleases/ubuntu/pool
-https://ppa.launchpadcontent.net/mozillateam/thunderbird-next/ubuntu
+https://ppa.launchpadcontent.net/mozillateam/thunderbird-next/ubuntu/pool
 https://ppa.launchpadcontent.net/ubuntu-mozilla-daily/ppa/ubuntu/pool
 "
 
