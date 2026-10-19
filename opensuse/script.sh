@@ -111,6 +111,8 @@ libwayland-client0
 libX11-6
 libx264-[0-9][0-9][0-9]
 libx265-[0-9][0-9][0-9]
+libxcb-render0
+libxcb-shm0
 libxcb1
 libXext6
 libxkbcommon0

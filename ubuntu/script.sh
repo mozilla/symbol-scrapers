@@ -130,6 +130,8 @@ libwayland-egl1 w/wayland
 libx11-6 libx/libx11
 libx264-[0-9][0-9][0-9] x/x264
 libx265-[0-9][0-9][0-9] x/x265
+libxcb-render0 libx/libxcb
+libxcb-shm0 libx/libxcb
 libxcb1 libx/libxcb
 libxext6 libx/libxext
 libxkbcommon0 libx/libxkbcommon
