@@ -60,6 +60,7 @@ libice
 libp11-kit
 libpipewire
 libpulse
+libsecret
 libsm
 libspeechd
 libva

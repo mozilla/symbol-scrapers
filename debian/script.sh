@@ -121,6 +121,7 @@ libpng16-16t64 libp/libpng1.6
 libproxy1-plugin-gsettings libp/libproxy
 libproxy1v5 libp/libproxy
 libpulse0 p/pulseaudio
+libsecret-1-0 libs/libsecret
 libsm6 libs/libsm
 libspa-0.2-modules p/pipewire
 libspeechd2 s/speech-dispatcher

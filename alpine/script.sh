@@ -72,6 +72,7 @@ libmount
 libpciaccess
 libpng
 libpulse
+libsecret
 libssl3
 libstdc++
 libtheora

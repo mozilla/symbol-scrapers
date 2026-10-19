@@ -72,6 +72,7 @@ libicu l
 libpng12 l
 libpng l
 libproxy l
+libsecret l
 libSM l
 libstdc++ l
 libthai l

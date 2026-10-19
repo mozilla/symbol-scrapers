@@ -93,6 +93,7 @@ libproxy1
 libproxy1
 libproxy1-config-kde
 libpulse0
+libsecret-1-0
 libSM6
 libsoftokn3
 libsqlite3-0
