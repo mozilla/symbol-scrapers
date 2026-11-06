@@ -12,10 +12,12 @@ https://ftp-stud.hs-esslingen.de/pub/Mirrors/rpmfusion.org/nonfree/fedora/
 
 RELEASES="
 rawhide
-42
 43
 44
-test/44_beta
+45
+46
+test/45_beta
+test/46_beta
 "
 
 ARCHITECTURES="
